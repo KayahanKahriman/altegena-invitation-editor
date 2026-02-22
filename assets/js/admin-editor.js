@@ -126,7 +126,15 @@
                     this.showJsonStatus('Geçersiz yapı: canvas ve layers gerekli', false);
                     return;
                 }
-                this.showJsonStatus('JSON geçerli', true);
+                
+                // If valid, apply it to the visual editor
+                this.config = parsed;
+                this.deselectLayer();
+                this.renderVisualEditor();
+                this.fitCanvas();
+                this.syncConfigToHiddenField();
+                
+                this.showJsonStatus('JSON geçerli ve uygulandı', true);
             } catch (e) {
                 this.showJsonStatus('Hata: ' + e.message, false);
             }
@@ -1029,6 +1037,22 @@
         bindFormSubmission: function () {
             var self = this;
             $('#post').on('submit', function () {
+                // If the JSON tab is currently active, try to parse and apply the JSON first
+                if ($('#sie-tab-json').hasClass('active')) {
+                    var raw = self.$jsonTextarea.val();
+                    if (raw.trim()) {
+                        try {
+                            var parsed = JSON.parse(raw);
+                            if (parsed.canvas && Array.isArray(parsed.layers)) {
+                                self.config = parsed;
+                            }
+                        } catch (e) {
+                            // If it's invalid JSON, we just fall back to the last valid config
+                            console.error('SIE JSON parse error before save:', e);
+                        }
+                    }
+                }
+                
                 self.syncConfigToHiddenField();
             });
         },
