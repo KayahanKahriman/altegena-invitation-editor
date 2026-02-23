@@ -71,7 +71,7 @@ class SIE_Product_Meta
         wp_enqueue_script(
             'sie-admin-editor-js',
             SIE_PLUGIN_URL . 'assets/js/admin-editor.js',
-            array('jquery', 'wp-color-picker'),
+            array('jquery', 'wp-color-picker', 'jquery-ui-sortable'),
             SIE_VERSION,
             true
         );

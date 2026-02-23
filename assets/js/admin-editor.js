@@ -337,7 +337,7 @@
 
         renderVisualEditor: function () {
             this.renderCanvasSettings();
-            this.renderLayerList();
+            this.renderLayerList(); // also calls initLayerSortable
             this.renderLayers();
             this.updateCanvas();
         },
@@ -358,10 +358,41 @@
                 var selected = self.selectedLayerIds.indexOf(layer.id) !== -1 ? ' selected' : '';
                 $list.append(
                     '<li class="sie-admin-layer-item' + selected + '" data-layer-id="' + layer.id + '">' +
+                    '<span class="sie-admin-layer-drag-handle dashicons dashicons-menu"></span>' +
                     '<span class="dashicons dashicons-text"></span>' +
                     '<span>' + self.escapeHtml(layer.label) + '</span>' +
                     '</li>'
                 );
+            });
+
+            this.initLayerSortable();
+        },
+
+        initLayerSortable: function () {
+            var self = this;
+            var $list = this.$leftPanel.find('.sie-admin-layer-list');
+
+            if ($list.data('ui-sortable')) {
+                $list.sortable('destroy');
+            }
+
+            $list.sortable({
+                handle: '.sie-admin-layer-drag-handle',
+                axis: 'y',
+                containment: 'parent',
+                tolerance: 'pointer',
+                update: function () {
+                    var newOrder = [];
+                    $list.find('.sie-admin-layer-item').each(function () {
+                        var id = $(this).data('layer-id');
+                        var layer = self.getLayerById(id);
+                        if (layer) newOrder.push(layer);
+                    });
+                    self.config.layers = newOrder;
+                    self.renderLayers();
+                    self.refreshSelectionUI();
+                    self.syncConfigToHiddenField();
+                }
             });
         },
 
