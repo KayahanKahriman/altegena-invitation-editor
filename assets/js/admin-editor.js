@@ -452,6 +452,14 @@
                 self.$canvas.find('.sie-admin-layer[data-layer-id="' + id + '"]').addClass('selected');
             });
 
+            // Show/hide canvas-align section (1+ selected)
+            var $canvasAlignSection = this.$rightPanel.find('.sie-admin-canvas-align-section');
+            if (this.selectedLayerIds.length >= 1) {
+                $canvasAlignSection.show();
+            } else {
+                $canvasAlignSection.hide();
+            }
+
             // Show/hide alignment section based on multi-selection
             var $alignSection = this.$rightPanel.find('.sie-admin-align-section');
             if (this.selectedLayerIds.length >= 2) {
@@ -467,6 +475,7 @@
             this.$leftPanel.find('.sie-admin-layer-item').removeClass('selected');
             this.$canvas.find('.sie-admin-layer').removeClass('selected');
             this.$rightPanel.addClass('hidden');
+            this.$rightPanel.find('.sie-admin-canvas-align-section').hide();
             this.$rightPanel.find('.sie-admin-align-section').hide();
         },
 
@@ -904,6 +913,12 @@
                 var type = $(this).data('align');
                 if (type) self.alignLayers(type);
             });
+
+            this.$rightPanel.on('click', '.sie-canvas-align-btn', function (e) {
+                e.preventDefault();
+                var type = $(this).data('canvas-align');
+                if (type) self.alignLayersToCanvas(type);
+            });
         },
 
         getSelectedLayersBounds: function () {
@@ -1026,6 +1041,48 @@
             this.syncConfigToHiddenField();
 
             // Re-show properties for current primary layer
+            if (this.selectedLayerId) {
+                var layer = this.getLayerById(this.selectedLayerId);
+                if (layer) this.showPropertiesPanel(layer);
+            }
+        },
+
+        alignLayersToCanvas: function (type) {
+            var self = this;
+            if (!this.selectedLayerIds.length) return;
+
+            this.selectedLayerIds.forEach(function (id) {
+                var layer = self.getLayerById(id);
+                if (!layer || !layer.style) return;
+
+                var width = parseFloat(layer.style.width) || 80;
+
+                switch (type) {
+                    case 'canvas-left':
+                        layer.style.left = '0%';
+                        break;
+                    case 'canvas-center-h':
+                        layer.style.left = (50 - width / 2) + '%';
+                        break;
+                    case 'canvas-right':
+                        layer.style.left = (100 - width) + '%';
+                        break;
+                    case 'canvas-top':
+                        layer.style.top = '0%';
+                        break;
+                    case 'canvas-center-v':
+                        layer.style.top = '50%';
+                        break;
+                    case 'canvas-bottom':
+                        layer.style.top = '100%';
+                        break;
+                }
+            });
+
+            this.renderLayers();
+            this.refreshSelectionUI();
+            this.syncConfigToHiddenField();
+
             if (this.selectedLayerId) {
                 var layer = this.getLayerById(this.selectedLayerId);
                 if (layer) this.showPropertiesPanel(layer);

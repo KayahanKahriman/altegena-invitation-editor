@@ -358,7 +358,8 @@
     gap: 4px;
 }
 
-.sie-align-btn {
+.sie-align-btn,
+.sie-canvas-align-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -373,20 +374,23 @@
     transition: background 0.1s, color 0.1s;
 }
 
-.sie-align-btn:hover {
+.sie-align-btn:hover,
+.sie-canvas-align-btn:hover {
     background: #2271b1;
     border-color: #2271b1;
     color: #fff;
 }
 
-.sie-align-btn .dashicons {
+.sie-align-btn .dashicons,
+.sie-canvas-align-btn .dashicons {
     font-size: 16px;
     width: 16px;
     height: 16px;
     line-height: 16px;
 }
 
-.sie-align-btn .sie-rotate-90 {
+.sie-align-btn .sie-rotate-90,
+.sie-canvas-align-btn .sie-rotate-90 {
     transform: rotate(90deg);
 }
 

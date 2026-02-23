@@ -180,6 +180,19 @@ class SIE_Product_Meta
 
                         <!-- Right Panel: Layer Properties -->
                         <div class="sie-admin-right-panel hidden">
+                            <div class="sie-admin-canvas-align-section" style="display:none">
+                                <div class="sie-admin-panel-section">
+                                    <h4>Canvas'a Hizala</h4>
+                                    <div class="sie-admin-align-buttons">
+                                        <button type="button" class="sie-canvas-align-btn" data-canvas-align="canvas-left" title="Sola Hizala"><span class="dashicons dashicons-align-left"></span></button>
+                                        <button type="button" class="sie-canvas-align-btn" data-canvas-align="canvas-center-h" title="Yatay Ortala"><span class="dashicons dashicons-align-center"></span></button>
+                                        <button type="button" class="sie-canvas-align-btn" data-canvas-align="canvas-right" title="Sağa Hizala"><span class="dashicons dashicons-align-right"></span></button>
+                                        <button type="button" class="sie-canvas-align-btn" data-canvas-align="canvas-top" title="Üste Hizala"><span class="dashicons dashicons-align-left sie-rotate-90"></span></button>
+                                        <button type="button" class="sie-canvas-align-btn" data-canvas-align="canvas-center-v" title="Dikey Ortala"><span class="dashicons dashicons-align-center sie-rotate-90"></span></button>
+                                        <button type="button" class="sie-canvas-align-btn" data-canvas-align="canvas-bottom" title="Alta Hizala"><span class="dashicons dashicons-align-right sie-rotate-90"></span></button>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="sie-admin-align-section" style="display:none">
                                 <div class="sie-admin-panel-section">
                                     <h4>Hizalama</h4>
