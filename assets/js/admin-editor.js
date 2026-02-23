@@ -304,6 +304,25 @@
                 }
             });
 
+            // Toggle frontend visibility from layer list eye icon
+            this.$leftPanel.on('click', '.sie-admin-layer-visibility', function (e) {
+                e.stopPropagation();
+                var $item = $(this).closest('.sie-admin-layer-item');
+                var id = $item.data('layer-id');
+                var layer = self.getLayerById(id);
+                if (!layer) return;
+
+                layer.hidden_on_frontend = !layer.hidden_on_frontend;
+                $(this).toggleClass('dashicons-visibility dashicons-hidden');
+                $item.toggleClass('sie-layer-hidden');
+                self.syncConfigToHiddenField();
+
+                // Update checkbox if this layer is currently shown in properties
+                if (self.selectedLayerId === id) {
+                    $('#sie-prop-hidden-frontend').prop('checked', layer.hidden_on_frontend);
+                }
+            });
+
             // Deselect on canvas background mousedown (not click, to avoid conflicts with layer mousedown)
             this.$canvasArea.on('mousedown', function (e) {
                 if ($(e.target).hasClass('sie-admin-canvas-area') || $(e.target).hasClass('sie-admin-canvas')) {
@@ -356,11 +375,14 @@
 
             this.config.layers.forEach(function (layer) {
                 var selected = self.selectedLayerIds.indexOf(layer.id) !== -1 ? ' selected' : '';
+                var hiddenClass = layer.hidden_on_frontend ? ' sie-layer-hidden' : '';
+                var eyeIcon = layer.hidden_on_frontend ? 'dashicons-hidden' : 'dashicons-visibility';
                 $list.append(
-                    '<li class="sie-admin-layer-item' + selected + '" data-layer-id="' + layer.id + '">' +
+                    '<li class="sie-admin-layer-item' + selected + hiddenClass + '" data-layer-id="' + layer.id + '">' +
                     '<span class="sie-admin-layer-drag-handle dashicons dashicons-menu"></span>' +
                     '<span class="dashicons dashicons-text"></span>' +
                     '<span>' + self.escapeHtml(layer.label) + '</span>' +
+                    '<span class="sie-admin-layer-visibility dashicons ' + eyeIcon + '" title="Önyüzde Görünürlük"></span>' +
                     '</li>'
                 );
             });
@@ -597,6 +619,17 @@
                 self.updateSelectedLayerStyle('fontStyle', $(this).val());
             });
 
+            // Hidden on frontend checkbox
+            this.$rightPanel.on('change', '#sie-prop-hidden-frontend', function () {
+                if (!self.selectedLayerId) return;
+                var layer = self.getLayerById(self.selectedLayerId);
+                if (!layer) return;
+                layer.hidden_on_frontend = $(this).is(':checked');
+                self.renderLayerList();
+                self.refreshSelectionUI();
+                self.syncConfigToHiddenField();
+            });
+
             // Duplicate & Delete
             this.$rightPanel.on('click', '#sie-prop-duplicate', function (e) {
                 e.preventDefault();
@@ -653,6 +686,7 @@
             $('#sie-prop-lineheight').val(s.lineHeight || '');
             $('#sie-prop-fontweight').val(s.fontWeight || 'normal');
             $('#sie-prop-fontstyle').val(s.fontStyle || 'normal');
+            $('#sie-prop-hidden-frontend').prop('checked', !!layer.hidden_on_frontend);
 
             // Init/update color picker
             this.initColorPicker(s.color || '#333333');

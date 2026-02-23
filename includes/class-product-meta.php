@@ -225,6 +225,13 @@ class SIE_Product_Meta
                                     <label for="sie-prop-default-text">Varsayılan Metin</label>
                                     <textarea id="sie-prop-default-text" rows="2"></textarea>
                                 </div>
+
+                                <div class="sie-admin-field sie-admin-field-checkbox">
+                                    <label>
+                                        <input type="checkbox" id="sie-prop-hidden-frontend">
+                                        Önyüzde Gizle (Sabit Alan)
+                                    </label>
+                                </div>
                             </div>
 
                             <div class="sie-admin-panel-section">

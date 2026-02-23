@@ -278,6 +278,37 @@
     color: #2271b1;
 }
 
+.sie-admin-layer-visibility {
+    margin-left: auto !important;
+    margin-right: 0 !important;
+    cursor: pointer;
+    color: #c3c4c7 !important;
+}
+
+.sie-admin-layer-visibility:hover {
+    color: #2271b1 !important;
+}
+
+.sie-admin-layer-item.sie-layer-hidden {
+    opacity: 0.5;
+}
+
+.sie-admin-layer-item.sie-layer-hidden .sie-admin-layer-visibility {
+    color: #d63638 !important;
+}
+
+.sie-admin-field-checkbox label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.sie-admin-field-checkbox input[type="checkbox"] {
+    margin: 0;
+}
+
 .sie-admin-add-layer-btn {
     width: 100%;
     margin-top: 6px;

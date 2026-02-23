@@ -92,14 +92,16 @@
 
         addTextLayer: function (layer) {
             console.log('SIE: Adding text layer', layer.id, 'Font Family:', layer.style.fontFamily);
-            // Create Sidebar Input
-            const inputHtml = `
-                <div class="sie-input-group" data-layer-id="${layer.id}">
-                    <label>${layer.label}</label>
-                    <textarea class="sie-layer-input" rows="3">${layer.default_text}</textarea>
-                </div>
-            `;
-            this.sidebar.append(inputHtml);
+            // Create Sidebar Input (skip for hidden/fixed layers)
+            if (!layer.hidden_on_frontend) {
+                const inputHtml = `
+                    <div class="sie-input-group" data-layer-id="${layer.id}">
+                        <label>${layer.label}</label>
+                        <textarea class="sie-layer-input" rows="3">${layer.default_text}</textarea>
+                    </div>
+                `;
+                this.sidebar.append(inputHtml);
+            }
 
             // Create Preview Layer
             const style = Object.assign({}, layer.style);
@@ -113,10 +115,11 @@
             }
             style.transform = 'translateX(-50%)';
 
+            const isEditable = !this.is_admin_mode && !layer.hidden_on_frontend;
             const elAttrs = {
                 class: 'sie-layer',
                 id: `sie-layer-${layer.id}`,
-                contenteditable: !this.is_admin_mode,
+                contenteditable: isEditable,
                 text: layer.default_text
             };
             if (this.is_admin_mode) {
