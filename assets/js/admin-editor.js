@@ -536,10 +536,6 @@
                 self.updateSelectedLayerStyle('fontSize', $(this).val() + 'px');
             });
 
-            this.$rightPanel.on('change', '#sie-prop-textalign', function () {
-                self.updateSelectedLayerStyle('textAlign', $(this).val());
-            });
-
             this.$rightPanel.on('input', '#sie-prop-left', function () {
                 self.updateSelectedLayerStylePosition('left', $(this).val());
             });
@@ -619,7 +615,6 @@
             var s = layer.style || {};
             $('#sie-prop-font').val(s.fontFamily || 'Darleston');
             $('#sie-prop-fontsize').val(parseInt(s.fontSize, 10) || 48);
-            $('#sie-prop-textalign').val(s.textAlign || 'center');
             $('#sie-prop-left').val(parseFloat(s.left) || 0);
             $('#sie-prop-top').val(parseFloat(s.top) || 0);
             $('#sie-prop-width').val(parseFloat(s.width) || 80);

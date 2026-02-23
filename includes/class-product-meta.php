@@ -235,19 +235,9 @@ class SIE_Product_Meta
                                     <select id="sie-prop-font"></select>
                                 </div>
 
-                                <div class="sie-admin-field-row">
-                                    <div class="sie-admin-field">
-                                        <label for="sie-prop-fontsize">Boyut (px)</label>
-                                        <input type="number" id="sie-prop-fontsize" min="8" max="200">
-                                    </div>
-                                    <div class="sie-admin-field">
-                                        <label for="sie-prop-textalign">Hizalama</label>
-                                        <select id="sie-prop-textalign">
-                                            <option value="left">Sol</option>
-                                            <option value="center">Orta</option>
-                                            <option value="right">Sağ</option>
-                                        </select>
-                                    </div>
+                                <div class="sie-admin-field">
+                                    <label for="sie-prop-fontsize">Boyut (px)</label>
+                                    <input type="number" id="sie-prop-fontsize" min="8" max="200">
                                 </div>
 
                                 <div class="sie-admin-field">
