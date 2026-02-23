@@ -916,7 +916,7 @@
 
             this.$rightPanel.on('click', '.sie-canvas-align-btn', function (e) {
                 e.preventDefault();
-                var type = $(this).data('canvas-align');
+                var type = $(this).attr('data-canvas-align');
                 if (type) self.alignLayersToCanvas(type);
             });
         },
