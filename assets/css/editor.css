@@ -129,7 +129,7 @@ body.admin-bar #card-designer.sie-modal {
 /* Preview Area (Right Panel) */
 .sie-preview-area {
     flex: 1;
-    height: 100%;
+    height: 90%;
     background-color: #eef2f7;
     background-image: radial-gradient(#d1d5db 1px, transparent 1px);
     background-size: 20px 20px;
