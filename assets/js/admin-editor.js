@@ -391,55 +391,33 @@
             var $list = this.$leftPanel.find('.sie-admin-layer-list');
             $list.empty();
 
-            // Separate grouped and ungrouped layers, preserving order
-            var groups = {}; // groupName -> [layers]
-            var groupOrder = []; // ordered list of group names encountered
-            var ungrouped = [];
+            // Track which group headers have been rendered
+            var renderedGroups = {};
 
             this.config.layers.forEach(function (layer) {
                 if (layer.group) {
-                    if (!groups[layer.group]) {
-                        groups[layer.group] = [];
-                        groupOrder.push(layer.group);
+                    // Render group header once when first encountered
+                    if (!renderedGroups[layer.group]) {
+                        renderedGroups[layer.group] = true;
+                        var isCollapsed = !!self.collapsedGroups[layer.group];
+                        var toggleIcon = isCollapsed ? 'dashicons-arrow-right-alt2' : 'dashicons-arrow-down-alt2';
+                        $list.append(
+                            '<li class="sie-admin-group-header-row" data-group-header="' + self.escapeHtml(layer.group) + '">' +
+                            '<span class="sie-admin-group-toggle dashicons ' + toggleIcon + '"></span>' +
+                            '<span class="sie-admin-group-name">' + self.escapeHtml(layer.group) + '</span>' +
+                            '</li>'
+                        );
                     }
-                    groups[layer.group].push(layer);
+                    // Render the layer item, hidden if group is collapsed
+                    var $item = self.buildLayerItem(layer);
+                    $item.attr('data-group', layer.group);
+                    if (self.collapsedGroups[layer.group]) {
+                        $item.hide();
+                    }
+                    $list.append($item);
                 } else {
-                    ungrouped.push(layer);
+                    $list.append(self.buildLayerItem(layer));
                 }
-            });
-
-            // Render group sections
-            groupOrder.forEach(function (groupName) {
-                var isCollapsed = !!self.collapsedGroups[groupName];
-                var toggleIcon = isCollapsed ? 'dashicons-arrow-right-alt2' : 'dashicons-arrow-down-alt2';
-
-                var $groupEl = $(
-                    '<li class="sie-admin-layer-group" data-group-name="' + self.escapeHtml(groupName) + '">' +
-                    '<div class="sie-admin-group-header">' +
-                    '<span class="sie-admin-group-drag-handle dashicons dashicons-menu"></span>' +
-                    '<span class="sie-admin-group-toggle dashicons ' + toggleIcon + '"></span>' +
-                    '<span class="sie-admin-group-name">' + self.escapeHtml(groupName) + '</span>' +
-                    '<span class="sie-admin-group-count">(' + groups[groupName].length + ')</span>' +
-                    '</div>' +
-                    '<ul class="sie-admin-group-items"></ul>' +
-                    '</li>'
-                );
-
-                var $groupItems = $groupEl.find('.sie-admin-group-items');
-                groups[groupName].forEach(function (layer) {
-                    $groupItems.append(self.buildLayerItem(layer));
-                });
-
-                if (isCollapsed) {
-                    $groupItems.hide();
-                }
-
-                $list.append($groupEl);
-            });
-
-            // Render ungrouped layers at bottom
-            ungrouped.forEach(function (layer) {
-                $list.append(self.buildLayerItem(layer));
             });
 
             this.initLayerSortable();
@@ -449,42 +427,34 @@
             var self = this;
             var $list = this.$leftPanel.find('.sie-admin-layer-list');
 
-            // Destroy existing sortables
             if ($list.data('ui-sortable')) { $list.sortable('destroy'); }
-            $list.find('.sie-admin-group-items').each(function () {
-                if ($(this).data('ui-sortable')) { $(this).sortable('destroy'); }
-            });
 
-            // Rebuild config.layers from current DOM state.
-            // Uses a flag so that even if multiple sortable events fire for
-            // one drag operation, we only process once (deferred via setTimeout).
-            var rebuildPending = false;
-            var rebuildLayers = function () {
-                if (rebuildPending) return;
-                rebuildPending = true;
-                setTimeout(function () {
-                    rebuildPending = false;
+            // Single flat sortable — only layer items are draggable, group headers are fixed dividers
+            $list.sortable({
+                handle: '.sie-admin-layer-drag-handle',
+                items: '.sie-admin-layer-item',
+                tolerance: 'pointer',
+                placeholder: 'sie-admin-sortable-placeholder',
+                update: function () {
                     var newOrder = [];
+                    var currentGroup = null;
 
                     $list.children().each(function () {
                         var $item = $(this);
 
-                        if ($item.hasClass('sie-admin-layer-group')) {
-                            // Use attr() to read from DOM, avoiding stale jQuery data cache
-                            var groupName = $item.attr('data-group-name');
-                            $item.find('.sie-admin-group-items > .sie-admin-layer-item').each(function () {
-                                var id = $(this).attr('data-layer-id');
-                                var layer = self.getLayerById(id);
-                                if (layer) {
-                                    layer.group = groupName;
-                                    newOrder.push(layer);
-                                }
-                            });
+                        if ($item.hasClass('sie-admin-group-header-row')) {
+                            // Track which group we're currently under
+                            currentGroup = $item.attr('data-group-header');
                         } else if ($item.hasClass('sie-admin-layer-item')) {
                             var id = $item.attr('data-layer-id');
                             var layer = self.getLayerById(id);
                             if (layer) {
-                                delete layer.group;
+                                if (currentGroup) {
+                                    layer.group = currentGroup;
+                                } else {
+                                    delete layer.group;
+                                }
+                                $item.attr('data-group', currentGroup || '');
                                 newOrder.push(layer);
                             }
                         }
@@ -494,47 +464,24 @@
                     self.renderLayers();
                     self.refreshSelectionUI();
                     self.syncConfigToHiddenField();
-                }, 0);
-            };
-
-            // Make each group's item list sortable and connected to other groups + root
-            var $allGroupLists = $list.find('.sie-admin-group-items');
-            $allGroupLists.sortable({
-                handle: '.sie-admin-layer-drag-handle',
-                connectWith: '.sie-admin-group-items, .sie-admin-layer-list',
-                tolerance: 'pointer',
-                placeholder: 'sie-admin-sortable-placeholder',
-                stop: function () {
-                    rebuildLayers();
-                }
-            });
-
-            // Make the root list sortable (groups + ungrouped items)
-            $list.sortable({
-                handle: '.sie-admin-layer-drag-handle, .sie-admin-group-drag-handle',
-                connectWith: '.sie-admin-group-items',
-                tolerance: 'pointer',
-                placeholder: 'sie-admin-sortable-placeholder',
-                items: '> li',
-                stop: function () {
-                    rebuildLayers();
                 }
             });
 
             // Collapse/expand on group header toggle
             $list.off('click.sie-group').on('click.sie-group', '.sie-admin-group-toggle', function (e) {
                 e.stopPropagation();
-                var $groupEl = $(this).closest('.sie-admin-layer-group');
-                var groupName = $groupEl.attr('data-group-name');
-                var $items = $groupEl.find('.sie-admin-group-items');
-                var isCollapsed = $items.is(':hidden');
+                var $headerRow = $(this).closest('.sie-admin-group-header-row');
+                var groupName = $headerRow.attr('data-group-header');
+                var isCollapsed = !!self.collapsedGroups[groupName];
 
                 if (isCollapsed) {
-                    $items.slideDown(150);
+                    // Expand: show all items belonging to this group
+                    $list.find('.sie-admin-layer-item[data-group="' + groupName + '"]').show();
                     $(this).removeClass('dashicons-arrow-right-alt2').addClass('dashicons-arrow-down-alt2');
                     delete self.collapsedGroups[groupName];
                 } else {
-                    $items.slideUp(150);
+                    // Collapse: hide all items belonging to this group
+                    $list.find('.sie-admin-layer-item[data-group="' + groupName + '"]').hide();
                     $(this).removeClass('dashicons-arrow-down-alt2').addClass('dashicons-arrow-right-alt2');
                     self.collapsedGroups[groupName] = true;
                 }

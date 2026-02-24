@@ -276,49 +276,38 @@
     padding: 0;
 }
 
-/* Layer Groups */
-.sie-admin-layer-group {
-    list-style: none;
-    margin-bottom: 4px;
-}
-
-.sie-admin-group-header {
+/* Layer Group Header Rows */
+.sie-admin-group-header-row {
     display: flex;
     align-items: center;
-    padding: 6px 10px;
+    padding: 5px 10px;
     background: #f0f0f1;
     border: 1px solid #c3c4c7;
     border-radius: 3px;
-    cursor: default;
-    font-size: 12px;
+    margin-bottom: 2px;
+    margin-top: 6px;
+    font-size: 11px;
     font-weight: 600;
-    color: #1d2327;
+    color: #50575e;
     text-transform: uppercase;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.5px;
+    cursor: default;
+    list-style: none;
+    user-select: none;
 }
 
-.sie-admin-group-drag-handle {
-    cursor: grab;
-    color: #c3c4c7 !important;
-    margin-right: 4px !important;
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-    line-height: 16px;
-}
-
-.sie-admin-group-drag-handle:hover {
-    color: #8c8f94 !important;
+.sie-admin-group-header-row:first-child {
+    margin-top: 0;
 }
 
 .sie-admin-group-toggle {
     cursor: pointer;
     color: #50575e !important;
     margin-right: 4px !important;
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-    line-height: 16px;
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    line-height: 14px;
     flex-shrink: 0;
 }
 
@@ -330,23 +319,11 @@
     flex: 1;
 }
 
-.sie-admin-group-count {
-    color: #8c8f94;
-    font-weight: 400;
-    font-size: 11px;
-    margin-left: 4px;
-}
-
-.sie-admin-group-items {
-    list-style: none;
-    margin: 0;
-    padding: 0 0 0 16px;
-    border-left: 2px solid #e0e0e0;
-    margin-left: 10px;
-}
-
-.sie-admin-group-items .sie-admin-layer-item {
+/* Indent layer items that belong to a group */
+.sie-admin-layer-item[data-group] {
+    padding-left: 24px;
     font-size: 12px;
+    border-left: 2px solid #e0e0e0;
 }
 
 /* Sortable placeholder */
