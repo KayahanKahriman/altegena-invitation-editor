@@ -363,11 +363,11 @@
 }
 
 .sie-admin-layer:hover {
-    box-shadow: 0 0 0 1px rgba(34, 113, 177, 0.5);
+    background-color: #cfc91820;
 }
 
 .sie-admin-layer.selected {
-    box-shadow: 0 0 0 2px #2271b1;
+    background-color: #cfc91830;
     z-index: 100;
 }
 
