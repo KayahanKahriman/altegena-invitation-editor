@@ -404,7 +404,7 @@
                         $list.append(
                             '<li class="sie-admin-group-header-row" data-group-header="' + self.escapeHtml(layer.group) + '">' +
                             '<span class="sie-admin-group-toggle dashicons ' + toggleIcon + '"></span>' +
-                            '<span class="sie-admin-group-name">' + self.escapeHtml(layer.group) + '</span>' +
+                            '<input type="text" class="sie-admin-group-name-input" value="' + self.escapeHtml(layer.group) + '" title="Düzenlemek için tıklayın">' +
                             '<button type="button" class="sie-admin-group-duplicate" title="Grubu Çoğalt"><span class="dashicons dashicons-admin-page"></span></button>' +
                             '</li>'
                         );
@@ -465,6 +465,28 @@
                     self.renderLayers();
                     self.refreshSelectionUI();
                     self.syncConfigToHiddenField();
+                }
+            });
+
+            // Rename group on input change
+            $list.off('change.sie-rename blur.sie-rename').on('change.sie-rename blur.sie-rename', '.sie-admin-group-name-input', function () {
+                var $input = $(this);
+                var $headerRow = $input.closest('.sie-admin-group-header-row');
+                var oldName = $headerRow.attr('data-group-header');
+                var newName = $input.val().trim();
+                if (!newName || newName === oldName) {
+                    $input.val(oldName); // revert if empty
+                    return;
+                }
+                self.renameGroup(oldName, newName);
+            });
+
+            $list.off('keydown.sie-rename').on('keydown.sie-rename', '.sie-admin-group-name-input', function (e) {
+                if (e.key === 'Enter') {
+                    $(this).trigger('blur');
+                } else if (e.key === 'Escape') {
+                    var oldName = $(this).closest('.sie-admin-group-header-row').attr('data-group-header');
+                    $(this).val(oldName).blur();
                 }
             });
 
@@ -866,6 +888,31 @@
             layer.style[prop] = value + '%';
             this.renderLayers();
             this.selectLayerById(this.selectedLayerId);
+            this.syncConfigToHiddenField();
+        },
+
+        renameGroup: function (oldName, newName) {
+            var self = this;
+            var $list = this.$leftPanel.find('.sie-admin-layer-list');
+
+            // Update all layers with the old group name
+            this.config.layers.forEach(function (layer) {
+                if (layer.group === oldName) {
+                    layer.group = newName;
+                }
+            });
+
+            // Update DOM: header row attribute and all layer item data-group attributes
+            var $headerRow = $list.find('.sie-admin-group-header-row[data-group-header="' + oldName + '"]');
+            $headerRow.attr('data-group-header', newName);
+            $list.find('.sie-admin-layer-item[data-group="' + oldName + '"]').attr('data-group', newName);
+
+            // Update collapsed state if it existed under the old name
+            if (this.collapsedGroups[oldName]) {
+                this.collapsedGroups[newName] = true;
+                delete this.collapsedGroups[oldName];
+            }
+
             this.syncConfigToHiddenField();
         },
 
