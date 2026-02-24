@@ -455,37 +455,46 @@
                 if ($(this).data('ui-sortable')) { $(this).sortable('destroy'); }
             });
 
-            // Shared update logic: rebuild config.layers from DOM
+            // Rebuild config.layers from current DOM state.
+            // Uses a flag so that even if multiple sortable events fire for
+            // one drag operation, we only process once (deferred via setTimeout).
+            var rebuildPending = false;
             var rebuildLayers = function () {
-                var newOrder = [];
+                if (rebuildPending) return;
+                rebuildPending = true;
+                setTimeout(function () {
+                    rebuildPending = false;
+                    var newOrder = [];
 
-                $list.children().each(function () {
-                    var $item = $(this);
+                    $list.children().each(function () {
+                        var $item = $(this);
 
-                    if ($item.hasClass('sie-admin-layer-group')) {
-                        var groupName = $item.data('group-name');
-                        $item.find('.sie-admin-group-items .sie-admin-layer-item').each(function () {
-                            var id = $(this).data('layer-id');
+                        if ($item.hasClass('sie-admin-layer-group')) {
+                            // Use attr() to read from DOM, avoiding stale jQuery data cache
+                            var groupName = $item.attr('data-group-name');
+                            $item.find('.sie-admin-group-items > .sie-admin-layer-item').each(function () {
+                                var id = $(this).attr('data-layer-id');
+                                var layer = self.getLayerById(id);
+                                if (layer) {
+                                    layer.group = groupName;
+                                    newOrder.push(layer);
+                                }
+                            });
+                        } else if ($item.hasClass('sie-admin-layer-item')) {
+                            var id = $item.attr('data-layer-id');
                             var layer = self.getLayerById(id);
                             if (layer) {
-                                layer.group = groupName;
+                                delete layer.group;
                                 newOrder.push(layer);
                             }
-                        });
-                    } else if ($item.hasClass('sie-admin-layer-item')) {
-                        var id = $item.data('layer-id');
-                        var layer = self.getLayerById(id);
-                        if (layer) {
-                            delete layer.group;
-                            newOrder.push(layer);
                         }
-                    }
-                });
+                    });
 
-                self.config.layers = newOrder;
-                self.renderLayers();
-                self.refreshSelectionUI();
-                self.syncConfigToHiddenField();
+                    self.config.layers = newOrder;
+                    self.renderLayers();
+                    self.refreshSelectionUI();
+                    self.syncConfigToHiddenField();
+                }, 0);
             };
 
             // Make each group's item list sortable and connected to other groups + root
@@ -495,9 +504,7 @@
                 connectWith: '.sie-admin-group-items, .sie-admin-layer-list',
                 tolerance: 'pointer',
                 placeholder: 'sie-admin-sortable-placeholder',
-                update: function (event, ui) {
-                    // Only fire once (on the list that received the item)
-                    if (ui.sender !== null && $(this).find(ui.item).length === 0) return;
+                stop: function () {
                     rebuildLayers();
                 }
             });
@@ -509,8 +516,7 @@
                 tolerance: 'pointer',
                 placeholder: 'sie-admin-sortable-placeholder',
                 items: '> li',
-                update: function (event, ui) {
-                    if (ui.sender !== null && $(this).find(ui.item).length === 0) return;
+                stop: function () {
                     rebuildLayers();
                 }
             });
@@ -519,7 +525,7 @@
             $list.off('click.sie-group').on('click.sie-group', '.sie-admin-group-toggle', function (e) {
                 e.stopPropagation();
                 var $groupEl = $(this).closest('.sie-admin-layer-group');
-                var groupName = $groupEl.data('group-name');
+                var groupName = $groupEl.attr('data-group-name');
                 var $items = $groupEl.find('.sie-admin-group-items');
                 var isCollapsed = $items.is(':hidden');
 
