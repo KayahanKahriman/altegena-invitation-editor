@@ -276,6 +276,89 @@
     padding: 0;
 }
 
+/* Layer Groups */
+.sie-admin-layer-group {
+    list-style: none;
+    margin-bottom: 4px;
+}
+
+.sie-admin-group-header {
+    display: flex;
+    align-items: center;
+    padding: 6px 10px;
+    background: #f0f0f1;
+    border: 1px solid #c3c4c7;
+    border-radius: 3px;
+    cursor: default;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1d2327;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.sie-admin-group-drag-handle {
+    cursor: grab;
+    color: #c3c4c7 !important;
+    margin-right: 4px !important;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+}
+
+.sie-admin-group-drag-handle:hover {
+    color: #8c8f94 !important;
+}
+
+.sie-admin-group-toggle {
+    cursor: pointer;
+    color: #50575e !important;
+    margin-right: 4px !important;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+    flex-shrink: 0;
+}
+
+.sie-admin-group-toggle:hover {
+    color: #2271b1 !important;
+}
+
+.sie-admin-group-name {
+    flex: 1;
+}
+
+.sie-admin-group-count {
+    color: #8c8f94;
+    font-weight: 400;
+    font-size: 11px;
+    margin-left: 4px;
+}
+
+.sie-admin-group-items {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 16px;
+    border-left: 2px solid #e0e0e0;
+    margin-left: 10px;
+}
+
+.sie-admin-group-items .sie-admin-layer-item {
+    font-size: 12px;
+}
+
+/* Sortable placeholder */
+.sie-admin-sortable-placeholder {
+    height: 30px;
+    background: #e7f0f9;
+    border: 1px dashed #2271b1;
+    border-radius: 3px;
+    margin-bottom: 2px;
+    list-style: none;
+}
+
 .sie-admin-layer-item {
     display: flex;
     align-items: center;

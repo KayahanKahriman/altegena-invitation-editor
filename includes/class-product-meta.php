@@ -223,6 +223,11 @@ class SIE_Product_Meta
                                 </div>
 
                                 <div class="sie-admin-field">
+                                    <label for="sie-prop-group">Grup</label>
+                                    <input type="text" id="sie-prop-group" placeholder="Örn: Ön Yüz">
+                                </div>
+
+                                <div class="sie-admin-field">
                                     <label for="sie-prop-default-text">Varsayılan Metin</label>
                                     <textarea id="sie-prop-default-text" rows="2"></textarea>
                                 </div>

@@ -369,23 +369,77 @@
             this.renderBgPreview();
         },
 
+        collapsedGroups: {},
+
+        buildLayerItem: function (layer) {
+            var self = this;
+            var selected = self.selectedLayerIds.indexOf(layer.id) !== -1 ? ' selected' : '';
+            var hiddenClass = layer.hidden_on_frontend ? ' sie-layer-hidden' : '';
+            var eyeIcon = layer.hidden_on_frontend ? 'dashicons-hidden' : 'dashicons-visibility';
+            return $(
+                '<li class="sie-admin-layer-item' + selected + hiddenClass + '" data-layer-id="' + layer.id + '">' +
+                '<span class="sie-admin-layer-drag-handle dashicons dashicons-menu"></span>' +
+                '<span class="dashicons dashicons-text"></span>' +
+                '<span>' + self.escapeHtml(layer.label) + '</span>' +
+                '<span class="sie-admin-layer-visibility dashicons ' + eyeIcon + '" title="Önyüzde Görünürlük"></span>' +
+                '</li>'
+            );
+        },
+
         renderLayerList: function () {
             var self = this;
             var $list = this.$leftPanel.find('.sie-admin-layer-list');
             $list.empty();
 
+            // Separate grouped and ungrouped layers, preserving order
+            var groups = {}; // groupName -> [layers]
+            var groupOrder = []; // ordered list of group names encountered
+            var ungrouped = [];
+
             this.config.layers.forEach(function (layer) {
-                var selected = self.selectedLayerIds.indexOf(layer.id) !== -1 ? ' selected' : '';
-                var hiddenClass = layer.hidden_on_frontend ? ' sie-layer-hidden' : '';
-                var eyeIcon = layer.hidden_on_frontend ? 'dashicons-hidden' : 'dashicons-visibility';
-                $list.append(
-                    '<li class="sie-admin-layer-item' + selected + hiddenClass + '" data-layer-id="' + layer.id + '">' +
-                    '<span class="sie-admin-layer-drag-handle dashicons dashicons-menu"></span>' +
-                    '<span class="dashicons dashicons-text"></span>' +
-                    '<span>' + self.escapeHtml(layer.label) + '</span>' +
-                    '<span class="sie-admin-layer-visibility dashicons ' + eyeIcon + '" title="Önyüzde Görünürlük"></span>' +
+                if (layer.group) {
+                    if (!groups[layer.group]) {
+                        groups[layer.group] = [];
+                        groupOrder.push(layer.group);
+                    }
+                    groups[layer.group].push(layer);
+                } else {
+                    ungrouped.push(layer);
+                }
+            });
+
+            // Render group sections
+            groupOrder.forEach(function (groupName) {
+                var isCollapsed = !!self.collapsedGroups[groupName];
+                var toggleIcon = isCollapsed ? 'dashicons-arrow-right-alt2' : 'dashicons-arrow-down-alt2';
+
+                var $groupEl = $(
+                    '<li class="sie-admin-layer-group" data-group-name="' + self.escapeHtml(groupName) + '">' +
+                    '<div class="sie-admin-group-header">' +
+                    '<span class="sie-admin-group-drag-handle dashicons dashicons-menu"></span>' +
+                    '<span class="sie-admin-group-toggle dashicons ' + toggleIcon + '"></span>' +
+                    '<span class="sie-admin-group-name">' + self.escapeHtml(groupName) + '</span>' +
+                    '<span class="sie-admin-group-count">(' + groups[groupName].length + ')</span>' +
+                    '</div>' +
+                    '<ul class="sie-admin-group-items"></ul>' +
                     '</li>'
                 );
+
+                var $groupItems = $groupEl.find('.sie-admin-group-items');
+                groups[groupName].forEach(function (layer) {
+                    $groupItems.append(self.buildLayerItem(layer));
+                });
+
+                if (isCollapsed) {
+                    $groupItems.hide();
+                }
+
+                $list.append($groupEl);
+            });
+
+            // Render ungrouped layers at bottom
+            ungrouped.forEach(function (layer) {
+                $list.append(self.buildLayerItem(layer));
             });
 
             this.initLayerSortable();
@@ -395,26 +449,88 @@
             var self = this;
             var $list = this.$leftPanel.find('.sie-admin-layer-list');
 
-            if ($list.data('ui-sortable')) {
-                $list.sortable('destroy');
-            }
+            // Destroy existing sortables
+            if ($list.data('ui-sortable')) { $list.sortable('destroy'); }
+            $list.find('.sie-admin-group-items').each(function () {
+                if ($(this).data('ui-sortable')) { $(this).sortable('destroy'); }
+            });
 
-            $list.sortable({
-                handle: '.sie-admin-layer-drag-handle',
-                axis: 'y',
-                containment: 'parent',
-                tolerance: 'pointer',
-                update: function () {
-                    var newOrder = [];
-                    $list.find('.sie-admin-layer-item').each(function () {
-                        var id = $(this).data('layer-id');
+            // Shared update logic: rebuild config.layers from DOM
+            var rebuildLayers = function () {
+                var newOrder = [];
+
+                $list.children().each(function () {
+                    var $item = $(this);
+
+                    if ($item.hasClass('sie-admin-layer-group')) {
+                        var groupName = $item.data('group-name');
+                        $item.find('.sie-admin-group-items .sie-admin-layer-item').each(function () {
+                            var id = $(this).data('layer-id');
+                            var layer = self.getLayerById(id);
+                            if (layer) {
+                                layer.group = groupName;
+                                newOrder.push(layer);
+                            }
+                        });
+                    } else if ($item.hasClass('sie-admin-layer-item')) {
+                        var id = $item.data('layer-id');
                         var layer = self.getLayerById(id);
-                        if (layer) newOrder.push(layer);
-                    });
-                    self.config.layers = newOrder;
-                    self.renderLayers();
-                    self.refreshSelectionUI();
-                    self.syncConfigToHiddenField();
+                        if (layer) {
+                            delete layer.group;
+                            newOrder.push(layer);
+                        }
+                    }
+                });
+
+                self.config.layers = newOrder;
+                self.renderLayers();
+                self.refreshSelectionUI();
+                self.syncConfigToHiddenField();
+            };
+
+            // Make each group's item list sortable and connected to other groups + root
+            var $allGroupLists = $list.find('.sie-admin-group-items');
+            $allGroupLists.sortable({
+                handle: '.sie-admin-layer-drag-handle',
+                connectWith: '.sie-admin-group-items, .sie-admin-layer-list',
+                tolerance: 'pointer',
+                placeholder: 'sie-admin-sortable-placeholder',
+                update: function (event, ui) {
+                    // Only fire once (on the list that received the item)
+                    if (ui.sender !== null && $(this).find(ui.item).length === 0) return;
+                    rebuildLayers();
+                }
+            });
+
+            // Make the root list sortable (groups + ungrouped items)
+            $list.sortable({
+                handle: '.sie-admin-layer-drag-handle, .sie-admin-group-drag-handle',
+                connectWith: '.sie-admin-group-items',
+                tolerance: 'pointer',
+                placeholder: 'sie-admin-sortable-placeholder',
+                items: '> li',
+                update: function (event, ui) {
+                    if (ui.sender !== null && $(this).find(ui.item).length === 0) return;
+                    rebuildLayers();
+                }
+            });
+
+            // Collapse/expand on group header toggle
+            $list.off('click.sie-group').on('click.sie-group', '.sie-admin-group-toggle', function (e) {
+                e.stopPropagation();
+                var $groupEl = $(this).closest('.sie-admin-layer-group');
+                var groupName = $groupEl.data('group-name');
+                var $items = $groupEl.find('.sie-admin-group-items');
+                var isCollapsed = $items.is(':hidden');
+
+                if (isCollapsed) {
+                    $items.slideDown(150);
+                    $(this).removeClass('dashicons-arrow-right-alt2').addClass('dashicons-arrow-down-alt2');
+                    delete self.collapsedGroups[groupName];
+                } else {
+                    $items.slideUp(150);
+                    $(this).removeClass('dashicons-arrow-down-alt2').addClass('dashicons-arrow-right-alt2');
+                    self.collapsedGroups[groupName] = true;
                 }
             });
         },
@@ -560,6 +676,21 @@
                 self.updateSelectedLayerProperty('label', $(this).val());
             });
 
+            this.$rightPanel.on('input', '#sie-prop-group', function () {
+                if (!self.selectedLayerId) return;
+                var layer = self.getLayerById(self.selectedLayerId);
+                if (!layer) return;
+                var val = $(this).val().trim();
+                if (val) {
+                    layer.group = val;
+                } else {
+                    delete layer.group;
+                }
+                self.renderLayerList();
+                self.refreshSelectionUI();
+                self.syncConfigToHiddenField();
+            });
+
             this.$rightPanel.on('input', '#sie-prop-default-text', function () {
                 self.updateSelectedLayerProperty('default_text', $(this).val());
             });
@@ -675,6 +806,7 @@
             // Fill fields
             $('#sie-prop-id').val(layer.id);
             $('#sie-prop-label').val(layer.label || '');
+            $('#sie-prop-group').val(layer.group || '');
             $('#sie-prop-default-text').val(layer.default_text || '');
 
             var s = layer.style || {};
