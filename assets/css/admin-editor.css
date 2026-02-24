@@ -87,6 +87,51 @@
     background: #f0f0f1;
     min-height: 600px;
     overflow: hidden;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* Fullscreen Mode */
+.sie-admin-editor.sie-admin-fullscreen {
+    position: fixed;
+    top: 32px; /* WP Admin bar height */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 99999;
+    border: none;
+    border-radius: 0;
+    min-height: auto;
+    height: calc(100vh - 32px);
+}
+
+@media screen and (max-width: 782px) {
+    .sie-admin-editor.sie-admin-fullscreen {
+        top: 46px; /* Mobile WP Admin bar height */
+        height: calc(100vh - 46px);
+    }
+}
+
+.sie-admin-fullscreen-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 100;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 3px;
+    padding: 4px;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #50575e;
+}
+
+.sie-admin-fullscreen-btn:hover {
+    background: #f6f7f7;
+    color: #2271b1;
 }
 
 /* Left Panel - Canvas Settings & Layer List */

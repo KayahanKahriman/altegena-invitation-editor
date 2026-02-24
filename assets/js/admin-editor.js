@@ -42,6 +42,7 @@
             this.bindFormSubmission();
             this.bindKeyboardMovement();
             this.bindAlignmentButtons();
+            this.bindFullscreen();
             this.renderVisualEditor();
             this.setupCanvasScaling();
             this.pushHistory(); // Save initial state
@@ -965,6 +966,19 @@
         },
 
         // ─── Alignment & Distribution ─────────────────────────────
+
+        bindFullscreen: function () {
+            var self = this;
+            this.$container.on('click', '.sie-admin-fullscreen-btn', function (e) {
+                e.preventDefault();
+                self.$container.toggleClass('sie-admin-fullscreen');
+                
+                // Allow CSS transition to finish before recalculating scale
+                setTimeout(function() {
+                    self.fitCanvas();
+                }, 350);
+            });
+        },
 
         bindAlignmentButtons: function () {
             var self = this;

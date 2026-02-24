@@ -175,6 +175,7 @@ class SIE_Product_Meta
 
                         <!-- Center Panel: Canvas Preview -->
                         <div class="sie-admin-canvas-area">
+                            <button type="button" class="sie-admin-fullscreen-btn" title="Tam Ekran Yap / Çık"><span class="dashicons dashicons-editor-expand"></span></button>
                             <div class="sie-admin-canvas"></div>
                         </div>
 
