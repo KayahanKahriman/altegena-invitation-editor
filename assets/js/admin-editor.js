@@ -405,6 +405,7 @@
                             '<li class="sie-admin-group-header-row" data-group-header="' + self.escapeHtml(layer.group) + '">' +
                             '<span class="sie-admin-group-toggle dashicons ' + toggleIcon + '"></span>' +
                             '<span class="sie-admin-group-name">' + self.escapeHtml(layer.group) + '</span>' +
+                            '<button type="button" class="sie-admin-group-duplicate" title="Grubu Çoğalt"><span class="dashicons dashicons-admin-page"></span></button>' +
                             '</li>'
                         );
                     }
@@ -465,6 +466,13 @@
                     self.refreshSelectionUI();
                     self.syncConfigToHiddenField();
                 }
+            });
+
+            // Duplicate group button
+            $list.off('click.sie-dup-group').on('click.sie-dup-group', '.sie-admin-group-duplicate', function (e) {
+                e.stopPropagation();
+                var groupName = $(this).closest('.sie-admin-group-header-row').attr('data-group-header');
+                self.duplicateGroup(groupName);
             });
 
             // Collapse/expand on group header toggle
@@ -858,6 +866,46 @@
             layer.style[prop] = value + '%';
             this.renderLayers();
             this.selectLayerById(this.selectedLayerId);
+            this.syncConfigToHiddenField();
+        },
+
+        duplicateGroup: function (groupName) {
+            var self = this;
+            var newGroupName = groupName + ' (kopya)';
+            // Ensure unique group name
+            var suffix = 1;
+            var existingNames = {};
+            this.config.layers.forEach(function (l) { if (l.group) existingNames[l.group] = true; });
+            while (existingNames[newGroupName]) {
+                newGroupName = groupName + ' (kopya ' + (++suffix) + ')';
+            }
+
+            // Clone all layers in the group
+            var clones = [];
+            this.config.layers.forEach(function (layer) {
+                if (layer.group === groupName) {
+                    var clone = JSON.parse(JSON.stringify(layer));
+                    clone.id = layer.id + '_copy_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+                    clone.label = layer.label + ' (kopya)';
+                    clone.group = newGroupName;
+                    if (clone.style && clone.style.top) {
+                        clone.style.top = (parseFloat(clone.style.top) + 3) + '%';
+                    }
+                    clones.push(clone);
+                }
+            });
+
+            if (!clones.length) return;
+
+            // Insert clones after the last layer of the original group
+            var lastIdx = -1;
+            for (var i = 0; i < this.config.layers.length; i++) {
+                if (this.config.layers[i].group === groupName) lastIdx = i;
+            }
+            var args = [lastIdx + 1, 0].concat(clones);
+            Array.prototype.splice.apply(this.config.layers, args);
+
+            this.renderVisualEditor();
             this.syncConfigToHiddenField();
         },
 

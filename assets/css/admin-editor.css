@@ -319,6 +319,28 @@
     flex: 1;
 }
 
+.sie-admin-group-duplicate {
+    background: none;
+    border: none;
+    padding: 0 2px;
+    cursor: pointer;
+    color: #c3c4c7;
+    display: flex;
+    align-items: center;
+    line-height: 1;
+}
+
+.sie-admin-group-duplicate:hover {
+    color: #2271b1;
+}
+
+.sie-admin-group-duplicate .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    line-height: 14px;
+}
+
 /* Indent layer items that belong to a group */
 .sie-admin-layer-item[data-group] {
     padding-left: 24px;
