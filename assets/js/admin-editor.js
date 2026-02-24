@@ -249,7 +249,7 @@
             var availH = areaH - pad * 2;
             var baseW = this.config.canvas.width;
             var baseH = this.config.canvas.height;
-            var scale = Math.min(availW / baseW, availH / baseH, 1);
+            var scale = Math.min(availW / baseW, availH / baseH); // Removed the 1 limit to allow scaling up
 
             this.$canvas.css({
                 width: baseW + 'px',
