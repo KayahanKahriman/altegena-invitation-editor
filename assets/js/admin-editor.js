@@ -537,7 +537,14 @@
                 style.left = (left + width / 2) + '%';
                 delete style.width;
             }
-            style.transform = 'translateX(-50%)';
+            
+            var transform = 'translateX(-50%)';
+            if (style.rotate) {
+                transform += ' rotate(' + style.rotate + 'deg)';
+                delete style.rotate;
+            }
+            style.transform = transform;
+            
             style.position = 'absolute';
 
             var text = (layer.default_text || '').replace(/\\n/g, '\n');
@@ -716,6 +723,10 @@
                 self.updateSelectedLayerStylePosition('width', $(this).val());
             });
 
+            this.$rightPanel.on('input', '#sie-prop-rotate', function () {
+                self.updateSelectedLayerStyle('rotate', $(this).val());
+            });
+
             this.$rightPanel.on('input', '#sie-prop-letterspacing', function () {
                 var val = $(this).val();
                 self.updateSelectedLayerStyle('letterSpacing', val ? val + 'px' : '');
@@ -798,6 +809,7 @@
             $('#sie-prop-left').val(parseFloat(s.left) || 0);
             $('#sie-prop-top').val(parseFloat(s.top) || 0);
             $('#sie-prop-width').val(parseFloat(s.width) || 80);
+            $('#sie-prop-rotate').val(parseInt(s.rotate, 10) || 0);
             $('#sie-prop-letterspacing').val(parseFloat(s.letterSpacing) || '');
             $('#sie-prop-lineheight').val(s.lineHeight || '');
             $('#sie-prop-fontweight').val(s.fontWeight || 'normal');
@@ -869,12 +881,13 @@
 
             // Apply to canvas layer (need to handle center-point conversion for positioning)
             var $el = this.$canvas.find('.sie-admin-layer[data-layer-id="' + this.selectedLayerId + '"]');
-            if (['left', 'top', 'width'].indexOf(prop) === -1) {
-                $el.css(prop, value || '');
-            } else {
-                // Re-render this single layer to apply position conversion
+            
+            // Re-render this single layer to apply position/transform conversion
+            if (['left', 'top', 'width', 'rotate'].indexOf(prop) !== -1) {
                 this.renderLayers();
                 this.selectLayerById(this.selectedLayerId);
+            } else {
+                $el.css(prop, value || '');
             }
 
             this.syncConfigToHiddenField();

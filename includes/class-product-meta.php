@@ -307,6 +307,11 @@ class SIE_Product_Meta
                                     <label for="sie-prop-width">Genişlik (%)</label>
                                     <input type="number" id="sie-prop-width" step="any" min="5" max="100">
                                 </div>
+
+                                <div class="sie-admin-field">
+                                    <label for="sie-prop-rotate">Döndürme (Derece)</label>
+                                    <input type="number" id="sie-prop-rotate" step="1" min="-360" max="360" value="0">
+                                </div>
                             </div>
 
                             <div class="sie-admin-panel-section">

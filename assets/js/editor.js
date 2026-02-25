@@ -113,7 +113,13 @@
                 style.left = (left + width / 2) + '%';
                 delete style.width;
             }
-            style.transform = 'translateX(-50%)';
+            
+            let transform = 'translateX(-50%)';
+            if (style.rotate) {
+                transform += ` rotate(${style.rotate}deg)`;
+                delete style.rotate;
+            }
+            style.transform = transform;
 
             const isEditable = !this.is_admin_mode && !layer.hidden_on_frontend;
             const elAttrs = {
