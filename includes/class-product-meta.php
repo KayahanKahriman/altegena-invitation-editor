@@ -58,21 +58,21 @@ class SIE_Product_Meta
             'sie-fonts-css',
             SIE_PLUGIN_URL . 'assets/css/fonts.css',
             array(),
-            SIE_VERSION
+            filemtime(SIE_PLUGIN_DIR . 'assets/css/fonts.css')
         );
 
         wp_enqueue_style(
             'sie-admin-editor-css',
             SIE_PLUGIN_URL . 'assets/css/admin-editor.css',
             array('wp-color-picker'),
-            SIE_VERSION
+            filemtime(SIE_PLUGIN_DIR . 'assets/css/admin-editor.css')
         );
 
         wp_enqueue_script(
             'sie-admin-editor-js',
             SIE_PLUGIN_URL . 'assets/js/admin-editor.js',
             array('jquery', 'wp-color-picker', 'jquery-ui-sortable'),
-            SIE_VERSION,
+            filemtime(SIE_PLUGIN_DIR . 'assets/js/admin-editor.js'),
             true
         );
 

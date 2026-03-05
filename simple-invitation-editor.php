@@ -68,10 +68,14 @@ class Simple_Invitation_Editor
 			return;
 		}
 
+		$fonts_ver = filemtime(SIE_PLUGIN_DIR . 'assets/css/fonts.css');
+		$editor_css_ver = filemtime(SIE_PLUGIN_DIR . 'assets/css/editor.css');
+		$editor_js_ver = filemtime(SIE_PLUGIN_DIR . 'assets/js/editor.js');
+
 		// Load custom fonts first
-		wp_enqueue_style('sie-fonts-css', SIE_PLUGIN_URL . 'assets/css/fonts.css', array(), SIE_VERSION);
-		wp_enqueue_style('sie-editor-css', SIE_PLUGIN_URL . 'assets/css/editor.css', array('sie-fonts-css'), SIE_VERSION);
-		wp_enqueue_script('sie-editor-js', SIE_PLUGIN_URL . 'assets/js/editor.js', array('jquery', 'wc-add-to-cart'), SIE_VERSION, true);
+		wp_enqueue_style('sie-fonts-css', SIE_PLUGIN_URL . 'assets/css/fonts.css', array(), $fonts_ver);
+		wp_enqueue_style('sie-editor-css', SIE_PLUGIN_URL . 'assets/css/editor.css', array('sie-fonts-css'), $editor_css_ver);
+		wp_enqueue_script('sie-editor-js', SIE_PLUGIN_URL . 'assets/js/editor.js', array('jquery', 'wc-add-to-cart'), $editor_js_ver, true);
 
 		wp_localize_script('sie-editor-js', 'sie_config', array(
 			'raw_config' => $config,
