@@ -127,14 +127,14 @@
                     this.showJsonStatus('Geçersiz yapı: canvas ve layers gerekli', false);
                     return;
                 }
-                
+
                 // If valid, apply it to the visual editor
                 this.config = parsed;
                 this.deselectLayer();
                 this.renderVisualEditor();
                 this.fitCanvas();
                 this.syncConfigToHiddenField();
-                
+
                 this.showJsonStatus('JSON geçerli ve uygulandı', true);
             } catch (e) {
                 this.showJsonStatus('Hata: ' + e.message, false);
@@ -343,8 +343,8 @@
                     left: '10%',
                     top: '10%',
                     width: '80%',
-                    fontFamily: 'Darleston',
-                    fontSize: '48px',
+                    fontFamily: 'Mokka',
+                    fontSize: '22px',
                     color: '#333333',
                     textAlign: 'center'
                 }
@@ -537,14 +537,14 @@
                 style.left = (left + width / 2) + '%';
                 delete style.width;
             }
-            
+
             var transform = 'translateX(-50%)';
             if (style.rotate) {
                 transform += ' rotate(' + style.rotate + 'deg)';
                 delete style.rotate;
             }
             style.transform = transform;
-            
+
             style.position = 'absolute';
 
             var text = (layer.default_text || '').replace(/\\n/g, '\n');
@@ -804,7 +804,7 @@
             $('#sie-prop-default-text').val(layer.default_text || '');
 
             var s = layer.style || {};
-            $('#sie-prop-font').val(s.fontFamily || 'Darleston');
+            $('#sie-prop-font').val(s.fontFamily || 'Mokka');
             $('#sie-prop-fontsize').val(parseInt(s.fontSize, 10) || 48);
             $('#sie-prop-left').val(parseFloat(s.left) || 0);
             $('#sie-prop-top').val(parseFloat(s.top) || 0);
@@ -881,7 +881,7 @@
 
             // Apply to canvas layer (need to handle center-point conversion for positioning)
             var $el = this.$canvas.find('.sie-admin-layer[data-layer-id="' + this.selectedLayerId + '"]');
-            
+
             // Re-render this single layer to apply position/transform conversion
             if (['left', 'top', 'width', 'rotate'].indexOf(prop) !== -1) {
                 this.renderLayers();
@@ -1165,9 +1165,9 @@
             this.$container.on('click', '.sie-admin-fullscreen-btn', function (e) {
                 e.preventDefault();
                 self.$container.toggleClass('sie-admin-fullscreen');
-                
+
                 // Allow CSS transition to finish before recalculating scale
-                setTimeout(function() {
+                setTimeout(function () {
                     self.fitCanvas();
                 }, 350);
             });
@@ -1376,7 +1376,7 @@
                         }
                     }
                 }
-                
+
                 self.syncConfigToHiddenField();
             });
         },

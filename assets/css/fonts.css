@@ -132,6 +132,14 @@
 }
 
 @font-face {
+    font-family: 'Lovely Home';
+    src: url('../fonts/LovelyHome.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
     font-family: 'Madina';
     src: url('../fonts/Madina.ttf') format('truetype');
     font-weight: normal;
