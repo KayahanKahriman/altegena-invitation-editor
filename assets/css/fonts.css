@@ -44,6 +44,14 @@
 }
 
 @font-face {
+    font-family: 'Ayalena';
+    src: url('../fonts/Ayalena.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
     font-family: 'Avant Garde';
     src: url('../fonts/AvantGarde.ttf') format('truetype');
     font-weight: normal;
@@ -92,6 +100,14 @@
 }
 
 @font-face {
+    font-family: 'Christmas Wish Calligraphy';
+    src: url('../fonts/ChristmasWishCalligraphy.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
     font-family: 'Fenice';
     src: url('../fonts/FeniceRegularTR.ttf') format('truetype');
     font-weight: normal;
@@ -116,8 +132,24 @@
 }
 
 @font-face {
+    font-family: 'Fleur De Leah';
+    src: url('../fonts/FleurDeLeah.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
     font-family: 'Fragrance';
     src: url('../fonts/FragranceXRegular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Futura Book';
+    src: url('../fonts/FuturaBook.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -208,6 +240,14 @@
     src: url('../fonts/PerpetuaStd-Bold_ItalicTR.ttf') format('truetype');
     font-weight: bold;
     font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Playball';
+    src: url('../fonts/Playball.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
     font-display: swap;
 }
 
