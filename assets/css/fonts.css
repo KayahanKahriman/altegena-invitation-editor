@@ -84,6 +84,14 @@
 }
 
 @font-face {
+    font-family: 'Champignon';
+    src: url('../fonts/Champignon.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
     font-family: 'Candlescript';
     src: url('../fonts/Candlescript.ttf') format('truetype');
     font-weight: normal;
@@ -220,6 +228,14 @@
 }
 
 @font-face {
+    font-family: 'Opel Sans';
+    src: url('../fonts/OpelSans.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
     font-family: 'Optimus Princeps';
     src: url('../fonts/OptimusPrinceps.ttf') format('truetype');
     font-weight: normal;
@@ -246,6 +262,14 @@
 @font-face {
     font-family: 'Playball';
     src: url('../fonts/Playball.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Queen Xylophia';
+    src: url('../fonts/QueenXylophia.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
