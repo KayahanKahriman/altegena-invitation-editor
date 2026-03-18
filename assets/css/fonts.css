@@ -68,6 +68,14 @@
 }
 
 @font-face {
+    font-family: 'Belgedes';
+    src: url('../fonts/Belgedes.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
     font-family: 'Breakfast And Chill';
     src: url('../fonts/BreakfastAndChill.ttf') format('truetype');
     font-weight: normal;
@@ -190,6 +198,14 @@
 @font-face {
     font-family: 'Mokka';
     src: url('../fonts/MokkaSmallCaps.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Marquette';
+    src: url('../fonts/Marquette.otf') format('opentype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
