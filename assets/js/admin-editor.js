@@ -745,6 +745,18 @@
                 self.updateSelectedLayerStyle('fontStyle', $(this).val());
             });
 
+            // Metin hizalama butonları
+            this.$rightPanel.on('click', '.sie-text-align-btn', function (e) {
+                e.preventDefault();
+                var align = $(this).data('align');
+                if (align) {
+                    $('.sie-text-align-btn').removeClass('active');
+                    $(this).addClass('active');
+                    $('#sie-prop-textalign').val(align);
+                    self.updateSelectedLayerStyle('textAlign', align);
+                }
+            });
+
             // Hidden on frontend checkbox
             this.$rightPanel.on('change', '#sie-prop-hidden-frontend', function () {
                 if (!self.selectedLayerId) return;
@@ -815,6 +827,12 @@
             $('#sie-prop-fontweight').val(s.fontWeight || 'normal');
             $('#sie-prop-fontstyle').val(s.fontStyle || 'normal');
             $('#sie-prop-hidden-frontend').prop('checked', !!layer.hidden_on_frontend);
+
+            // Metin hizalama butonlarını güncelle
+            var textAlign = s.textAlign || 'center';
+            $('#sie-prop-textalign').val(textAlign);
+            $('.sie-text-align-btn').removeClass('active');
+            $('.sie-text-align-btn[data-align="' + textAlign + '"]').addClass('active');
 
             // Init/update color picker
             this.initColorPicker(s.color || '#333333');

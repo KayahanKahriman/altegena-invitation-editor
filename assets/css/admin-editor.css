@@ -94,7 +94,8 @@
 /* Fullscreen Mode */
 .sie-admin-editor.sie-admin-fullscreen {
     position: fixed;
-    top: 32px; /* WP Admin bar height */
+    top: 32px;
+    /* WP Admin bar height */
     left: 0;
     right: 0;
     bottom: 0;
@@ -107,7 +108,8 @@
 
 @media screen and (max-width: 782px) {
     .sie-admin-editor.sie-admin-fullscreen {
-        top: 46px; /* Mobile WP Admin bar height */
+        top: 46px;
+        /* Mobile WP Admin bar height */
         height: calc(100vh - 46px);
     }
 }
@@ -122,7 +124,7 @@
     border-radius: 3px;
     padding: 4px;
     cursor: pointer;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -586,6 +588,46 @@
 .sie-align-btn .sie-rotate-90,
 .sie-canvas-align-btn .sie-rotate-90 {
     transform: rotate(90deg);
+}
+
+/* Metin Hizalama Butonları */
+.sie-admin-text-align-buttons {
+    display: flex;
+    gap: 4px;
+}
+
+.sie-text-align-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid #8c8f94;
+    border-radius: 3px;
+    background: #f6f7f7;
+    cursor: pointer;
+    color: #50575e;
+    transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+
+.sie-text-align-btn:hover {
+    background: #2271b1;
+    border-color: #2271b1;
+    color: #fff;
+}
+
+.sie-text-align-btn.active {
+    background: #2271b1;
+    border-color: #2271b1;
+    color: #fff;
+}
+
+.sie-text-align-btn .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
 }
 
 /* Properties Panel Specific */

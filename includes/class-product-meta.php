@@ -307,6 +307,17 @@ class SIE_Product_Meta
                             </div>
                         </div>
 
+                        <div class="sie-admin-field">
+                            <label>Metin Hizalama</label>
+                            <div class="sie-admin-text-align-buttons">
+                                <button type="button" class="sie-text-align-btn" data-align="left" title="Sola Dayalı"><span class="dashicons dashicons-align-left"></span></button>
+                                <button type="button" class="sie-text-align-btn" data-align="center" title="Ortalı"><span class="dashicons dashicons-align-center"></span></button>
+                                <button type="button" class="sie-text-align-btn" data-align="right" title="Sağa Dayalı"><span class="dashicons dashicons-align-right"></span></button>
+                                <button type="button" class="sie-text-align-btn" data-align="justify" title="İki Yana Yaslı"><span class="dashicons dashicons-align-justify"></span></button>
+                            </div>
+                            <input type="hidden" id="sie-prop-textalign" value="center">
+                        </div>
+
                         <div class="sie-admin-field-row">
                             <div class="sie-admin-field">
                                 <label for="sie-prop-letterspacing">Harf Aralığı</label>
