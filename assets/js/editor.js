@@ -91,7 +91,6 @@
         },
 
         addTextLayer: function (layer) {
-            console.log('SIE: Adding text layer', layer.id, 'Font Family:', layer.style.fontFamily);
             // Create Sidebar Input (skip for hidden/fixed layers)
             if (!layer.hidden_on_frontend) {
                 const inputHtml = `
