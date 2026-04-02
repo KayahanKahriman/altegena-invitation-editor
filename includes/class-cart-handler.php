@@ -46,10 +46,8 @@ class SIE_Cart_Handler
             return;
         }
 
-        // Trigger Button - Disabled by default until variant is selected
-        // Trigger Button - Disabled by default until variant is selected
-        echo '<div class="wp-block-button is-style-cta-button">';
-        echo '<button type="button" id="open-card-designer" class="wp-block-button__link" disabled>Davetiyeyi Sana Özel Yap</button>';
+        echo '<div class="is-style-add-to-cart-button">';
+        echo '<button type="button" id="open-card-designer" disabled>Davetiyeni Özelleştir</button>';
         echo '</div>';
 
         // Modal Container (Hidden by default)
