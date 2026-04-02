@@ -113,7 +113,7 @@
                 style.left = (left + width / 2) + '%';
                 delete style.width;
             }
-            
+
             let transform = 'translateX(-50%)';
             if (style.rotate) {
                 transform += ` rotate(${style.rotate}deg)`;
@@ -235,45 +235,54 @@
 
             // Add to Cart Button (using event delegation since modal is moved to body)
             $(document).on('click', '#sie-add-to-cart-btn', function () {
+                var $btn = $(this);
+                if ($btn.hasClass('sie-loading')) return;
+
                 // Update hidden input with latest data
                 self.updateHiddenInput();
 
-                // Get product ID from add to cart button
-                const $addToCartBtn = $('button[name="add-to-cart"]');
-                const productId = $addToCartBtn.val();
+                var $form = $('form.cart');
+
+                // Check if variation is selected for variable products
+                var variationId = 0;
+                if ($form.find('.variations').length) {
+                    variationId = $form.find('input[name="variation_id"]').val();
+                    if (!variationId || variationId === '0') {
+                        alert('Lütfen önce bir varyasyon seçin.');
+                        return;
+                    }
+                }
+
+                // Get product ID
+                var productId = $form.find('input[name="product_id"]').val()
+                    || $form.find('button[name="add-to-cart"]').val();
 
                 if (!productId) {
                     console.error('SIE: Product ID not found');
                     return;
                 }
 
-                // Get customization data
-                const customData = $('#sie-custom-data').val();
+                // Loading state
+                var originalText = $btn.text();
+                $btn.addClass('sie-loading').text('Ekleniyor...').prop('disabled', true);
 
-                // Prepare AJAX data
-                const data = {
-                    action: 'woocommerce_add_to_cart',
-                    product_id: productId,
-                    quantity: 1,
-                    sie_custom_data: customData
-                };
+                // Build form data for submission
+                var formData = $form.serialize();
+                formData += '&add-to-cart=' + productId;
 
-                // Add to cart via AJAX
+                // Submit via AJAX using the product page URL (handles both simple & variable)
                 $.ajax({
-                    url: wc_add_to_cart_params.wc_ajax_url.toString().replace('%%endpoint%%', 'add_to_cart'),
+                    url: $form.attr('action') || window.location.href,
                     type: 'POST',
-                    data: data,
-                    success: function (response) {
-                        if (response.error) {
-                            console.error('SIE: Add to cart failed', response);
-                            alert('Sepete eklenirken bir hata oluştu.');
-                        } else {
-                            // Redirect to cart page
+                    data: formData,
+                    success: function () {
+                        $btn.text('Eklendi ✓');
+                        setTimeout(function () {
                             window.location.href = wc_add_to_cart_params.cart_url;
-                        }
+                        }, 600);
                     },
-                    error: function (xhr, status, error) {
-                        console.error('SIE: AJAX error', error);
+                    error: function () {
+                        $btn.removeClass('sie-loading').text(originalText).prop('disabled', false);
                         alert('Sepete eklenirken bir hata oluştu.');
                     }
                 });

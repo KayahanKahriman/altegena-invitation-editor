@@ -95,6 +95,33 @@ body.admin-bar #card-designer.sie-modal {
     box-shadow: 0 2px 6px rgba(212, 175, 55, 0.3);
 }
 
+.sie-add-to-cart-btn.sie-loading {
+    pointer-events: none;
+    opacity: 0.8;
+    position: relative;
+    padding-left: 40px;
+}
+
+.sie-add-to-cart-btn.sie-loading::before {
+    content: '';
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    margin-top: -8px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: sie-spin 0.6s linear infinite;
+}
+
+@keyframes sie-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 /* The Editor App Container (Inside Modal) */
 #sie-editor-app {
     flex: 1;
