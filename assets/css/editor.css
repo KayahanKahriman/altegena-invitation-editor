@@ -66,12 +66,12 @@ body.admin-bar #card-designer.altegena-modal {
 }
 
 .altegena-close-btn:hover {
-    color: #d90429;
+    color: var(--altegena-danger, #d90429);
 }
 
 /* Add to Cart Button */
 .altegena-add-to-cart-btn {
-    background: linear-gradient(135deg, #d4af37 0%, #c5a028 100%);
+    background: linear-gradient(135deg, var(--altegena-accent, #d4af37) 0%, var(--altegena-accent-dark, #c5a028) 100%);
     color: #ffffff;
     border: none;
     padding: 10px 24px;
@@ -86,7 +86,7 @@ body.admin-bar #card-designer.altegena-modal {
 }
 
 .altegena-add-to-cart-btn:hover {
-    background: linear-gradient(135deg, #c5a028 0%, #b69121 100%);
+    background: linear-gradient(135deg, var(--altegena-accent-dark, #c5a028) 0%, #b69121 100%);
     box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
     transform: translateY(-1px);
 }
@@ -140,7 +140,7 @@ body.admin-bar #card-designer.altegena-modal {
     bottom: 16px;
     right: 16px;
     z-index: 30;
-    background: #25D366;
+    background: var(--altegena-share, #25D366);
     color: #ffffff;
     border: none;
     padding: 7px 14px;
@@ -155,7 +155,7 @@ body.admin-bar #card-designer.altegena-modal {
 }
 
 .altegena-share-btn:hover {
-    background: #1ebe5b;
+    background: var(--altegena-share-dark, #1ebe5b);
     box-shadow: 0 5px 14px rgba(0, 0, 0, 0.3);
     transform: translateY(-1px);
 }
@@ -223,7 +223,7 @@ body.admin-bar #card-designer.altegena-modal {
 }
 
 .altegena-share-close:hover {
-    color: #d90429;
+    color: var(--altegena-danger, #d90429);
 }
 
 .altegena-share-preview {
@@ -257,13 +257,13 @@ body.admin-bar #card-designer.altegena-modal {
 
 .altegena-share-action.altegena-wa-link,
 .altegena-share-action.altegena-wa-image {
-    background: #25D366;
+    background: var(--altegena-share, #25D366);
     color: #ffffff;
 }
 
 .altegena-share-action.altegena-wa-link:hover,
 .altegena-share-action.altegena-wa-image:hover {
-    background: #1ebe5b;
+    background: var(--altegena-share-dark, #1ebe5b);
     color: #ffffff;
 }
 
@@ -364,7 +364,7 @@ body.admin-bar #card-designer.altegena-modal {
 
 .altegena-layer.is-selected,
 .altegena-layer:focus {
-    box-shadow: 0 0 0 2px #d4af37;
+    box-shadow: 0 0 0 2px var(--altegena-accent, #d4af37);
     z-index: 100;
 }
 
@@ -404,7 +404,7 @@ body.admin-bar #card-designer.altegena-modal {
 .altegena-input-group input:focus,
 .altegena-input-group textarea:focus,
 .altegena-input-group select:focus {
-    border-color: #d4af37;
+    border-color: var(--altegena-accent, #d4af37);
     background: #fff;
     outline: none;
 }
@@ -412,7 +412,7 @@ body.admin-bar #card-designer.altegena-modal {
 /* Active State Highlighting */
 .altegena-input-group.active {
     background-color: #fffbf0;
-    border-left: 3px solid #d4af37;
+    border-left: 3px solid var(--altegena-accent, #d4af37);
     padding-left: 10px;
     margin-left: -10px;
     /* Compensate for padding */

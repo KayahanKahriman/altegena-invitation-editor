@@ -28,6 +28,10 @@ class Altegena_Cart_Handler
         // Display design data in cart and checkout
         add_filter('woocommerce_get_item_data', array($this, 'get_item_data'), 10, 2);
 
+        // Control where the per-layer personalization rows appear on orders
+        // (this plugin owns the visibility so themes don't need to know its data keys).
+        add_filter('woocommerce_order_item_get_formatted_meta_data', array($this, 'filter_order_item_meta'), 10, 2);
+
         // Save design data to order line item
         add_action('woocommerce_checkout_create_order_line_item', array($this, 'checkout_create_order_line_item'), 10, 4);
 
@@ -47,15 +51,15 @@ class Altegena_Cart_Handler
         }
 
         echo '<div class="is-style-add-to-cart-button">';
-        echo '<button type="button" id="open-card-designer" disabled>Davetiyeni Özelleştir</button>';
+        echo '<button type="button" id="open-card-designer" disabled>' . esc_html(Altegena_Settings::text('label_customize')) . '</button>';
         echo '</div>';
 
         // Modal Container (Hidden by default)
         echo '<div id="card-designer" class="altegena-modal" style="display:none;">';
         echo '<div class="altegena-modal-header">';
-        echo '<h2>Tasarımcı</h2>';
-        echo '<button type="button" id="altegena-add-to-cart-btn" class="altegena-add-to-cart-btn">Sepete Ekle</button>';
-        echo '<button type="button" id="altegena-share-btn" class="altegena-share-btn">WhatsApp\'ta Paylaş</button>';
+        echo '<h2>' . esc_html(Altegena_Settings::text('modal_title')) . '</h2>';
+        echo '<button type="button" id="altegena-add-to-cart-btn" class="altegena-add-to-cart-btn">' . esc_html(Altegena_Settings::text('label_add_to_cart')) . '</button>';
+        echo '<button type="button" id="altegena-share-btn" class="altegena-share-btn">' . esc_html(Altegena_Settings::text('label_share')) . '</button>';
         echo '<button type="button" id="close-card-designer" class="altegena-close-btn">&times;</button>';
         echo '</div>';
         echo '<div id="altegena-editor-app"></div>';
@@ -141,6 +145,12 @@ class Altegena_Cart_Handler
             return $item_data;
         }
 
+        // Personalization visibility is plugin-controlled: only surface the rows
+        // to the customer when explicitly configured to.
+        if (Altegena_Settings::visibility() !== 'customer_and_admin') {
+            return $item_data;
+        }
+
         if (isset($cart_item['altegena_design_data'])) {
             foreach ($cart_item['altegena_design_data'] as $layer_id => $layer_info) {
                 if (isset($layer_info['label']) && isset($layer_info['text'])) {
@@ -171,5 +181,49 @@ class Altegena_Cart_Handler
                 }
             }
         }
+    }
+
+    /**
+     * Hide the per-layer personalization rows from order displays according to
+     * the visibility setting. Uses the private `_altegena_design_data` blob to
+     * know which layer labels belong to this plugin (so unrelated meta is left
+     * alone). Replaces the equivalent theme-side hiding — the plugin owns it now.
+     *
+     *  - customer_and_admin: shown everywhere (no filtering)
+     *  - admin_only:         kept in wp-admin, hidden on the frontend (default)
+     *  - hidden:             hidden everywhere
+     */
+    public function filter_order_item_meta($formatted_meta, $item)
+    {
+        $visibility = Altegena_Settings::visibility();
+        if ($visibility === 'customer_and_admin') {
+            return $formatted_meta;
+        }
+        if ($visibility === 'admin_only' && is_admin() && !wp_doing_ajax()) {
+            return $formatted_meta;
+        }
+
+        $design = $item->get_meta('_altegena_design_data');
+        if (empty($design) || !is_array($design)) {
+            return $formatted_meta;
+        }
+
+        $labels = array();
+        foreach ($design as $layer) {
+            if (is_array($layer) && !empty($layer['label'])) {
+                $labels[] = (string) $layer['label'];
+            }
+        }
+        if (empty($labels)) {
+            return $formatted_meta;
+        }
+
+        foreach ($formatted_meta as $id => $meta) {
+            $key = isset($meta->display_key) ? $meta->display_key : (isset($meta->key) ? $meta->key : '');
+            if (in_array((string) $key, $labels, true)) {
+                unset($formatted_meta[$id]);
+            }
+        }
+        return $formatted_meta;
     }
 }

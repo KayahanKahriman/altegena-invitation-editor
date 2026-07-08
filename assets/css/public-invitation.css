@@ -5,7 +5,7 @@ body.altegena-public-page {
     margin: 0 !important;
     padding: 0 !important;
     height: 100%;
-    background: #1c1c1c;
+    background: var(--altegena-stage-bg, #1c1c1c);
 }
 
 /* Full-viewport stage that centers the card. padding here MUST match the
@@ -19,7 +19,7 @@ body.altegena-public-page {
     overflow: auto;
     padding: 40px;
     box-sizing: border-box;
-    background: #1c1c1c;
+    background: var(--altegena-stage-bg, #1c1c1c);
 }
 
 /* Base canvas + layer rules duplicated from editor.css so the public page
@@ -60,7 +60,7 @@ body.altegena-public-page {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #25D366;
+    background: var(--altegena-share, #25D366);
     color: #ffffff;
     text-decoration: none;
     border: none;
@@ -75,7 +75,7 @@ body.altegena-public-page {
 }
 
 .altegena-public-share:hover {
-    background: #1ebe5b;
+    background: var(--altegena-share-dark, #1ebe5b);
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
     transform: translateY(-1px);
     color: #ffffff;

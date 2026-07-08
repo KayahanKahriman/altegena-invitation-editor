@@ -45,6 +45,7 @@ class Altegena_Invitation_Editor
 
 	private function includes()
 	{
+		require_once ALTEGENA_PLUGIN_DIR . 'includes/class-settings.php';
 		require_once ALTEGENA_PLUGIN_DIR . 'includes/class-product-meta.php';
 		require_once ALTEGENA_PLUGIN_DIR . 'includes/class-cart-handler.php';
 		require_once ALTEGENA_PLUGIN_DIR . 'includes/class-product-page-handler.php';
@@ -56,6 +57,7 @@ class Altegena_Invitation_Editor
 		add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
 
 		// Initialize classes
+		Altegena_Settings::get_instance();
 		Altegena_Product_Meta::get_instance();
 		Altegena_Cart_Handler::get_instance();
 		Altegena_Product_Page_Handler::get_instance();
@@ -83,6 +85,9 @@ class Altegena_Invitation_Editor
 		// Load custom fonts first
 		wp_enqueue_style('altegena-fonts-css', ALTEGENA_PLUGIN_URL . 'assets/css/fonts.css', array(), $fonts_ver);
 		wp_enqueue_style('altegena-editor-css', ALTEGENA_PLUGIN_URL . 'assets/css/editor.css', array('altegena-fonts-css'), $editor_css_ver);
+
+		// Theme-overridable color variables (settings + `altegena_colors` filter).
+		wp_add_inline_style('altegena-editor-css', Altegena_Settings::css_vars());
 
 		// html2canvas is bundled locally (not a CDN) so the same-origin canvas is not tainted.
 		wp_enqueue_script('altegena-html2canvas', ALTEGENA_PLUGIN_URL . 'assets/js/vendor/html2canvas.min.js', array(), '1.4.1', true);

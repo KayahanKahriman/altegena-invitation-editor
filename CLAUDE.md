@@ -318,6 +318,26 @@ Still available for quick position tweaks on the live product page:
 - No npm/composer dependencies - pure WordPress + jQuery
 - No REST API endpoints - uses WooCommerce's built-in AJAX `add_to_cart`
 - No database tables - all data stored in post meta and order item meta
-- No settings page - configuration is per-product via JSON
-- Turkish UI strings are hardcoded (not using `__()` for JS strings)
+- Settings page: **Settings → Altegena Davetiye** (`Altegena_Settings`, option `altegena_settings`) for visibility, colors, labels, share message, OG title/desc. Per-product design is still JSON post meta.
+- JS strings are hardcoded Turkish; PHP labels/messages are configurable via settings + `altegena_*` filters (see Theme Integration below). Full `__()` i18n not yet done.
 - **wp_slash gotcha:** `update_post_meta()` internally calls `wp_unslash()`, so if you've already unslashed `$_POST` data, you must wrap with `wp_slash()` before saving — otherwise backslash sequences like `\n` in JSON get stripped. This applies to any meta value containing JSON with escape sequences.
+
+## Theme Integration / Extension API
+
+The plugin is theme-agnostic: it ships sensible defaults and works on any theme. A theme/site integrates through settings (**Settings → Altegena Davetiye**), the documented filters, and CSS custom properties — never by depending on the plugin's internals. `Altegena_Settings` (includes/class-settings.php) is the hub: `::text($key)` (label/message with built-in default + `altegena_$key` filter), `::visibility()`, `::css_vars()`, `::get()`.
+
+### Filters
+- `altegena_label_customize`, `altegena_label_add_to_cart`, `altegena_label_share`, `altegena_modal_title` — UI button/title text
+- `altegena_share_message` — WhatsApp message prefix; `altegena_og_title`, `altegena_og_description` — share-page OG text
+- `altegena_personalization_visibility` — `admin_only` (default) | `customer_and_admin` | `hidden`
+- `altegena_colors` — assoc array of CSS variable → value (overrides settings)
+- `altegena_seo_suppress_actions` — array of `['callback'=>fn, 'priority'=>n]`; on share pages the plugin `remove_action`s each from `wp_head` (theme opts in to prevent duplicate OG — replaces any hardcoded theme knowledge)
+
+### CSS custom properties (overridable by theme/settings)
+`--altegena-accent`, `--altegena-accent-dark`, `--altegena-share`, `--altegena-share-dark` (fed from settings via `wp_add_inline_style` on `:root`); plus fallback-only `--altegena-danger`, `--altegena-stage-bg`. Used in editor.css / public-invitation.css as `var(--altegena-*, <default>)`.
+
+### Personalization visibility
+The plugin owns whether the per-layer text rows appear to the customer. `get_item_data()` only adds cart/checkout rows when `customer_and_admin`; `filter_order_item_meta()` (on `woocommerce_order_item_get_formatted_meta_data`) hides the per-layer rows on the frontend for `admin_only` (kept in wp-admin) or everywhere for `hidden`, matching labels against the `_altegena_design_data` blob. Themes should NOT read the plugin's cart/order keys to hide these rows.
+
+### dm-omni theme note
+The active `dm-omni` theme integrates via `altegena_seo_suppress_actions` (registers its `dm_seo_print_*` callbacks) and decorates the modal via stable `altegena-*` classes. It no longer contains the old hardcoded data-key hiding filters (the plugin handles visibility).

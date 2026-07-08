@@ -392,13 +392,14 @@ class Altegena_Share_Handler
 
         wp_enqueue_style('altegena-fonts-css', ALTEGENA_PLUGIN_URL . 'assets/css/fonts.css', array(), $fonts_ver);
         wp_enqueue_style('altegena-public-css', ALTEGENA_PLUGIN_URL . 'assets/css/public-invitation.css', array('altegena-fonts-css'), $css_ver);
+        wp_add_inline_style('altegena-public-css', Altegena_Settings::css_vars());
         wp_enqueue_script('altegena-public-js', ALTEGENA_PLUGIN_URL . 'assets/js/public-invitation.js', array('jquery'), $js_ver, true);
 
         wp_localize_script('altegena-public-js', 'altegena_share', array(
             'config'    => $raw_config, // raw JSON string; JS parses + normalizes \n like editor.js
             'image_url' => $image_url,
             'page_url'  => get_permalink($post_id),
-            'wa_text'   => 'Davetiyemize göz atın:',
+            'wa_text'   => Altegena_Settings::text('share_message'),
         ));
     }
 
@@ -418,8 +419,8 @@ class Altegena_Share_Handler
         $dims = get_post_meta($post_id, '_altegena_share_image_dims', true);
         $page_url = get_permalink($post_id);
 
-        $title = 'Davetiyemize Davetlisiniz';
-        $desc = 'Özel günümüz için hazırladığımız davetiyeyi görüntüleyin.';
+        $title = Altegena_Settings::text('og_title');
+        $desc = Altegena_Settings::text('og_description');
 
         echo "\n<!-- Altegena Invitation Editor: Open Graph -->\n";
         echo '<meta name="robots" content="noindex,nofollow" />' . "\n";
@@ -443,22 +444,31 @@ class Altegena_Share_Handler
     }
 
     /**
-     * Remove duplicate Open Graph / SEO output from the active theme and common
-     * SEO plugins on our share pages, so only our tags remain.
+     * Remove duplicate Open Graph / SEO output from other sources on our share
+     * pages so only our tags remain. This is theme-agnostic: a theme opts in by
+     * filtering `altegena_seo_suppress_actions` with the wp_head callbacks it
+     * wants removed, e.g.:
+     *
+     *   add_filter('altegena_seo_suppress_actions', function ($a) {
+     *       $a[] = array('callback' => 'my_theme_print_meta', 'priority' => 6);
+     *       return $a;
+     *   });
      */
     private function suppress_other_seo()
     {
-        // Active theme (dm-omni) prints its own OG/canonical/JSON-LD on wp_head.
-        remove_action('wp_head', 'dm_seo_print_meta', 6);
-        remove_action('wp_head', 'dm_seo_print_canonical', 4);
-        remove_action('wp_head', 'dm_seo_print_jsonld', 5);
+        $actions = apply_filters('altegena_seo_suppress_actions', array());
+        if (is_array($actions)) {
+            foreach ($actions as $a) {
+                if (!empty($a['callback'])) {
+                    remove_action('wp_head', $a['callback'], isset($a['priority']) ? (int) $a['priority'] : 10);
+                }
+            }
+        }
 
-        // Yoast SEO (if ever activated): drop its OG image/tags on these pages.
+        // Common SEO plugins (harmless no-ops if the plugin is inactive).
         add_filter('wpseo_opengraph_image', '__return_false', 99);
         add_filter('wpseo_opengraph_title', '__return_false', 99);
         add_filter('wpseo_opengraph_desc', '__return_false', 99);
-
-        // Rank Math (if ever activated): disable its frontend head output.
         add_filter('rank_math/frontend/disable_integration', '__return_true', 99);
     }
 
