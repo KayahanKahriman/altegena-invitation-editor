@@ -1,7 +1,7 @@
 (function ($) {
     'use strict';
 
-    const SIE_Editor = {
+    const Altegena_Editor = {
         config: null,
         container: null,
         sidebar: null,
@@ -9,20 +9,20 @@
         is_admin_mode: false,
 
         init: function () {
-            if (typeof sie_config === 'undefined' || !sie_config.raw_config) return;
+            if (typeof altegena_config === 'undefined' || !altegena_config.raw_config) return;
 
             try {
-                this.config = JSON.parse(sie_config.raw_config);
+                this.config = JSON.parse(altegena_config.raw_config);
             } catch (e) {
-                console.error('SIE: Invalid JSON configuration', e);
+                console.error('Altegena: Invalid JSON configuration', e);
                 return;
             }
 
-            this.is_admin_mode = sie_config.is_admin_mode;
-            this.container = $('#sie-editor-app');
+            this.is_admin_mode = altegena_config.is_admin_mode;
+            this.container = $('#altegena-editor-app');
 
             if (this.is_admin_mode) {
-                $('body').addClass('sie-admin-mode');
+                $('body').addClass('altegena-admin-mode');
             }
 
             this.renderLayout();
@@ -34,17 +34,17 @@
 
         renderLayout: function () {
             this.container.html(`
-                <div class="sie-sidebar"></div>
-                <div class="sie-preview-area">
-                    <div class="sie-canvas" style="
+                <div class="altegena-sidebar"></div>
+                <div class="altegena-preview-area">
+                    <div class="altegena-canvas" style="
                         background-image: url('${this.config.canvas.bg_image}');
                     "></div>
                 </div>
             `);
 
-            this.sidebar = this.container.find('.sie-sidebar');
-            this.preview = this.container.find('.sie-canvas');
-            this.previewArea = this.container.find('.sie-preview-area');
+            this.sidebar = this.container.find('.altegena-sidebar');
+            this.preview = this.container.find('.altegena-canvas');
+            this.previewArea = this.container.find('.altegena-preview-area');
 
             // Use ResizeObserver to fit canvas when modal becomes visible or resizes
             const self = this;
@@ -94,9 +94,9 @@
             // Create Sidebar Input (skip for hidden/fixed layers)
             if (!layer.hidden_on_frontend) {
                 const inputHtml = `
-                    <div class="sie-input-group" data-layer-id="${layer.id}">
+                    <div class="altegena-input-group" data-layer-id="${layer.id}">
                         <label>${layer.label}</label>
-                        <textarea class="sie-layer-input" rows="3">${layer.default_text}</textarea>
+                        <textarea class="altegena-layer-input" rows="3">${layer.default_text}</textarea>
                     </div>
                 `;
                 this.sidebar.append(inputHtml);
@@ -122,8 +122,8 @@
 
             const isEditable = !this.is_admin_mode && !layer.hidden_on_frontend;
             const elAttrs = {
-                class: 'sie-layer',
-                id: `sie-layer-${layer.id}`,
+                class: 'altegena-layer',
+                id: `altegena-layer-${layer.id}`,
                 contenteditable: isEditable,
                 text: layer.default_text
             };
@@ -133,7 +133,7 @@
             const $el = $('<div>', elAttrs).css(style);
 
             if (this.is_admin_mode) {
-                $el.data('sie-layer-config', layer);
+                $el.data('altegena-layer-config', layer);
                 this.makeDraggable($el, layer);
             }
 
@@ -144,11 +144,11 @@
             const self = this;
 
             // Sidebar Input -> Preview
-            this.sidebar.on('input', '.sie-layer-input', function () {
+            this.sidebar.on('input', '.altegena-layer-input', function () {
                 const $input = $(this);
-                const layerId = $input.closest('.sie-input-group').data('layer-id');
+                const layerId = $input.closest('.altegena-input-group').data('layer-id');
                 const text = $input.val();
-                const $layer = $(`#sie-layer-${layerId}`);
+                const $layer = $(`#altegena-layer-${layerId}`);
                 $layer.text(text);
                 self.updateHiddenInput();
             });
@@ -156,38 +156,38 @@
 
 
             // Preview -> Sidebar Input
-            this.preview.on('input', '.sie-layer', function () {
+            this.preview.on('input', '.altegena-layer', function () {
                 const $layer = $(this);
-                const layerId = $layer.attr('id').replace('sie-layer-', '');
+                const layerId = $layer.attr('id').replace('altegena-layer-', '');
                 const text = $layer.text();
-                $(`.sie-input-group[data-layer-id="${layerId}"] input`).val(text);
+                $(`.altegena-input-group[data-layer-id="${layerId}"] input`).val(text);
                 self.updateHiddenInput();
             });
 
             // Highlight link
-            this.preview.on('focus', '.sie-layer', function () {
-                const layerId = $(this).attr('id').replace('sie-layer-', '');
-                $('.sie-input-group').removeClass('active');
-                $(`.sie-input-group[data-layer-id="${layerId}"]`).addClass('active')[0].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            this.preview.on('focus', '.altegena-layer', function () {
+                const layerId = $(this).attr('id').replace('altegena-layer-', '');
+                $('.altegena-input-group').removeClass('active');
+                $(`.altegena-input-group[data-layer-id="${layerId}"]`).addClass('active')[0].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             });
 
-            this.sidebar.on('focus', '.sie-layer-input', function () {
-                const layerId = $(this).closest('.sie-input-group').data('layer-id');
-                $('.sie-layer').css('box-shadow', 'none');
-                $(`#sie-layer-${layerId}`).css('box-shadow', '0 0 0 2px #d4af37');
+            this.sidebar.on('focus', '.altegena-layer-input', function () {
+                const layerId = $(this).closest('.altegena-input-group').data('layer-id');
+                $('.altegena-layer').css('box-shadow', 'none');
+                $(`#altegena-layer-${layerId}`).css('box-shadow', '0 0 0 2px #d4af37');
             });
 
             // Admin mode: layer selection and keyboard movement
             if (this.is_admin_mode) {
                 // Select layer on click
-                this.preview.on('click', '.sie-layer', function (e) {
+                this.preview.on('click', '.altegena-layer', function (e) {
                     e.stopPropagation();
                     self.selectLayer($(this));
                 });
 
                 // Deselect on canvas background click
                 this.preview.on('click', function (e) {
-                    if ($(e.target).hasClass('sie-canvas') || $(e.target).hasClass('sie-preview-area')) {
+                    if ($(e.target).hasClass('altegena-canvas') || $(e.target).hasClass('altegena-preview-area')) {
                         self.deselectLayer();
                     }
                 });
@@ -212,7 +212,7 @@
                     e.preventDefault();
                     const step = e.shiftKey ? 10 : 1;
                     const $el = self.selectedLayer;
-                    const layer = $el.data('sie-layer-config');
+                    const layer = $el.data('altegena-layer-config');
 
                     let left = parseFloat($el.css('left'));
                     let top = parseFloat($el.css('top'));
@@ -233,9 +233,9 @@
             }
 
             // Add to Cart Button (using event delegation since modal is moved to body)
-            $(document).on('click', '#sie-add-to-cart-btn', function () {
+            $(document).on('click', '#altegena-add-to-cart-btn', function () {
                 var $btn = $(this);
-                if ($btn.hasClass('sie-loading')) return;
+                if ($btn.hasClass('altegena-loading')) return;
 
                 // Update hidden input with latest data
                 self.updateHiddenInput();
@@ -257,13 +257,13 @@
                     || $form.find('button[name="add-to-cart"]').val();
 
                 if (!productId) {
-                    console.error('SIE: Product ID not found');
+                    console.error('Altegena: Product ID not found');
                     return;
                 }
 
                 // Loading state
                 var originalText = $btn.text();
-                $btn.addClass('sie-loading').text('Ekleniyor...').prop('disabled', true);
+                $btn.addClass('altegena-loading').text('Ekleniyor...').prop('disabled', true);
 
                 // Build form data for submission
                 var formData = $form.serialize();
@@ -281,14 +281,14 @@
                         }, 600);
                     },
                     error: function () {
-                        $btn.removeClass('sie-loading').text(originalText).prop('disabled', false);
+                        $btn.removeClass('altegena-loading').text(originalText).prop('disabled', false);
                         alert('Sepete eklenirken bir hata oluştu.');
                     }
                 });
             });
 
             // Share Button (event delegation since modal is moved to body)
-            $(document).on('click', '#sie-share-btn', function () {
+            $(document).on('click', '#altegena-share-btn', function () {
                 self.shareHandler($(this));
             });
         },
@@ -322,7 +322,7 @@
                 startLeft = parseFloat($el.css('left'));
                 startTop = parseFloat($el.css('top'));
 
-                $(document).on('mousemove.sie-drag', function (e) {
+                $(document).on('mousemove.altegena-drag', function (e) {
                     if (!isDragging) return;
 
                     const dx = e.clientX - startX;
@@ -339,9 +339,9 @@
                     self.updateAdminExport();
                 });
 
-                $(document).on('mouseup.sie-drag', function () {
+                $(document).on('mouseup.altegena-drag', function () {
                     isDragging = false;
-                    $(document).off('.sie-drag');
+                    $(document).off('.altegena-drag');
                 });
             });
         },
@@ -349,8 +349,8 @@
         updateHiddenInput: function () {
             const data = {};
             this.config.layers.forEach(layer => {
-                const $group = $(`.sie-input-group[data-layer-id="${layer.id}"]`);
-                const text = $group.find('.sie-layer-input').val();
+                const $group = $(`.altegena-input-group[data-layer-id="${layer.id}"]`);
+                const text = $group.find('.altegena-layer-input').val();
 
                 data[layer.id] = {
                     label: layer.label,
@@ -359,31 +359,31 @@
                 };
             });
             const jsonString = JSON.stringify(data);
-            $('#sie-custom-data').val(jsonString);
+            $('#altegena-custom-data').val(jsonString);
 
             // Autosave to LocalStorage
             const productId = $('form.cart').find('button[name="add-to-cart"]').val() || window.location.pathname;
-            localStorage.setItem('sie_autosave_' + productId, jsonString);
+            localStorage.setItem('altegena_autosave_' + productId, jsonString);
         },
 
         loadFromLocalStorage: function () {
             const productId = $('form.cart').find('button[name="add-to-cart"]').val() || window.location.pathname;
-            const saved = localStorage.getItem('sie_autosave_' + productId);
+            const saved = localStorage.getItem('altegena_autosave_' + productId);
             if (saved) {
                 try {
                     const data = JSON.parse(saved);
                     Object.keys(data).forEach(layerId => {
                         const layerData = data[layerId];
-                        const $group = $(`.sie-input-group[data-layer-id="${layerId}"]`);
-                        const $layer = $(`#sie-layer-${layerId}`);
+                        const $group = $(`.altegena-input-group[data-layer-id="${layerId}"]`);
+                        const $layer = $(`#altegena-layer-${layerId}`);
 
                         if (layerData.text !== undefined) {
-                            $group.find('.sie-layer-input').val(layerData.text);
+                            $group.find('.altegena-layer-input').val(layerData.text);
                             $layer.text(layerData.text);
                         }
                     });
                 } catch (e) {
-                    console.warn('SIE: Failed to load autosave', e);
+                    console.warn('Altegena: Failed to load autosave', e);
                 }
             }
         },
@@ -395,9 +395,9 @@
             console.log('UPDATED CONFIG:', JSON.stringify(this.config, null, 2));
 
             // Optionally, we could add a "Copy JSON" button in the UI
-            if ($('#sie-admin-copy-json').length === 0) {
-                this.sidebar.prepend('<button id="sie-admin-copy-json" style="margin-bottom: 10px;">Copy Updated JSON</button>');
-                $('#sie-admin-copy-json').on('click', (e) => {
+            if ($('#altegena-admin-copy-json').length === 0) {
+                this.sidebar.prepend('<button id="altegena-admin-copy-json" style="margin-bottom: 10px;">Copy Updated JSON</button>');
+                $('#altegena-admin-copy-json').on('click', (e) => {
                     e.preventDefault();
                     const json = JSON.stringify(this.config, null, 2);
                     navigator.clipboard.writeText(json).then(() => {
@@ -411,13 +411,13 @@
          * WhatsApp Share
          * ---------------------------------------------------------------- */
 
-        // Text-only map, same shape as #sie-custom-data ({id:{label,text,fontFamily}}).
+        // Text-only map, same shape as #altegena-custom-data ({id:{label,text,fontFamily}}).
         // The server merges this into the trusted product template.
         buildTextMap: function () {
             const data = {};
             this.config.layers.forEach(layer => {
-                const $group = $(`.sie-input-group[data-layer-id="${layer.id}"]`);
-                const text = $group.find('.sie-layer-input').val();
+                const $group = $(`.altegena-input-group[data-layer-id="${layer.id}"]`);
+                const text = $group.find('.altegena-layer-input').val();
                 data[layer.id] = {
                     label: layer.label,
                     text: text !== undefined ? text : (layer.default_text || ''),
@@ -451,7 +451,7 @@
             });
         },
 
-        // Capture the card at native resolution. The live .sie-canvas carries a
+        // Capture the card at native resolution. The live .altegena-canvas carries a
         // transform: scale() from fitCanvas(), which html2canvas does not honor
         // reliably, so we capture an un-scaled off-screen clone instead.
         captureCard: function () {
@@ -493,7 +493,7 @@
 
         shareHandler: function ($btn) {
             const self = this;
-            if ($btn.hasClass('sie-loading')) return;
+            if ($btn.hasClass('altegena-loading')) return;
 
             if (typeof html2canvas === 'undefined') {
                 alert('Paylaşım aracı yüklenemedi. Lütfen sayfayı yenileyin.');
@@ -501,19 +501,19 @@
             }
 
             const originalText = $btn.text();
-            $btn.addClass('sie-loading').text('Hazırlanıyor...').prop('disabled', true);
+            $btn.addClass('altegena-loading').text('Hazırlanıyor...').prop('disabled', true);
 
             self.updateHiddenInput();
             const textMap = self.buildTextMap();
 
             self.captureCard().then(imageDataUrl => {
                 return $.ajax({
-                    url: sie_config.ajax_url,
+                    url: altegena_config.ajax_url,
                     type: 'POST',
                     data: {
-                        action: sie_config.share_action,
-                        nonce: sie_config.share_nonce,
-                        product_id: sie_config.product_id,
+                        action: altegena_config.share_action,
+                        nonce: altegena_config.share_nonce,
+                        product_id: altegena_config.product_id,
                         custom_data: JSON.stringify(textMap),
                         image: imageDataUrl
                     }
@@ -528,10 +528,10 @@
                     });
                 });
             }).catch(err => {
-                console.error('SIE share error', err);
+                console.error('Altegena share error', err);
                 alert('Paylaşım oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
             }).then(() => {
-                $btn.removeClass('sie-loading').text(originalText).prop('disabled', false);
+                $btn.removeClass('altegena-loading').text(originalText).prop('disabled', false);
             });
         },
 
@@ -539,30 +539,30 @@
             const message = 'Davetiyemize göz atın:';
             const waHref = 'https://wa.me/?text=' + encodeURIComponent(message + ' ' + opts.url);
 
-            $('.sie-share-overlay').remove();
+            $('.altegena-share-overlay').remove();
 
             const $overlay = $(`
-                <div class="sie-share-overlay">
-                    <div class="sie-share-dialog" role="dialog" aria-label="Paylaş">
-                        <button type="button" class="sie-share-close" aria-label="Kapat">&times;</button>
+                <div class="altegena-share-overlay">
+                    <div class="altegena-share-dialog" role="dialog" aria-label="Paylaş">
+                        <button type="button" class="altegena-share-close" aria-label="Kapat">&times;</button>
                         <h3>Davetiyeni Paylaş</h3>
-                        <img class="sie-share-preview" alt="Davetiye">
-                        <div class="sie-share-actions">
-                            <a class="sie-share-action sie-wa-link" target="_blank" rel="noopener">WhatsApp'ta bağlantı gönder</a>
-                            <button type="button" class="sie-share-action sie-wa-image">Görseli paylaş</button>
-                            <button type="button" class="sie-share-action sie-copy-link">Bağlantıyı kopyala</button>
-                            <a class="sie-share-action sie-download-img" download="davetiye.png">Görseli indir</a>
+                        <img class="altegena-share-preview" alt="Davetiye">
+                        <div class="altegena-share-actions">
+                            <a class="altegena-share-action altegena-wa-link" target="_blank" rel="noopener">WhatsApp'ta bağlantı gönder</a>
+                            <button type="button" class="altegena-share-action altegena-wa-image">Görseli paylaş</button>
+                            <button type="button" class="altegena-share-action altegena-copy-link">Bağlantıyı kopyala</button>
+                            <a class="altegena-share-action altegena-download-img" download="davetiye.png">Görseli indir</a>
                         </div>
                     </div>
                 </div>
             `);
 
-            $overlay.find('.sie-share-preview').attr('src', opts.imageUrl || opts.imageDataUrl);
-            $overlay.find('.sie-wa-link').attr('href', waHref);
-            $overlay.find('.sie-download-img').attr('href', opts.imageDataUrl);
+            $overlay.find('.altegena-share-preview').attr('src', opts.imageUrl || opts.imageDataUrl);
+            $overlay.find('.altegena-wa-link').attr('href', waHref);
+            $overlay.find('.altegena-download-img').attr('href', opts.imageDataUrl);
 
             // Image share via Web Share API (mobile). Hide when unsupported.
-            const $imgBtn = $overlay.find('.sie-wa-image');
+            const $imgBtn = $overlay.find('.altegena-wa-image');
             let shareFile = null;
             try {
                 const bstr = atob(opts.imageDataUrl.split(',')[1]);
@@ -585,7 +585,7 @@
             }
 
             // Copy link
-            $overlay.find('.sie-copy-link').on('click', function () {
+            $overlay.find('.altegena-copy-link').on('click', function () {
                 const $b = $(this);
                 const restore = $b.text();
                 const done = function () { $b.text('Kopyalandı ✓'); setTimeout(() => $b.text(restore), 1500); };
@@ -601,14 +601,14 @@
 
             // Close interactions
             const close = function () {
-                $(document).off('keydown.sie-share');
+                $(document).off('keydown.altegena-share');
                 $overlay.remove();
             };
-            $overlay.find('.sie-share-close').on('click', close);
+            $overlay.find('.altegena-share-close').on('click', close);
             $overlay.on('click', function (e) {
                 if (e.target === this) close();
             });
-            $(document).on('keydown.sie-share', function (e) {
+            $(document).on('keydown.altegena-share', function (e) {
                 if (e.key === 'Escape') close();
             });
 
@@ -617,7 +617,7 @@
     };
 
     $(document).ready(function () {
-        SIE_Editor.init();
+        Altegena_Editor.init();
     });
 
 })(jQuery);

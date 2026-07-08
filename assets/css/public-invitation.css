@@ -1,7 +1,7 @@
-/* Simple Invitation Editor - Public shared invitation page */
+/* Altegena Invitation Editor - Public shared invitation page */
 
 html,
-body.sie-public-page {
+body.altegena-public-page {
     margin: 0 !important;
     padding: 0 !important;
     height: 100%;
@@ -10,7 +10,7 @@ body.sie-public-page {
 
 /* Full-viewport stage that centers the card. padding here MUST match the
    `pad` constant in public-invitation.js (40 desktop / 20 mobile). */
-.sie-public-stage {
+.altegena-public-stage {
     position: fixed;
     inset: 0;
     display: flex;
@@ -24,7 +24,7 @@ body.sie-public-page {
 
 /* Base canvas + layer rules duplicated from editor.css so the public page
    does not depend on the editor stylesheet. Interactive states are omitted. */
-.sie-canvas {
+.altegena-canvas {
     position: relative;
     background-size: 100% 100%;
     background-position: center;
@@ -33,26 +33,26 @@ body.sie-public-page {
     flex-shrink: 0;
 }
 
-.sie-layer {
+.altegena-layer {
     position: absolute;
     white-space: pre;
     overflow: visible;
     outline: none;
 }
 
-.sie-layer--readonly {
+.altegena-layer--readonly {
     cursor: default;
     user-select: text;
 }
 
-.sie-public-fallback-img {
+.altegena-public-fallback-img {
     max-width: 100%;
     height: auto;
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
 }
 
 /* Floating WhatsApp share button */
-.sie-public-share {
+.altegena-public-share {
     position: fixed;
     bottom: 24px;
     right: 24px;
@@ -74,24 +74,24 @@ body.sie-public-page {
     transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
-.sie-public-share:hover {
+.altegena-public-share:hover {
     background: #1ebe5b;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
     transform: translateY(-1px);
     color: #ffffff;
 }
 
-.sie-public-share-icon {
+.altegena-public-share-icon {
     display: inline-flex;
     align-items: center;
 }
 
 @media (max-width: 900px) {
-    .sie-public-stage {
+    .altegena-public-stage {
         padding: 20px;
     }
 
-    .sie-public-share {
+    .altegena-public-share {
         bottom: 16px;
         right: 16px;
         padding: 12px 18px;

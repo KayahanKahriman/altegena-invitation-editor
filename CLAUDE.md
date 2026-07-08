@@ -1,4 +1,4 @@
-# Simple Invitation Editor - Plugin Documentation
+# Altegena Invitation Editor - Plugin Documentation
 
 ## Overview
 
@@ -6,8 +6,8 @@ A lightweight, DOM-based invitation card editor for WooCommerce. Customers can c
 
 **Author:** Kayahan
 **Version:** 1.0.0
-**Text Domain:** `simple-invitation-editor`
-**Constants prefix:** `SIE_`
+**Text Domain:** `altegena-invitation-editor`
+**Constants prefix:** `ALTEGENA_`
 **UI Language:** Turkish (button labels, error messages)
 
 ## Architecture
@@ -24,26 +24,26 @@ Admin creates JSON config --> Saved as `_invitation_json_config` post meta
                                         |
 Customer visits product page --> JS parses JSON --> Renders editor UI
                                         |
-Customer edits text layers --> Data stored in hidden input `#sie-custom-data`
+Customer edits text layers --> Data stored in hidden input `#altegena-custom-data`
                                         |
-Add to cart (AJAX) --> `sie_custom_data` POST param --> Saved as `sie_design_data` in cart item
+Add to cart (AJAX) --> `altegena_custom_data` POST param --> Saved as `altegena_design_data` in cart item
                                         |
-Checkout --> Saved as `_sie_design_data` order item meta + individual layer labels as separate meta
+Checkout --> Saved as `_altegena_design_data` order item meta + individual layer labels as separate meta
 ```
 
 ## File Structure
 
 ```
-simple-invitation-editor/
-├── simple-invitation-editor.php      # Main plugin file, bootstrap class
+altegena-invitation-editor/
+├── altegena-invitation-editor.php      # Main plugin file, bootstrap class
 ├── includes/
 │   ├── class-product-meta.php        # WordPress metabox: visual editor + JSON config for product editor
 │   ├── class-cart-handler.php        # Cart/order integration + editor modal HTML + trigger button
 │   └── class-product-page-handler.php # Hides default add-to-cart & quantity for invitation products
 ├── assets/
 │   ├── js/
-│   │   ├── editor.js                 # Frontend editor logic (SIE_Editor object)
-│   │   └── admin-editor.js           # Admin visual editor logic (SIE_AdminEditor object)
+│   │   ├── editor.js                 # Frontend editor logic (Altegena_Editor object)
+│   │   └── admin-editor.js           # Admin visual editor logic (Altegena_AdminEditor object)
 │   ├── css/
 │   │   ├── editor.css                # Full-screen modal layout, sidebar, canvas, layers
 │   │   ├── admin-editor.css          # Admin visual editor styles (three-panel layout, properties)
@@ -55,52 +55,52 @@ simple-invitation-editor/
 
 ## PHP Classes
 
-### `Simple_Invitation_Editor` (simple-invitation-editor.php)
+### `Altegena_Invitation_Editor` (altegena-invitation-editor.php)
 - **Role:** Plugin bootstrap. Defines constants, includes files, initializes all handler classes.
-- **Constants:** `SIE_PLUGIN_DIR`, `SIE_PLUGIN_URL`, `SIE_VERSION`
+- **Constants:** `ALTEGENA_PLUGIN_DIR`, `ALTEGENA_PLUGIN_URL`, `ALTEGENA_VERSION`
 - **Enqueue logic:** Only loads assets on single product pages (`is_product()`) that have `_invitation_json_config` meta set.
 - **Script dependencies:** `jquery`, `wc-add-to-cart`
-- **Localized data (`sie_config`):**
+- **Localized data (`altegena_config`):**
   - `raw_config` - The raw JSON string from post meta
   - `is_admin_mode` - Boolean, true when user has `manage_options` cap AND `?mode=admin` query param is present
 
-### `SIE_Product_Meta` (class-product-meta.php)
+### `Altegena_Product_Meta` (class-product-meta.php)
 - **Role:** Registers a standalone WordPress metabox ("Invitation Editor") on the product edit screen with a full visual editor.
 - **Metabox:** Registered via `add_meta_boxes` hook, rendered by `render_meta_box()`. Context: `normal`, priority: `high`.
 - **Meta key:** `_invitation_json_config` (stored via hidden input, synced from visual editor or JSON textarea)
 - **Admin asset enqueue:** Hooks `admin_enqueue_scripts`, guarded to `post.php`/`post-new.php` on `product` post type. Loads `wp.media`, `wp-color-picker`, fonts CSS, `admin-editor.css`, `admin-editor.js`.
-- **Localized data (`sie_admin_config`):** `fonts` (array of 34 font family names), `plugin_url`
+- **Localized data (`altegena_admin_config`):** `fonts` (array of 34 font family names), `plugin_url`
 - **`get_available_fonts()`** - Returns all custom font family names matching `fonts.css` declarations.
 - **Save validation:** `save_product_data_tab()` validates JSON structure (must have `canvas` and `layers` keys) before saving. Uses `wp_slash()` before `update_post_meta()` to prevent double-unslashing of backslash sequences (e.g., `\n` in JSON). Empty values delete the meta.
 - **Metabox HTML:** Two tabs (Visual Editor / JSON). Visual tab contains a three-panel layout: left (canvas settings + layer list), center (live canvas preview), right (layer properties). JSON tab contains a raw textarea with validate button.
 
-### `SIE_Cart_Handler` (class-cart-handler.php)
+### `Altegena_Cart_Handler` (class-cart-handler.php)
 - **Role:** The largest class. Handles:
   1. **Editor trigger button** - Renders "Davetiyeyi Sana Ozel Yap" button, disabled until a variation is selected
-  2. **Modal HTML** - Full-screen modal with header (title, add-to-cart button, close button) and `#sie-editor-app` container
+  2. **Modal HTML** - Full-screen modal with header (title, add-to-cart button, close button) and `#altegena-editor-app` container
   3. **Inline JS** - Modal open/close logic, variation-aware button enable/disable
-  4. **Cart item data** - Captures `sie_custom_data` from POST, decodes JSON, stores as `sie_design_data`
+  4. **Cart item data** - Captures `altegena_custom_data` from POST, decodes JSON, stores as `altegena_design_data`
   5. **Cart display** - Shows customized text per layer at checkout (hidden on cart page)
-  6. **Order meta** - Stores `_sie_design_data` blob + individual layer labels as separate order item meta
+  6. **Order meta** - Stores `_altegena_design_data` blob + individual layer labels as separate order item meta
 - **Hook:** Uses `woocommerce_single_variation` (priority 15) instead of `woocommerce_single_product_summary` for FSE/block theme compatibility.
 - **Modal z-index:** `2147483647` (max int) - moved to `document.body` via JS to avoid stacking context issues.
 
-### `SIE_Product_Page_Handler` (class-product-page-handler.php)
+### `Altegena_Product_Page_Handler` (class-product-page-handler.php)
 - **Role:** Injects CSS via `wp_head` to hide the default WooCommerce add-to-cart button and quantity input for invitation products. Uses CSS `display: none !important` rather than removing template hooks, so the variation form stays functional.
 
-## JavaScript: SIE_Editor (editor.js)
+## JavaScript: Altegena_Editor (editor.js)
 
 Single IIFE-wrapped object, jQuery-based. Key behaviors:
 
 ### Initialization
-1. Parses `sie_config.raw_config` JSON
+1. Parses `altegena_config.raw_config` JSON
 2. Builds layout: sidebar (left, 360px) + preview area (right, flexible)
 3. Renders text layers on canvas and input fields in sidebar
 4. Loads autosaved data from `localStorage`
 5. Binds all events
 
 ### Canvas Scaling
-- Uses `ResizeObserver` on `.sie-preview-area`
+- Uses `ResizeObserver` on `.altegena-preview-area`
 - Canvas is rendered at its natural pixel size from JSON config (`config.canvas.width`/`height`)
 - CSS `transform: scale()` is applied to fit within the preview area while preserving aspect ratio
 - `scaleFactor` is stored for coordinate translation
@@ -124,15 +124,15 @@ Single IIFE-wrapped object, jQuery-based. Key behaviors:
 
 ### Add to Cart
 - Custom AJAX call to WooCommerce `add_to_cart` endpoint
-- Sends `product_id`, `quantity: 1`, and `sie_custom_data` (JSON string)
+- Sends `product_id`, `quantity: 1`, and `altegena_custom_data` (JSON string)
 - On success: redirects to cart page
 - On error: Turkish alert message
 
 ### Autosave
-- Saves to `localStorage` with key `sie_autosave_{productId}`
+- Saves to `localStorage` with key `altegena_autosave_{productId}`
 - Loads on init, restoring text values to both sidebar inputs and preview layers
 
-## JavaScript: SIE_AdminEditor (admin-editor.js)
+## JavaScript: Altegena_AdminEditor (admin-editor.js)
 
 Single IIFE-wrapped object, jQuery-based. Provides a visual design editor inside a standalone WordPress metabox on the product edit screen.
 
@@ -198,7 +198,7 @@ Single IIFE-wrapped object, jQuery-based. Provides a visual design editor inside
 - `escapeHtml()` sanitizes text first, then `\n` characters are converted to `<br>`
 
 ### Alignment & Distribution
-- Appears at the top of the right panel when 2+ layers are selected (`.sie-admin-align-section`, hidden by default)
+- Appears at the top of the right panel when 2+ layers are selected (`.altegena-admin-align-section`, hidden by default)
 - **8 buttons** in a compact grid: Align Left, Center H, Right, Top, Center V, Bottom, Distribute H, Distribute V
 - All operations work on stored config percentage values (`left`, `top`, `width`); layers have no stored height so vertical ops use `top` only
 - Distribute requires 3+ layers; evenly spaces center-points (horizontal) or `top` values (vertical) between extremes

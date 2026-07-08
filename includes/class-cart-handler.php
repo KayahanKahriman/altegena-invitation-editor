@@ -1,13 +1,13 @@
 <?php
 /**
- * Handles Cart and Order integration for Simple Invitation Editor
+ * Handles Cart and Order integration for Altegena Invitation Editor
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class SIE_Cart_Handler
+class Altegena_Cart_Handler
 {
 
     private static $instance = null;
@@ -51,17 +51,17 @@ class SIE_Cart_Handler
         echo '</div>';
 
         // Modal Container (Hidden by default)
-        echo '<div id="card-designer" class="sie-modal" style="display:none;">';
-        echo '<div class="sie-modal-header">';
+        echo '<div id="card-designer" class="altegena-modal" style="display:none;">';
+        echo '<div class="altegena-modal-header">';
         echo '<h2>Tasarımcı</h2>';
-        echo '<button type="button" id="sie-add-to-cart-btn" class="sie-add-to-cart-btn">Sepete Ekle</button>';
-        echo '<button type="button" id="sie-share-btn" class="sie-share-btn">WhatsApp\'ta Paylaş</button>';
-        echo '<button type="button" id="close-card-designer" class="sie-close-btn">&times;</button>';
+        echo '<button type="button" id="altegena-add-to-cart-btn" class="altegena-add-to-cart-btn">Sepete Ekle</button>';
+        echo '<button type="button" id="altegena-share-btn" class="altegena-share-btn">WhatsApp\'ta Paylaş</button>';
+        echo '<button type="button" id="close-card-designer" class="altegena-close-btn">&times;</button>';
         echo '</div>';
-        echo '<div id="sie-editor-app"></div>';
+        echo '<div id="altegena-editor-app"></div>';
         echo '</div>';
 
-        echo '<input type="hidden" name="sie_custom_data" id="sie-custom-data" value="">';
+        echo '<input type="hidden" name="altegena_custom_data" id="altegena-custom-data" value="">';
 
         // Inline JS for Modal
         ?>
@@ -125,10 +125,10 @@ class SIE_Cart_Handler
 
     public function add_cart_item_data($cart_item_data, $product_id, $variation_id)
     {
-        if (isset($_POST['sie_custom_data']) && !empty($_POST['sie_custom_data'])) {
-            $custom_data = json_decode(stripslashes($_POST['sie_custom_data']), true);
+        if (isset($_POST['altegena_custom_data']) && !empty($_POST['altegena_custom_data'])) {
+            $custom_data = json_decode(stripslashes($_POST['altegena_custom_data']), true);
             if ($custom_data) {
-                $cart_item_data['sie_design_data'] = $custom_data;
+                $cart_item_data['altegena_design_data'] = $custom_data;
             }
         }
         return $cart_item_data;
@@ -141,8 +141,8 @@ class SIE_Cart_Handler
             return $item_data;
         }
 
-        if (isset($cart_item['sie_design_data'])) {
-            foreach ($cart_item['sie_design_data'] as $layer_id => $layer_info) {
+        if (isset($cart_item['altegena_design_data'])) {
+            foreach ($cart_item['altegena_design_data'] as $layer_id => $layer_info) {
                 if (isset($layer_info['label']) && isset($layer_info['text'])) {
                     $value = $layer_info['text'];
                     if (!empty($layer_info['fontFamily'])) {
@@ -162,10 +162,10 @@ class SIE_Cart_Handler
 
     public function checkout_create_order_line_item($item, $cart_item_key, $values, $order)
     {
-        if (isset($values['sie_design_data'])) {
-            $item->add_meta_data('_sie_design_data', $values['sie_design_data']);
+        if (isset($values['altegena_design_data'])) {
+            $item->add_meta_data('_altegena_design_data', $values['altegena_design_data']);
 
-            foreach ($values['sie_design_data'] as $layer_id => $layer_info) {
+            foreach ($values['altegena_design_data'] as $layer_id => $layer_info) {
                 if (isset($layer_info['label']) && isset($layer_info['text'])) {
                     $item->add_meta_data($layer_info['label'], $layer_info['text']);
                 }

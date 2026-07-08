@@ -1,7 +1,7 @@
 (function ($) {
     'use strict';
 
-    var SIE_AdminEditor = {
+    var Altegena_AdminEditor = {
         config: null,
         selectedLayerId: null,
         selectedLayerIds: [],
@@ -24,15 +24,15 @@
         $jsonTextarea: null,
 
         init: function () {
-            this.$container = $('#sie-admin-visual-editor');
+            this.$container = $('#altegena-admin-visual-editor');
             if (!this.$container.length) return;
 
-            this.$hiddenInput = $('#sie_invitation_json_config');
-            this.$jsonTextarea = $('#sie-json-textarea');
-            this.$canvasArea = this.$container.find('.sie-admin-canvas-area');
-            this.$canvas = this.$container.find('.sie-admin-canvas');
-            this.$leftPanel = this.$container.find('.sie-admin-left-panel');
-            this.$rightPanel = this.$container.find('.sie-admin-right-panel');
+            this.$hiddenInput = $('#altegena_invitation_json_config');
+            this.$jsonTextarea = $('#altegena-json-textarea');
+            this.$canvasArea = this.$container.find('.altegena-admin-canvas-area');
+            this.$canvas = this.$container.find('.altegena-admin-canvas');
+            this.$leftPanel = this.$container.find('.altegena-admin-left-panel');
+            this.$rightPanel = this.$container.find('.altegena-admin-right-panel');
 
             this.initializeConfig();
             this.bindTabSwitching();
@@ -76,14 +76,14 @@
 
         bindTabSwitching: function () {
             var self = this;
-            $(document).on('click', '.sie-admin-tab-btn', function (e) {
+            $(document).on('click', '.altegena-admin-tab-btn', function (e) {
                 e.preventDefault();
                 var target = $(this).data('tab');
 
-                $('.sie-admin-tab-btn').removeClass('active');
+                $('.altegena-admin-tab-btn').removeClass('active');
                 $(this).addClass('active');
-                $('.sie-admin-tab-content').removeClass('active');
-                $('#sie-tab-' + target).addClass('active');
+                $('.altegena-admin-tab-content').removeClass('active');
+                $('#altegena-tab-' + target).addClass('active');
 
                 if (target === 'json') {
                     self.syncVisualToJson();
@@ -142,7 +142,7 @@
         },
 
         showJsonStatus: function (msg, isValid) {
-            var $status = $('.sie-json-status');
+            var $status = $('.altegena-json-status');
             $status.text(msg)
                 .removeClass('valid invalid')
                 .addClass(isValid ? 'valid' : 'invalid');
@@ -157,7 +157,7 @@
         bindCanvasSettings: function () {
             var self = this;
 
-            this.$leftPanel.on('change', '#sie-canvas-width', function () {
+            this.$leftPanel.on('change', '#altegena-canvas-width', function () {
                 var val = parseInt($(this).val(), 10);
                 if (val > 0) {
                     self.config.canvas.width = val;
@@ -165,7 +165,7 @@
                 }
             });
 
-            this.$leftPanel.on('change', '#sie-canvas-height', function () {
+            this.$leftPanel.on('change', '#altegena-canvas-height', function () {
                 var val = parseInt($(this).val(), 10);
                 if (val > 0) {
                     self.config.canvas.height = val;
@@ -173,12 +173,12 @@
                 }
             });
 
-            this.$leftPanel.on('click', '#sie-bg-select-btn', function (e) {
+            this.$leftPanel.on('click', '#altegena-bg-select-btn', function (e) {
                 e.preventDefault();
                 self.openMediaPicker();
             });
 
-            this.$leftPanel.on('click', '.sie-admin-bg-remove', function (e) {
+            this.$leftPanel.on('click', '.altegena-admin-bg-remove', function (e) {
                 e.preventDefault();
                 self.removeBackgroundImage();
             });
@@ -203,24 +203,24 @@
 
         setBackgroundImage: function (url) {
             this.config.canvas.bg_image = url;
-            $('#sie-bg-url').val(url);
+            $('#altegena-bg-url').val(url);
             this.renderBgPreview();
             this.updateCanvas();
         },
 
         removeBackgroundImage: function () {
             this.config.canvas.bg_image = '';
-            $('#sie-bg-url').val('');
+            $('#altegena-bg-url').val('');
             this.renderBgPreview();
             this.updateCanvas();
         },
 
         renderBgPreview: function () {
-            var $preview = this.$leftPanel.find('.sie-admin-bg-preview');
+            var $preview = this.$leftPanel.find('.altegena-admin-bg-preview');
             if (this.config.canvas.bg_image) {
                 $preview.html(
                     '<img src="' + this.config.canvas.bg_image + '" alt="">' +
-                    '<button type="button" class="sie-admin-bg-remove" title="Kaldır">&times;</button>'
+                    '<button type="button" class="altegena-admin-bg-remove" title="Kaldır">&times;</button>'
                 );
             } else {
                 $preview.html('');
@@ -277,12 +277,12 @@
         bindLayerManagement: function () {
             var self = this;
 
-            this.$leftPanel.on('click', '.sie-admin-add-layer-btn', function (e) {
+            this.$leftPanel.on('click', '.altegena-admin-add-layer-btn', function (e) {
                 e.preventDefault();
                 self.addNewLayer();
             });
 
-            this.$leftPanel.on('click', '.sie-admin-layer-item', function (e) {
+            this.$leftPanel.on('click', '.altegena-admin-layer-item', function (e) {
                 var id = $(this).data('layer-id');
                 if (e.shiftKey && self.selectedLayerId) {
                     self.toggleLayerInSelection(id);
@@ -291,7 +291,7 @@
                 }
             });
 
-            this.$canvas.on('mousedown', '.sie-admin-layer', function (e) {
+            this.$canvas.on('mousedown', '.altegena-admin-layer', function (e) {
                 var id = $(this).data('layer-id');
                 if (e.shiftKey && self.selectedLayerId) {
                     self.toggleLayerInSelection(id);
@@ -306,27 +306,27 @@
             });
 
             // Toggle frontend visibility from layer list eye icon
-            this.$leftPanel.on('click', '.sie-admin-layer-visibility', function (e) {
+            this.$leftPanel.on('click', '.altegena-admin-layer-visibility', function (e) {
                 e.stopPropagation();
-                var $item = $(this).closest('.sie-admin-layer-item');
+                var $item = $(this).closest('.altegena-admin-layer-item');
                 var id = $item.data('layer-id');
                 var layer = self.getLayerById(id);
                 if (!layer) return;
 
                 layer.hidden_on_frontend = !layer.hidden_on_frontend;
                 $(this).toggleClass('dashicons-visibility dashicons-hidden');
-                $item.toggleClass('sie-layer-hidden');
+                $item.toggleClass('altegena-layer-hidden');
                 self.syncConfigToHiddenField();
 
                 // Update checkbox if this layer is currently shown in properties
                 if (self.selectedLayerId === id) {
-                    $('#sie-prop-hidden-frontend').prop('checked', layer.hidden_on_frontend);
+                    $('#altegena-prop-hidden-frontend').prop('checked', layer.hidden_on_frontend);
                 }
             });
 
             // Deselect on canvas background mousedown (not click, to avoid conflicts with layer mousedown)
             this.$canvasArea.on('mousedown', function (e) {
-                if ($(e.target).hasClass('sie-admin-canvas-area') || $(e.target).hasClass('sie-admin-canvas')) {
+                if ($(e.target).hasClass('altegena-admin-canvas-area') || $(e.target).hasClass('altegena-admin-canvas')) {
                     self.deselectLayer();
                 }
             });
@@ -363,9 +363,9 @@
         },
 
         renderCanvasSettings: function () {
-            $('#sie-canvas-width').val(this.config.canvas.width);
-            $('#sie-canvas-height').val(this.config.canvas.height);
-            $('#sie-bg-url').val(this.config.canvas.bg_image || '');
+            $('#altegena-canvas-width').val(this.config.canvas.width);
+            $('#altegena-canvas-height').val(this.config.canvas.height);
+            $('#altegena-bg-url').val(this.config.canvas.bg_image || '');
             this.renderBgPreview();
         },
 
@@ -374,21 +374,21 @@
         buildLayerItem: function (layer) {
             var self = this;
             var selected = self.selectedLayerIds.indexOf(layer.id) !== -1 ? ' selected' : '';
-            var hiddenClass = layer.hidden_on_frontend ? ' sie-layer-hidden' : '';
+            var hiddenClass = layer.hidden_on_frontend ? ' altegena-layer-hidden' : '';
             var eyeIcon = layer.hidden_on_frontend ? 'dashicons-hidden' : 'dashicons-visibility';
             return $(
-                '<li class="sie-admin-layer-item' + selected + hiddenClass + '" data-layer-id="' + layer.id + '">' +
-                '<span class="sie-admin-layer-drag-handle dashicons dashicons-menu"></span>' +
+                '<li class="altegena-admin-layer-item' + selected + hiddenClass + '" data-layer-id="' + layer.id + '">' +
+                '<span class="altegena-admin-layer-drag-handle dashicons dashicons-menu"></span>' +
                 '<span class="dashicons dashicons-text"></span>' +
                 '<span>' + self.escapeHtml(layer.label) + '</span>' +
-                '<span class="sie-admin-layer-visibility dashicons ' + eyeIcon + '" title="Önyüzde Görünürlük"></span>' +
+                '<span class="altegena-admin-layer-visibility dashicons ' + eyeIcon + '" title="Önyüzde Görünürlük"></span>' +
                 '</li>'
             );
         },
 
         renderLayerList: function () {
             var self = this;
-            var $list = this.$leftPanel.find('.sie-admin-layer-list');
+            var $list = this.$leftPanel.find('.altegena-admin-layer-list');
             $list.empty();
 
             // Track which group headers have been rendered
@@ -402,10 +402,10 @@
                         var isCollapsed = !!self.collapsedGroups[layer.group];
                         var toggleIcon = isCollapsed ? 'dashicons-arrow-right-alt2' : 'dashicons-arrow-down-alt2';
                         $list.append(
-                            '<li class="sie-admin-group-header-row" data-group-header="' + self.escapeHtml(layer.group) + '">' +
-                            '<span class="sie-admin-group-toggle dashicons ' + toggleIcon + '"></span>' +
-                            '<input type="text" class="sie-admin-group-name-input" value="' + self.escapeHtml(layer.group) + '" title="Düzenlemek için tıklayın">' +
-                            '<button type="button" class="sie-admin-group-duplicate" title="Grubu Çoğalt"><span class="dashicons dashicons-admin-page"></span></button>' +
+                            '<li class="altegena-admin-group-header-row" data-group-header="' + self.escapeHtml(layer.group) + '">' +
+                            '<span class="altegena-admin-group-toggle dashicons ' + toggleIcon + '"></span>' +
+                            '<input type="text" class="altegena-admin-group-name-input" value="' + self.escapeHtml(layer.group) + '" title="Düzenlemek için tıklayın">' +
+                            '<button type="button" class="altegena-admin-group-duplicate" title="Grubu Çoğalt"><span class="dashicons dashicons-admin-page"></span></button>' +
                             '</li>'
                         );
                     }
@@ -426,16 +426,16 @@
 
         initLayerSortable: function () {
             var self = this;
-            var $list = this.$leftPanel.find('.sie-admin-layer-list');
+            var $list = this.$leftPanel.find('.altegena-admin-layer-list');
 
             if ($list.data('ui-sortable')) { $list.sortable('destroy'); }
 
             // Single flat sortable — only layer items are draggable, group headers are fixed dividers
             $list.sortable({
-                handle: '.sie-admin-layer-drag-handle',
-                items: '.sie-admin-layer-item',
+                handle: '.altegena-admin-layer-drag-handle',
+                items: '.altegena-admin-layer-item',
                 tolerance: 'pointer',
-                placeholder: 'sie-admin-sortable-placeholder',
+                placeholder: 'altegena-admin-sortable-placeholder',
                 update: function () {
                     var newOrder = [];
                     var currentGroup = null;
@@ -443,10 +443,10 @@
                     $list.children().each(function () {
                         var $item = $(this);
 
-                        if ($item.hasClass('sie-admin-group-header-row')) {
+                        if ($item.hasClass('altegena-admin-group-header-row')) {
                             // Track which group we're currently under
                             currentGroup = $item.attr('data-group-header');
-                        } else if ($item.hasClass('sie-admin-layer-item')) {
+                        } else if ($item.hasClass('altegena-admin-layer-item')) {
                             var id = $item.attr('data-layer-id');
                             var layer = self.getLayerById(id);
                             if (layer) {
@@ -469,9 +469,9 @@
             });
 
             // Rename group on input change
-            $list.off('change.sie-rename blur.sie-rename').on('change.sie-rename blur.sie-rename', '.sie-admin-group-name-input', function () {
+            $list.off('change.altegena-rename blur.altegena-rename').on('change.altegena-rename blur.altegena-rename', '.altegena-admin-group-name-input', function () {
                 var $input = $(this);
-                var $headerRow = $input.closest('.sie-admin-group-header-row');
+                var $headerRow = $input.closest('.altegena-admin-group-header-row');
                 var oldName = $headerRow.attr('data-group-header');
                 var newName = $input.val().trim();
                 if (!newName || newName === oldName) {
@@ -481,37 +481,37 @@
                 self.renameGroup(oldName, newName);
             });
 
-            $list.off('keydown.sie-rename').on('keydown.sie-rename', '.sie-admin-group-name-input', function (e) {
+            $list.off('keydown.altegena-rename').on('keydown.altegena-rename', '.altegena-admin-group-name-input', function (e) {
                 if (e.key === 'Enter') {
                     $(this).trigger('blur');
                 } else if (e.key === 'Escape') {
-                    var oldName = $(this).closest('.sie-admin-group-header-row').attr('data-group-header');
+                    var oldName = $(this).closest('.altegena-admin-group-header-row').attr('data-group-header');
                     $(this).val(oldName).blur();
                 }
             });
 
             // Duplicate group button
-            $list.off('click.sie-dup-group').on('click.sie-dup-group', '.sie-admin-group-duplicate', function (e) {
+            $list.off('click.altegena-dup-group').on('click.altegena-dup-group', '.altegena-admin-group-duplicate', function (e) {
                 e.stopPropagation();
-                var groupName = $(this).closest('.sie-admin-group-header-row').attr('data-group-header');
+                var groupName = $(this).closest('.altegena-admin-group-header-row').attr('data-group-header');
                 self.duplicateGroup(groupName);
             });
 
             // Collapse/expand on group header toggle
-            $list.off('click.sie-group').on('click.sie-group', '.sie-admin-group-toggle', function (e) {
+            $list.off('click.altegena-group').on('click.altegena-group', '.altegena-admin-group-toggle', function (e) {
                 e.stopPropagation();
-                var $headerRow = $(this).closest('.sie-admin-group-header-row');
+                var $headerRow = $(this).closest('.altegena-admin-group-header-row');
                 var groupName = $headerRow.attr('data-group-header');
                 var isCollapsed = !!self.collapsedGroups[groupName];
 
                 if (isCollapsed) {
                     // Expand: show all items belonging to this group
-                    $list.find('.sie-admin-layer-item[data-group="' + groupName + '"]').show();
+                    $list.find('.altegena-admin-layer-item[data-group="' + groupName + '"]').show();
                     $(this).removeClass('dashicons-arrow-right-alt2').addClass('dashicons-arrow-down-alt2');
                     delete self.collapsedGroups[groupName];
                 } else {
                     // Collapse: hide all items belonging to this group
-                    $list.find('.sie-admin-layer-item[data-group="' + groupName + '"]').hide();
+                    $list.find('.altegena-admin-layer-item[data-group="' + groupName + '"]').hide();
                     $(this).removeClass('dashicons-arrow-down-alt2').addClass('dashicons-arrow-right-alt2');
                     self.collapsedGroups[groupName] = true;
                 }
@@ -520,7 +520,7 @@
 
         renderLayers: function () {
             var self = this;
-            this.$canvas.find('.sie-admin-layer').remove();
+            this.$canvas.find('.altegena-admin-layer').remove();
 
             this.config.layers.forEach(function (layer) {
                 self.renderLayer(layer);
@@ -551,7 +551,7 @@
             var htmlText = this.escapeHtml(text).replace(/\n/g, '<br>');
 
             var $el = $('<div>')
-                .addClass('sie-admin-layer')
+                .addClass('altegena-admin-layer')
                 .attr('data-layer-id', layer.id)
                 .css(style)
                 .html(htmlText);
@@ -604,16 +604,16 @@
 
         refreshSelectionUI: function () {
             var self = this;
-            this.$leftPanel.find('.sie-admin-layer-item').removeClass('selected');
-            this.$canvas.find('.sie-admin-layer').removeClass('selected');
+            this.$leftPanel.find('.altegena-admin-layer-item').removeClass('selected');
+            this.$canvas.find('.altegena-admin-layer').removeClass('selected');
 
             this.selectedLayerIds.forEach(function (id) {
-                self.$leftPanel.find('.sie-admin-layer-item[data-layer-id="' + id + '"]').addClass('selected');
-                self.$canvas.find('.sie-admin-layer[data-layer-id="' + id + '"]').addClass('selected');
+                self.$leftPanel.find('.altegena-admin-layer-item[data-layer-id="' + id + '"]').addClass('selected');
+                self.$canvas.find('.altegena-admin-layer[data-layer-id="' + id + '"]').addClass('selected');
             });
 
             // Show/hide canvas-align section (1+ selected)
-            var $canvasAlignSection = this.$rightPanel.find('.sie-admin-canvas-align-section');
+            var $canvasAlignSection = this.$rightPanel.find('.altegena-admin-canvas-align-section');
             if (this.selectedLayerIds.length >= 1) {
                 $canvasAlignSection.show();
             } else {
@@ -621,7 +621,7 @@
             }
 
             // Show/hide alignment section based on multi-selection
-            var $alignSection = this.$rightPanel.find('.sie-admin-align-section');
+            var $alignSection = this.$rightPanel.find('.altegena-admin-align-section');
             if (this.selectedLayerIds.length >= 2) {
                 $alignSection.show();
             } else {
@@ -632,11 +632,11 @@
         deselectLayer: function () {
             this.selectedLayerId = null;
             this.selectedLayerIds = [];
-            this.$leftPanel.find('.sie-admin-layer-item').removeClass('selected');
-            this.$canvas.find('.sie-admin-layer').removeClass('selected');
+            this.$leftPanel.find('.altegena-admin-layer-item').removeClass('selected');
+            this.$canvas.find('.altegena-admin-layer').removeClass('selected');
             this.$rightPanel.addClass('hidden');
-            this.$rightPanel.find('.sie-admin-canvas-align-section').hide();
-            this.$rightPanel.find('.sie-admin-align-section').hide();
+            this.$rightPanel.find('.altegena-admin-canvas-align-section').hide();
+            this.$rightPanel.find('.altegena-admin-align-section').hide();
         },
 
         getLayerById: function (id) {
@@ -662,11 +662,11 @@
             this.populateFontDropdown();
 
             // Text fields
-            this.$rightPanel.on('input', '#sie-prop-label', function () {
+            this.$rightPanel.on('input', '#altegena-prop-label', function () {
                 self.updateSelectedLayerProperty('label', $(this).val());
             });
 
-            this.$rightPanel.on('input', '#sie-prop-group', function () {
+            this.$rightPanel.on('input', '#altegena-prop-group', function () {
                 if (!self.selectedLayerId) return;
                 var layer = self.getLayerById(self.selectedLayerId);
                 if (!layer) return;
@@ -681,11 +681,11 @@
                 self.syncConfigToHiddenField();
             });
 
-            this.$rightPanel.on('input', '#sie-prop-default-text', function () {
+            this.$rightPanel.on('input', '#altegena-prop-default-text', function () {
                 self.updateSelectedLayerProperty('default_text', $(this).val());
             });
 
-            this.$rightPanel.on('input', '#sie-prop-id', function () {
+            this.$rightPanel.on('input', '#altegena-prop-id', function () {
                 var newId = $(this).val().replace(/[^a-zA-Z0-9_-]/g, '');
                 $(this).val(newId);
                 if (newId && self.selectedLayerId) {
@@ -695,70 +695,70 @@
                         layer.id = newId;
                         self.selectedLayerId = newId;
                         // Update DOM
-                        self.$canvas.find('.sie-admin-layer[data-layer-id="' + oldId + '"]').attr('data-layer-id', newId);
-                        self.$leftPanel.find('.sie-admin-layer-item[data-layer-id="' + oldId + '"]').attr('data-layer-id', newId);
+                        self.$canvas.find('.altegena-admin-layer[data-layer-id="' + oldId + '"]').attr('data-layer-id', newId);
+                        self.$leftPanel.find('.altegena-admin-layer-item[data-layer-id="' + oldId + '"]').attr('data-layer-id', newId);
                         self.syncConfigToHiddenField();
                     }
                 }
             });
 
             // Style fields
-            this.$rightPanel.on('change', '#sie-prop-font', function () {
+            this.$rightPanel.on('change', '#altegena-prop-font', function () {
                 self.updateSelectedLayerStyle('fontFamily', $(this).val());
             });
 
-            this.$rightPanel.on('input', '#sie-prop-fontsize', function () {
+            this.$rightPanel.on('input', '#altegena-prop-fontsize', function () {
                 self.updateSelectedLayerStyle('fontSize', $(this).val() + 'px');
             });
 
-            this.$rightPanel.on('input', '#sie-prop-left', function () {
+            this.$rightPanel.on('input', '#altegena-prop-left', function () {
                 self.updateSelectedLayerStylePosition('left', $(this).val());
             });
 
-            this.$rightPanel.on('input', '#sie-prop-top', function () {
+            this.$rightPanel.on('input', '#altegena-prop-top', function () {
                 self.updateSelectedLayerStylePosition('top', $(this).val());
             });
 
-            this.$rightPanel.on('input', '#sie-prop-width', function () {
+            this.$rightPanel.on('input', '#altegena-prop-width', function () {
                 self.updateSelectedLayerStylePosition('width', $(this).val());
             });
 
-            this.$rightPanel.on('input', '#sie-prop-rotate', function () {
+            this.$rightPanel.on('input', '#altegena-prop-rotate', function () {
                 self.updateSelectedLayerStyle('rotate', $(this).val());
             });
 
-            this.$rightPanel.on('input', '#sie-prop-letterspacing', function () {
+            this.$rightPanel.on('input', '#altegena-prop-letterspacing', function () {
                 var val = $(this).val();
                 self.updateSelectedLayerStyle('letterSpacing', val ? val + 'px' : '');
             });
 
-            this.$rightPanel.on('input', '#sie-prop-lineheight', function () {
+            this.$rightPanel.on('input', '#altegena-prop-lineheight', function () {
                 var val = $(this).val();
                 self.updateSelectedLayerStyle('lineHeight', val || '');
             });
 
-            this.$rightPanel.on('change', '#sie-prop-fontweight', function () {
+            this.$rightPanel.on('change', '#altegena-prop-fontweight', function () {
                 self.updateSelectedLayerStyle('fontWeight', $(this).val());
             });
 
-            this.$rightPanel.on('change', '#sie-prop-fontstyle', function () {
+            this.$rightPanel.on('change', '#altegena-prop-fontstyle', function () {
                 self.updateSelectedLayerStyle('fontStyle', $(this).val());
             });
 
             // Metin hizalama butonları
-            this.$rightPanel.on('click', '.sie-text-align-btn', function (e) {
+            this.$rightPanel.on('click', '.altegena-text-align-btn', function (e) {
                 e.preventDefault();
                 var align = $(this).data('align');
                 if (align) {
-                    $('.sie-text-align-btn').removeClass('active');
+                    $('.altegena-text-align-btn').removeClass('active');
                     $(this).addClass('active');
-                    $('#sie-prop-textalign').val(align);
+                    $('#altegena-prop-textalign').val(align);
                     self.updateSelectedLayerStyle('textAlign', align);
                 }
             });
 
             // Hidden on frontend checkbox
-            this.$rightPanel.on('change', '#sie-prop-hidden-frontend', function () {
+            this.$rightPanel.on('change', '#altegena-prop-hidden-frontend', function () {
                 if (!self.selectedLayerId) return;
                 var layer = self.getLayerById(self.selectedLayerId);
                 if (!layer) return;
@@ -769,12 +769,12 @@
             });
 
             // Duplicate & Delete
-            this.$rightPanel.on('click', '#sie-prop-duplicate', function (e) {
+            this.$rightPanel.on('click', '#altegena-prop-duplicate', function (e) {
                 e.preventDefault();
                 self.duplicateSelectedLayer();
             });
 
-            this.$rightPanel.on('click', '#sie-prop-delete', function (e) {
+            this.$rightPanel.on('click', '#altegena-prop-delete', function (e) {
                 e.preventDefault();
                 if (confirm('Bu katmanı silmek istediğinize emin misiniz?')) {
                     self.deleteSelectedLayer();
@@ -783,7 +783,7 @@
         },
 
         populateFontDropdown: function () {
-            var $select = this.$rightPanel.find('#sie-prop-font');
+            var $select = this.$rightPanel.find('#altegena-prop-font');
             if (!$select.length) return;
 
             $select.empty();
@@ -797,9 +797,9 @@
             $select.append($webGroup);
 
             // Custom fonts from localized data
-            if (typeof sie_admin_config !== 'undefined' && sie_admin_config.fonts) {
+            if (typeof altegena_admin_config !== 'undefined' && altegena_admin_config.fonts) {
                 var $customGroup = $('<optgroup label="Özel Fontlar">');
-                sie_admin_config.fonts.forEach(function (f) {
+                altegena_admin_config.fonts.forEach(function (f) {
                     $customGroup.append('<option value="' + f + '">' + f + '</option>');
                 });
                 $select.append($customGroup);
@@ -810,29 +810,29 @@
             this.$rightPanel.removeClass('hidden');
 
             // Fill fields
-            $('#sie-prop-id').val(layer.id);
-            $('#sie-prop-label').val(layer.label || '');
-            $('#sie-prop-group').val(layer.group || '');
-            $('#sie-prop-default-text').val(layer.default_text || '');
+            $('#altegena-prop-id').val(layer.id);
+            $('#altegena-prop-label').val(layer.label || '');
+            $('#altegena-prop-group').val(layer.group || '');
+            $('#altegena-prop-default-text').val(layer.default_text || '');
 
             var s = layer.style || {};
-            $('#sie-prop-font').val(s.fontFamily || 'Mokka');
-            $('#sie-prop-fontsize').val(parseInt(s.fontSize, 10) || 48);
-            $('#sie-prop-left').val(parseFloat(s.left) || 0);
-            $('#sie-prop-top').val(parseFloat(s.top) || 0);
-            $('#sie-prop-width').val(parseFloat(s.width) || 80);
-            $('#sie-prop-rotate').val(parseInt(s.rotate, 10) || 0);
-            $('#sie-prop-letterspacing').val(parseFloat(s.letterSpacing) || '');
-            $('#sie-prop-lineheight').val(s.lineHeight || '');
-            $('#sie-prop-fontweight').val(s.fontWeight || 'normal');
-            $('#sie-prop-fontstyle').val(s.fontStyle || 'normal');
-            $('#sie-prop-hidden-frontend').prop('checked', !!layer.hidden_on_frontend);
+            $('#altegena-prop-font').val(s.fontFamily || 'Mokka');
+            $('#altegena-prop-fontsize').val(parseInt(s.fontSize, 10) || 48);
+            $('#altegena-prop-left').val(parseFloat(s.left) || 0);
+            $('#altegena-prop-top').val(parseFloat(s.top) || 0);
+            $('#altegena-prop-width').val(parseFloat(s.width) || 80);
+            $('#altegena-prop-rotate').val(parseInt(s.rotate, 10) || 0);
+            $('#altegena-prop-letterspacing').val(parseFloat(s.letterSpacing) || '');
+            $('#altegena-prop-lineheight').val(s.lineHeight || '');
+            $('#altegena-prop-fontweight').val(s.fontWeight || 'normal');
+            $('#altegena-prop-fontstyle').val(s.fontStyle || 'normal');
+            $('#altegena-prop-hidden-frontend').prop('checked', !!layer.hidden_on_frontend);
 
             // Metin hizalama butonlarını güncelle
             var textAlign = s.textAlign || 'center';
-            $('#sie-prop-textalign').val(textAlign);
-            $('.sie-text-align-btn').removeClass('active');
-            $('.sie-text-align-btn[data-align="' + textAlign + '"]').addClass('active');
+            $('#altegena-prop-textalign').val(textAlign);
+            $('.altegena-text-align-btn').removeClass('active');
+            $('.altegena-text-align-btn[data-align="' + textAlign + '"]').addClass('active');
 
             // Init/update color picker
             this.initColorPicker(s.color || '#333333');
@@ -840,16 +840,16 @@
 
         initColorPicker: function (color) {
             var self = this;
-            var $input = $('#sie-prop-color');
+            var $input = $('#altegena-prop-color');
 
             // Destroy previous if exists
             if ($input.data('wpWpColorPicker')) {
                 $input.wpColorPicker('close');
                 // Re-create fresh input
-                var $parent = $input.closest('.sie-admin-field');
+                var $parent = $input.closest('.altegena-admin-field');
                 $parent.find('.wp-picker-container').remove();
-                $parent.append('<input type="text" id="sie-prop-color" value="">');
-                $input = $('#sie-prop-color');
+                $parent.append('<input type="text" id="altegena-prop-color" value="">');
+                $input = $('#altegena-prop-color');
             }
 
             $input.val(color);
@@ -874,7 +874,7 @@
             if (prop === 'default_text') {
                 var text = value.replace(/\\n/g, '\n');
                 var htmlText = this.escapeHtml(text).replace(/\n/g, '<br>');
-                this.$canvas.find('.sie-admin-layer[data-layer-id="' + this.selectedLayerId + '"]').html(htmlText);
+                this.$canvas.find('.altegena-admin-layer[data-layer-id="' + this.selectedLayerId + '"]').html(htmlText);
             }
 
             if (prop === 'label') {
@@ -898,7 +898,7 @@
             }
 
             // Apply to canvas layer (need to handle center-point conversion for positioning)
-            var $el = this.$canvas.find('.sie-admin-layer[data-layer-id="' + this.selectedLayerId + '"]');
+            var $el = this.$canvas.find('.altegena-admin-layer[data-layer-id="' + this.selectedLayerId + '"]');
 
             // Re-render this single layer to apply position/transform conversion
             if (['left', 'top', 'width', 'rotate'].indexOf(prop) !== -1) {
@@ -924,7 +924,7 @@
 
         renameGroup: function (oldName, newName) {
             var self = this;
-            var $list = this.$leftPanel.find('.sie-admin-layer-list');
+            var $list = this.$leftPanel.find('.altegena-admin-layer-list');
 
             // Update all layers with the old group name
             this.config.layers.forEach(function (layer) {
@@ -934,9 +934,9 @@
             });
 
             // Update DOM: header row attribute and all layer item data-group attributes
-            var $headerRow = $list.find('.sie-admin-group-header-row[data-group-header="' + oldName + '"]');
+            var $headerRow = $list.find('.altegena-admin-group-header-row[data-group-header="' + oldName + '"]');
             $headerRow.attr('data-group-header', newName);
-            $list.find('.sie-admin-layer-item[data-group="' + oldName + '"]').attr('data-group', newName);
+            $list.find('.altegena-admin-layer-item[data-group="' + oldName + '"]').attr('data-group', newName);
 
             // Update collapsed state if it existed under the old name
             if (this.collapsedGroups[oldName]) {
@@ -1041,7 +1041,7 @@
 
                 dragTargets = [];
                 ids.forEach(function (id) {
-                    var $layerEl = self.$canvas.find('.sie-admin-layer[data-layer-id="' + id + '"]');
+                    var $layerEl = self.$canvas.find('.altegena-admin-layer[data-layer-id="' + id + '"]');
                     var layerData = self.getLayerById(id);
                     if ($layerEl.length && layerData) {
                         dragTargets.push({
@@ -1055,7 +1055,7 @@
 
                 e.preventDefault();
 
-                $(document).on('mousemove.sie-admin-drag', function (e) {
+                $(document).on('mousemove.altegena-admin-drag', function (e) {
                     if (!isDragging) return;
 
                     var dx = (e.clientX - startX) / self.scaleFactor;
@@ -1081,17 +1081,17 @@
 
                     // Sync property fields for the primary selected layer
                     if (self.selectedLayerId === layer.id) {
-                        $('#sie-prop-left').val(parseFloat(layer.style.left).toFixed(2));
-                        $('#sie-prop-top').val(parseFloat(layer.style.top).toFixed(2));
+                        $('#altegena-prop-left').val(parseFloat(layer.style.left).toFixed(2));
+                        $('#altegena-prop-top').val(parseFloat(layer.style.top).toFixed(2));
                     }
                 });
 
-                $(document).on('mouseup.sie-admin-drag', function () {
+                $(document).on('mouseup.altegena-admin-drag', function () {
                     if (isDragging) {
                         isDragging = false;
                         self.syncConfigToHiddenField();
                     }
-                    $(document).off('.sie-admin-drag');
+                    $(document).off('.altegena-admin-drag');
                 });
             });
         },
@@ -1101,7 +1101,7 @@
         bindKeyboardMovement: function () {
             var self = this;
 
-            $(document).on('keydown.sie-admin', function (e) {
+            $(document).on('keydown.altegena-admin', function (e) {
                 // Don't intercept when typing in inputs
                 var tag = e.target.tagName.toLowerCase();
                 if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
@@ -1143,7 +1143,7 @@
                 var canvasH = self.config.canvas.height;
 
                 self.selectedLayerIds.forEach(function (id) {
-                    var $el = self.$canvas.find('.sie-admin-layer[data-layer-id="' + id + '"]');
+                    var $el = self.$canvas.find('.altegena-admin-layer[data-layer-id="' + id + '"]');
                     var layer = self.getLayerById(id);
                     if (!$el.length || !layer) return;
 
@@ -1167,8 +1167,8 @@
 
                     // Sync property fields for the primary selected layer
                     if (self.selectedLayerId === id) {
-                        $('#sie-prop-left').val(parseFloat(layer.style.left).toFixed(2));
-                        $('#sie-prop-top').val(parseFloat(layer.style.top).toFixed(2));
+                        $('#altegena-prop-left').val(parseFloat(layer.style.left).toFixed(2));
+                        $('#altegena-prop-top').val(parseFloat(layer.style.top).toFixed(2));
                     }
                 });
 
@@ -1180,9 +1180,9 @@
 
         bindFullscreen: function () {
             var self = this;
-            this.$container.on('click', '.sie-admin-fullscreen-btn', function (e) {
+            this.$container.on('click', '.altegena-admin-fullscreen-btn', function (e) {
                 e.preventDefault();
-                self.$container.toggleClass('sie-admin-fullscreen');
+                self.$container.toggleClass('altegena-admin-fullscreen');
 
                 // Allow CSS transition to finish before recalculating scale
                 setTimeout(function () {
@@ -1193,13 +1193,13 @@
 
         bindAlignmentButtons: function () {
             var self = this;
-            this.$rightPanel.on('click', '.sie-align-btn', function (e) {
+            this.$rightPanel.on('click', '.altegena-align-btn', function (e) {
                 e.preventDefault();
                 var type = $(this).data('align');
                 if (type) self.alignLayers(type);
             });
 
-            this.$rightPanel.on('click', '.sie-canvas-align-btn', function (e) {
+            this.$rightPanel.on('click', '.altegena-canvas-align-btn', function (e) {
                 e.preventDefault();
                 var type = $(this).attr('data-canvas-align');
                 if (type) self.alignLayersToCanvas(type);
@@ -1380,7 +1380,7 @@
             var self = this;
             $('#post').on('submit', function () {
                 // If the JSON tab is currently active, try to parse and apply the JSON first
-                if ($('#sie-tab-json').hasClass('active')) {
+                if ($('#altegena-tab-json').hasClass('active')) {
                     var raw = self.$jsonTextarea.val();
                     if (raw.trim()) {
                         try {
@@ -1390,7 +1390,7 @@
                             }
                         } catch (e) {
                             // If it's invalid JSON, we just fall back to the last valid config
-                            console.error('SIE JSON parse error before save:', e);
+                            console.error('Altegena JSON parse error before save:', e);
                         }
                     }
                 }
@@ -1458,12 +1458,12 @@
     };
 
     $(document).ready(function () {
-        SIE_AdminEditor.init();
+        Altegena_AdminEditor.init();
 
         // Validate JSON button
-        $(document).on('click', '#sie-validate-json', function (e) {
+        $(document).on('click', '#altegena-validate-json', function (e) {
             e.preventDefault();
-            SIE_AdminEditor.validateJson();
+            Altegena_AdminEditor.validateJson();
         });
     });
 

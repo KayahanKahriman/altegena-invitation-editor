@@ -1,19 +1,19 @@
-/* Simple Invitation Editor - Full Screen Mode */
+/* Altegena Invitation Editor - Full Screen Mode */
 
 /* The Modal Container (Hidden by default via inline style) */
-body.admin-bar #card-designer.sie-modal {
+body.admin-bar #card-designer.altegena-modal {
     top: 32px !important;
     height: calc(100vh - 32px) !important;
 }
 
 @media screen and (max-width: 782px) {
-    body.admin-bar #card-designer.sie-modal {
+    body.admin-bar #card-designer.altegena-modal {
         top: 46px !important;
         height: calc(100vh - 46px) !important;
     }
 }
 
-#card-designer.sie-modal {
+#card-designer.altegena-modal {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
@@ -35,7 +35,7 @@ body.admin-bar #card-designer.sie-modal {
 }
 
 /* Modal Header */
-.sie-modal-header {
+.altegena-modal-header {
     height: 60px;
     background-color: #ffffff;
     border-bottom: 1px solid #e0e0e0;
@@ -48,14 +48,14 @@ body.admin-bar #card-designer.sie-modal {
     gap: 16px;
 }
 
-.sie-modal-header h2 {
+.altegena-modal-header h2 {
     margin: 0;
     font-size: 18px;
     font-weight: 600;
     color: #333;
 }
 
-.sie-close-btn {
+.altegena-close-btn {
     background: none;
     border: none;
     font-size: 32px;
@@ -65,12 +65,12 @@ body.admin-bar #card-designer.sie-modal {
     padding: 0 10px;
 }
 
-.sie-close-btn:hover {
+.altegena-close-btn:hover {
     color: #d90429;
 }
 
 /* Add to Cart Button */
-.sie-add-to-cart-btn {
+.altegena-add-to-cart-btn {
     background: linear-gradient(135deg, #d4af37 0%, #c5a028 100%);
     color: #ffffff;
     border: none;
@@ -85,35 +85,35 @@ body.admin-bar #card-designer.sie-modal {
     margin-left: auto;
 }
 
-.sie-add-to-cart-btn:hover {
+.altegena-add-to-cart-btn:hover {
     background: linear-gradient(135deg, #c5a028 0%, #b69121 100%);
     box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
     transform: translateY(-1px);
 }
 
-.sie-add-to-cart-btn:active {
+.altegena-add-to-cart-btn:active {
     transform: translateY(0);
     box-shadow: 0 2px 6px rgba(212, 175, 55, 0.3);
 }
 
 /* The active theme (dm-omni) styles this button with letter-spacing via a
-   `.sie-modal #sie-add-to-cart-btn` !important rule. Override just the
+   `.altegena-modal #altegena-add-to-cart-btn` !important rule. Override just the
    letter-spacing with two-ID specificity so it wins regardless of load order,
    without disturbing the theme's other button styling. */
-#card-designer #sie-add-to-cart-btn {
+#card-designer #altegena-add-to-cart-btn {
     letter-spacing: normal !important;
 }
 
-.sie-add-to-cart-btn.sie-loading,
-.sie-share-btn.sie-loading {
+.altegena-add-to-cart-btn.altegena-loading,
+.altegena-share-btn.altegena-loading {
     pointer-events: none;
     opacity: 0.8;
     position: relative;
     padding-left: 40px;
 }
 
-.sie-add-to-cart-btn.sie-loading::before,
-.sie-share-btn.sie-loading::before {
+.altegena-add-to-cart-btn.altegena-loading::before,
+.altegena-share-btn.altegena-loading::before {
     content: '';
     position: absolute;
     left: 14px;
@@ -124,10 +124,10 @@ body.admin-bar #card-designer.sie-modal {
     border: 2px solid rgba(255, 255, 255, 0.4);
     border-top-color: #fff;
     border-radius: 50%;
-    animation: sie-spin 0.6s linear infinite;
+    animation: altegena-spin 0.6s linear infinite;
 }
 
-@keyframes sie-spin {
+@keyframes altegena-spin {
     to {
         transform: rotate(360deg);
     }
@@ -135,7 +135,7 @@ body.admin-bar #card-designer.sie-modal {
 
 /* WhatsApp Share Button (small, floating at the canvas bottom-right so it
    never competes with or blocks the primary "Sepete Ekle" button) */
-.sie-share-btn {
+.altegena-share-btn {
     position: fixed;
     bottom: 16px;
     right: 16px;
@@ -154,27 +154,27 @@ body.admin-bar #card-designer.sie-modal {
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
 }
 
-.sie-share-btn:hover {
+.altegena-share-btn:hover {
     background: #1ebe5b;
     box-shadow: 0 5px 14px rgba(0, 0, 0, 0.3);
     transform: translateY(-1px);
 }
 
-.sie-share-btn:active {
+.altegena-share-btn:active {
     transform: translateY(0);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
 /* Keep the floating button fixed (and spinner anchored) during its loading
-   state — the shared .sie-loading rule sets position:relative, which would
+   state — the shared .altegena-loading rule sets position:relative, which would
    otherwise snap it back into the header flow. */
-.sie-share-btn.sie-loading {
+.altegena-share-btn.altegena-loading {
     position: fixed;
     padding-left: 34px;
 }
 
 /* Share Dialog (overlay inside the full-screen modal) */
-.sie-share-overlay {
+.altegena-share-overlay {
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.6);
@@ -186,7 +186,7 @@ body.admin-bar #card-designer.sie-modal {
     box-sizing: border-box;
 }
 
-.sie-share-dialog {
+.altegena-share-dialog {
     position: relative;
     background: #ffffff;
     border-radius: 12px;
@@ -203,14 +203,14 @@ body.admin-bar #card-designer.sie-modal {
     text-align: center;
 }
 
-.sie-share-dialog h3 {
+.altegena-share-dialog h3 {
     margin: 0;
     font-size: 20px;
     font-weight: 600;
     color: #333;
 }
 
-.sie-share-close {
+.altegena-share-close {
     position: absolute;
     top: 10px;
     right: 12px;
@@ -222,25 +222,25 @@ body.admin-bar #card-designer.sie-modal {
     color: #999;
 }
 
-.sie-share-close:hover {
+.altegena-share-close:hover {
     color: #d90429;
 }
 
-.sie-share-preview {
+.altegena-share-preview {
     max-width: 100%;
     max-height: 45vh;
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
-.sie-share-actions {
+.altegena-share-actions {
     display: flex;
     flex-direction: column;
     gap: 10px;
     width: 100%;
 }
 
-.sie-share-action {
+.altegena-share-action {
     display: block;
     width: 100%;
     box-sizing: border-box;
@@ -255,42 +255,42 @@ body.admin-bar #card-designer.sie-modal {
     transition: filter 0.15s ease, background 0.15s ease;
 }
 
-.sie-share-action.sie-wa-link,
-.sie-share-action.sie-wa-image {
+.altegena-share-action.altegena-wa-link,
+.altegena-share-action.altegena-wa-image {
     background: #25D366;
     color: #ffffff;
 }
 
-.sie-share-action.sie-wa-link:hover,
-.sie-share-action.sie-wa-image:hover {
+.altegena-share-action.altegena-wa-link:hover,
+.altegena-share-action.altegena-wa-image:hover {
     background: #1ebe5b;
     color: #ffffff;
 }
 
-.sie-share-action.sie-copy-link,
-.sie-share-action.sie-download-img {
+.altegena-share-action.altegena-copy-link,
+.altegena-share-action.altegena-download-img {
     background: #f0f0f0;
     color: #333;
 }
 
-.sie-share-action.sie-copy-link:hover,
-.sie-share-action.sie-download-img:hover {
+.altegena-share-action.altegena-copy-link:hover,
+.altegena-share-action.altegena-download-img:hover {
     background: #e4e4e4;
     color: #333;
 }
 
 @media (max-width: 900px) {
-    .sie-share-dialog {
+    .altegena-share-dialog {
         max-width: 94%;
     }
 
-    .sie-share-preview {
+    .altegena-share-preview {
         max-height: 38vh;
     }
 }
 
 /* The Editor App Container (Inside Modal) */
-#sie-editor-app {
+#altegena-editor-app {
     flex: 1;
     display: flex;
     overflow: hidden;
@@ -305,7 +305,7 @@ body.admin-bar #card-designer.sie-modal {
 }
 
 /* Sidebar (Left Panel - Scrollable) */
-.sie-sidebar {
+.altegena-sidebar {
     width: 360px;
     min-width: 360px;
     height: 100%;
@@ -321,7 +321,7 @@ body.admin-bar #card-designer.sie-modal {
 }
 
 /* Preview Area (Right Panel) */
-.sie-preview-area {
+.altegena-preview-area {
     flex: 1;
     height: 100%;
     background-color: #eef2f7;
@@ -335,7 +335,7 @@ body.admin-bar #card-designer.sie-modal {
 }
 
 /* Canvas (sized by JS to maintain exact aspect ratio from JSON config) */
-.sie-canvas {
+.altegena-canvas {
     position: relative;
     background-size: 100% 100%;
     background-position: center;
@@ -345,7 +345,7 @@ body.admin-bar #card-designer.sie-modal {
 }
 
 /* Layers on Canvas */
-.sie-layer {
+.altegena-layer {
     position: absolute;
     cursor: move;
     /* Move cursor for draggable */
@@ -357,19 +357,19 @@ body.admin-bar #card-designer.sie-modal {
     /* Prevent text selection while dragging */
 }
 
-.sie-layer:hover {
+.altegena-layer:hover {
     box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.5);
     /* Gold outline */
 }
 
-.sie-layer.is-selected,
-.sie-layer:focus {
+.altegena-layer.is-selected,
+.altegena-layer:focus {
     box-shadow: 0 0 0 2px #d4af37;
     z-index: 100;
 }
 
 /* Input Groups in Sidebar */
-.sie-input-group {
+.altegena-input-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -377,11 +377,11 @@ body.admin-bar #card-designer.sie-modal {
     border-bottom: 1px solid #f0f0f0;
 }
 
-.sie-input-group:last-child {
+.altegena-input-group:last-child {
     border-bottom: none;
 }
 
-.sie-input-group label {
+.altegena-input-group label {
     font-weight: 600;
     font-size: 13px;
     text-transform: uppercase;
@@ -389,9 +389,9 @@ body.admin-bar #card-designer.sie-modal {
     letter-spacing: 0.5px;
 }
 
-.sie-input-group input[type="text"],
-.sie-input-group textarea,
-.sie-input-group select {
+.altegena-input-group input[type="text"],
+.altegena-input-group textarea,
+.altegena-input-group select {
     width: 100%;
     padding: 10px 12px;
     border: 1px solid #ddd;
@@ -401,16 +401,16 @@ body.admin-bar #card-designer.sie-modal {
     background: #fafafa;
 }
 
-.sie-input-group input:focus,
-.sie-input-group textarea:focus,
-.sie-input-group select:focus {
+.altegena-input-group input:focus,
+.altegena-input-group textarea:focus,
+.altegena-input-group select:focus {
     border-color: #d4af37;
     background: #fff;
     outline: none;
 }
 
 /* Active State Highlighting */
-.sie-input-group.active {
+.altegena-input-group.active {
     background-color: #fffbf0;
     border-left: 3px solid #d4af37;
     padding-left: 10px;
@@ -421,12 +421,12 @@ body.admin-bar #card-designer.sie-modal {
 
 /* Mobile Responsiveness */
 @media (max-width: 900px) {
-    #sie-editor-app {
+    #altegena-editor-app {
         flex-direction: column-reverse;
         /* Preview Top, Inputs Bottom */
     }
 
-    .sie-sidebar {
+    .altegena-sidebar {
         width: 100%;
         min-width: 0;
         height: 50%;
@@ -434,12 +434,12 @@ body.admin-bar #card-designer.sie-modal {
         border-top: 1px solid #e0e0e0;
     }
 
-    .sie-preview-area {
+    .altegena-preview-area {
         height: 50%;
         padding: 20px;
     }
 
-    .sie-modal-header {
+    .altegena-modal-header {
         height: 50px;
         padding: 0 15px;
     }

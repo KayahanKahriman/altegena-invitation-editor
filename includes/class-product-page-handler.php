@@ -1,6 +1,6 @@
 <?php
 /**
- * Handles Product Page modifications for Simple Invitation Editor
+ * Handles Product Page modifications for Altegena Invitation Editor
  * Hides default add-to-cart button for invitation products,
  * while keeping the variation form intact.
  */
@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) {
   exit;
 }
 
-class SIE_Product_Page_Handler
+class Altegena_Product_Page_Handler
 {
 
   private static $instance = null;
@@ -71,7 +71,7 @@ class SIE_Product_Page_Handler
       /* Styles removed to use theme's is-style-white-cta class */
 
       /* Ensure proper spacing */
-      .sie-custom-cart-section {
+      .altegena-custom-cart-section {
         margin-top: 20px;
       }
     </style>

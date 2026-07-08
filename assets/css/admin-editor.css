@@ -1,17 +1,17 @@
 /**
  * Admin Visual Editor Styles
- * Simple Invitation Editor
+ * Altegena Invitation Editor
  */
 
 /* Tab Navigation */
-.sie-admin-tabs {
+.altegena-admin-tabs {
     display: flex;
     gap: 0;
     border-bottom: 1px solid #c3c4c7;
     margin-bottom: 16px;
 }
 
-.sie-admin-tab-btn {
+.altegena-admin-tab-btn {
     padding: 8px 16px;
     border: 1px solid transparent;
     border-bottom: none;
@@ -25,26 +25,26 @@
     transition: color 0.15s;
 }
 
-.sie-admin-tab-btn:hover {
+.altegena-admin-tab-btn:hover {
     color: #2271b1;
 }
 
-.sie-admin-tab-btn.active {
+.altegena-admin-tab-btn.active {
     background: #fff;
     border-color: #c3c4c7;
     color: #1d2327;
 }
 
-.sie-admin-tab-content {
+.altegena-admin-tab-content {
     display: none;
 }
 
-.sie-admin-tab-content.active {
+.altegena-admin-tab-content.active {
     display: block;
 }
 
 /* JSON Tab */
-.sie-json-tab textarea {
+.altegena-json-tab textarea {
     width: 100%;
     height: 400px;
     font-family: Consolas, Monaco, monospace;
@@ -57,29 +57,29 @@
     tab-size: 2;
 }
 
-.sie-json-actions {
+.altegena-json-actions {
     display: flex;
     gap: 8px;
     margin-top: 8px;
 }
 
-.sie-json-status {
+.altegena-json-status {
     display: inline-block;
     margin-left: 12px;
     font-size: 12px;
     font-style: italic;
 }
 
-.sie-json-status.valid {
+.altegena-json-status.valid {
     color: #00a32a;
 }
 
-.sie-json-status.invalid {
+.altegena-json-status.invalid {
     color: #d63638;
 }
 
 /* Visual Editor Layout */
-.sie-admin-editor {
+.altegena-admin-editor {
     display: flex;
     gap: 0;
     border: 1px solid #c3c4c7;
@@ -92,7 +92,7 @@
 }
 
 /* Fullscreen Mode */
-.sie-admin-editor.sie-admin-fullscreen {
+.altegena-admin-editor.altegena-admin-fullscreen {
     position: fixed;
     top: 32px;
     /* WP Admin bar height */
@@ -107,14 +107,14 @@
 }
 
 @media screen and (max-width: 782px) {
-    .sie-admin-editor.sie-admin-fullscreen {
+    .altegena-admin-editor.altegena-admin-fullscreen {
         top: 46px;
         /* Mobile WP Admin bar height */
         height: calc(100vh - 46px);
     }
 }
 
-.sie-admin-fullscreen-btn {
+.altegena-admin-fullscreen-btn {
     position: absolute;
     top: 10px;
     left: 10px;
@@ -131,13 +131,13 @@
     color: #50575e;
 }
 
-.sie-admin-fullscreen-btn:hover {
+.altegena-admin-fullscreen-btn:hover {
     background: #f6f7f7;
     color: #2271b1;
 }
 
 /* Left Panel - Canvas Settings & Layer List */
-.sie-admin-left-panel {
+.altegena-admin-left-panel {
     width: 280px;
     min-width: 280px;
     background: #fff;
@@ -147,16 +147,16 @@
     flex-direction: column;
 }
 
-.sie-admin-panel-section {
+.altegena-admin-panel-section {
     padding: 12px 16px;
     border-bottom: 1px solid #e0e0e0;
 }
 
-.sie-admin-panel-section:last-child {
+.altegena-admin-panel-section:last-child {
     border-bottom: none;
 }
 
-.sie-admin-panel-section h4 {
+.altegena-admin-panel-section h4 {
     margin: 0 0 10px 0;
     font-size: 12px;
     text-transform: uppercase;
@@ -165,15 +165,15 @@
 }
 
 /* Canvas Settings Fields */
-.sie-admin-field {
+.altegena-admin-field {
     margin-bottom: 10px;
 }
 
-.sie-admin-field:last-child {
+.altegena-admin-field:last-child {
     margin-bottom: 0;
 }
 
-.sie-admin-field label {
+.altegena-admin-field label {
     display: block;
     font-size: 12px;
     font-weight: 600;
@@ -181,10 +181,10 @@
     margin-bottom: 4px;
 }
 
-.sie-admin-field input[type="number"],
-.sie-admin-field input[type="text"],
-.sie-admin-field select,
-.sie-admin-field textarea {
+.altegena-admin-field input[type="number"],
+.altegena-admin-field input[type="text"],
+.altegena-admin-field select,
+.altegena-admin-field textarea {
     width: 100%;
     padding: 4px 8px;
     border: 1px solid #8c8f94;
@@ -194,42 +194,42 @@
     box-sizing: border-box;
 }
 
-.sie-admin-field input:focus,
-.sie-admin-field select:focus,
-.sie-admin-field textarea:focus {
+.altegena-admin-field input:focus,
+.altegena-admin-field select:focus,
+.altegena-admin-field textarea:focus {
     border-color: #2271b1;
     box-shadow: 0 0 0 1px #2271b1;
     outline: none;
 }
 
-.sie-admin-field textarea {
+.altegena-admin-field textarea {
     resize: vertical;
     min-height: 50px;
 }
 
 /* Inline number fields */
-.sie-admin-field-row {
+.altegena-admin-field-row {
     display: flex;
     gap: 8px;
 }
 
-.sie-admin-field-row .sie-admin-field {
+.altegena-admin-field-row .altegena-admin-field {
     flex: 1;
 }
 
 /* Background Image Field */
-.sie-admin-bg-field {
+.altegena-admin-bg-field {
     display: flex;
     gap: 6px;
     align-items: flex-start;
 }
 
-.sie-admin-bg-field input[type="text"] {
+.altegena-admin-bg-field input[type="text"] {
     flex: 1;
     font-size: 11px;
 }
 
-.sie-admin-bg-field .button {
+.altegena-admin-bg-field .button {
     flex-shrink: 0;
     padding: 0 8px !important;
     min-height: 28px !important;
@@ -237,12 +237,12 @@
     font-size: 12px !important;
 }
 
-.sie-admin-bg-preview {
+.altegena-admin-bg-preview {
     margin-top: 6px;
     position: relative;
 }
 
-.sie-admin-bg-preview img {
+.altegena-admin-bg-preview img {
     max-width: 100%;
     max-height: 80px;
     border: 1px solid #c3c4c7;
@@ -250,7 +250,7 @@
     display: block;
 }
 
-.sie-admin-bg-remove {
+.altegena-admin-bg-remove {
     position: absolute;
     top: 2px;
     right: 2px;
@@ -267,19 +267,19 @@
     padding: 0;
 }
 
-.sie-admin-bg-remove:hover {
+.altegena-admin-bg-remove:hover {
     background: #d63638;
 }
 
 /* Layer List */
-.sie-admin-layer-list {
+.altegena-admin-layer-list {
     list-style: none;
     margin: 0;
     padding: 0;
 }
 
 /* Layer Group Header Rows */
-.sie-admin-group-header-row {
+.altegena-admin-group-header-row {
     display: flex;
     align-items: center;
     padding: 5px 10px;
@@ -298,11 +298,11 @@
     user-select: none;
 }
 
-.sie-admin-group-header-row:first-child {
+.altegena-admin-group-header-row:first-child {
     margin-top: 0;
 }
 
-.sie-admin-group-toggle {
+.altegena-admin-group-toggle {
     cursor: pointer;
     color: #50575e !important;
     margin-right: 4px !important;
@@ -313,11 +313,11 @@
     flex-shrink: 0;
 }
 
-.sie-admin-group-toggle:hover {
+.altegena-admin-group-toggle:hover {
     color: #2271b1 !important;
 }
 
-.sie-admin-group-name-input {
+.altegena-admin-group-name-input {
     flex: 1;
     background: none;
     border: 1px solid transparent;
@@ -334,12 +334,12 @@
     font-family: inherit;
 }
 
-.sie-admin-group-name-input:hover {
+.altegena-admin-group-name-input:hover {
     border-color: #c3c4c7;
     background: #fff;
 }
 
-.sie-admin-group-name-input:focus {
+.altegena-admin-group-name-input:focus {
     border-color: #2271b1;
     background: #fff;
     outline: none;
@@ -347,7 +347,7 @@
     text-transform: none;
 }
 
-.sie-admin-group-duplicate {
+.altegena-admin-group-duplicate {
     background: none;
     border: none;
     padding: 0 2px;
@@ -358,11 +358,11 @@
     line-height: 1;
 }
 
-.sie-admin-group-duplicate:hover {
+.altegena-admin-group-duplicate:hover {
     color: #2271b1;
 }
 
-.sie-admin-group-duplicate .dashicons {
+.altegena-admin-group-duplicate .dashicons {
     font-size: 14px;
     width: 14px;
     height: 14px;
@@ -370,14 +370,14 @@
 }
 
 /* Indent layer items that belong to a group */
-.sie-admin-layer-item[data-group] {
+.altegena-admin-layer-item[data-group] {
     padding-left: 24px;
     font-size: 12px;
     border-left: 2px solid #e0e0e0;
 }
 
 /* Sortable placeholder */
-.sie-admin-sortable-placeholder {
+.altegena-admin-sortable-placeholder {
     height: 30px;
     background: #e7f0f9;
     border: 1px dashed #2271b1;
@@ -386,7 +386,7 @@
     list-style: none;
 }
 
-.sie-admin-layer-item {
+.altegena-admin-layer-item {
     display: flex;
     align-items: center;
     padding: 8px 10px;
@@ -399,28 +399,28 @@
     transition: background 0.1s;
 }
 
-.sie-admin-layer-item:hover {
+.altegena-admin-layer-item:hover {
     background: #f0f0f1;
 }
 
-.sie-admin-layer-item.selected {
+.altegena-admin-layer-item.selected {
     background: #e7f0f9;
     border-color: #2271b1;
     color: #2271b1;
     font-weight: 600;
 }
 
-.sie-admin-layer-drag-handle {
+.altegena-admin-layer-drag-handle {
     cursor: grab;
     color: #c3c4c7 !important;
     margin-right: 2px !important;
 }
 
-.sie-admin-layer-drag-handle:hover {
+.altegena-admin-layer-drag-handle:hover {
     color: #8c8f94 !important;
 }
 
-.sie-admin-layer-item .dashicons {
+.altegena-admin-layer-item .dashicons {
     margin-right: 6px;
     font-size: 16px;
     width: 16px;
@@ -429,30 +429,30 @@
     color: #8c8f94;
 }
 
-.sie-admin-layer-item.selected .dashicons {
+.altegena-admin-layer-item.selected .dashicons {
     color: #2271b1;
 }
 
-.sie-admin-layer-visibility {
+.altegena-admin-layer-visibility {
     margin-left: auto !important;
     margin-right: 0 !important;
     cursor: pointer;
     color: #c3c4c7 !important;
 }
 
-.sie-admin-layer-visibility:hover {
+.altegena-admin-layer-visibility:hover {
     color: #2271b1 !important;
 }
 
-.sie-admin-layer-item.sie-layer-hidden {
+.altegena-admin-layer-item.altegena-layer-hidden {
     opacity: 0.5;
 }
 
-.sie-admin-layer-item.sie-layer-hidden .sie-admin-layer-visibility {
+.altegena-admin-layer-item.altegena-layer-hidden .altegena-admin-layer-visibility {
     color: #d63638 !important;
 }
 
-.sie-admin-field-checkbox label {
+.altegena-admin-field-checkbox label {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -460,18 +460,18 @@
     cursor: pointer;
 }
 
-.sie-admin-field-checkbox input[type="checkbox"] {
+.altegena-admin-field-checkbox input[type="checkbox"] {
     margin: 0;
 }
 
-.sie-admin-add-layer-btn {
+.altegena-admin-add-layer-btn {
     width: 100%;
     margin-top: 6px;
     text-align: center;
 }
 
 /* Center Panel - Canvas Preview */
-.sie-admin-canvas-area {
+.altegena-admin-canvas-area {
     flex: 1;
     display: flex;
     align-items: center;
@@ -484,7 +484,7 @@
     position: relative;
 }
 
-.sie-admin-canvas {
+.altegena-admin-canvas {
     position: relative;
     background-size: 100% 100%;
     background-position: center;
@@ -494,7 +494,7 @@
     background-color: #fff;
 }
 
-.sie-admin-canvas-empty {
+.altegena-admin-canvas-empty {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -506,7 +506,7 @@
 }
 
 /* Canvas Layers */
-.sie-admin-layer {
+.altegena-admin-layer {
     position: absolute;
     cursor: move;
     white-space: pre;
@@ -517,17 +517,17 @@
     box-sizing: border-box;
 }
 
-.sie-admin-layer:hover {
+.altegena-admin-layer:hover {
     background-color: #cfc91820;
 }
 
-.sie-admin-layer.selected {
+.altegena-admin-layer.selected {
     background-color: #cfc91830;
     z-index: 100;
 }
 
 /* Right Panel - Layer Properties */
-.sie-admin-right-panel {
+.altegena-admin-right-panel {
     width: 300px;
     min-width: 300px;
     background: #fff;
@@ -537,25 +537,25 @@
     flex-direction: column;
 }
 
-.sie-admin-right-panel.hidden {
+.altegena-admin-right-panel.hidden {
     display: none;
 }
 
-.sie-admin-right-panel .sie-admin-panel-section h4 {
+.altegena-admin-right-panel .altegena-admin-panel-section h4 {
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
 /* Alignment Buttons */
-.sie-admin-align-buttons {
+.altegena-admin-align-buttons {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 4px;
 }
 
-.sie-align-btn,
-.sie-canvas-align-btn {
+.altegena-align-btn,
+.altegena-canvas-align-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -570,33 +570,33 @@
     transition: background 0.1s, color 0.1s;
 }
 
-.sie-align-btn:hover,
-.sie-canvas-align-btn:hover {
+.altegena-align-btn:hover,
+.altegena-canvas-align-btn:hover {
     background: #2271b1;
     border-color: #2271b1;
     color: #fff;
 }
 
-.sie-align-btn .dashicons,
-.sie-canvas-align-btn .dashicons {
+.altegena-align-btn .dashicons,
+.altegena-canvas-align-btn .dashicons {
     font-size: 16px;
     width: 16px;
     height: 16px;
     line-height: 16px;
 }
 
-.sie-align-btn .sie-rotate-90,
-.sie-canvas-align-btn .sie-rotate-90 {
+.altegena-align-btn .altegena-rotate-90,
+.altegena-canvas-align-btn .altegena-rotate-90 {
     transform: rotate(90deg);
 }
 
 /* Metin Hizalama Butonları */
-.sie-admin-text-align-buttons {
+.altegena-admin-text-align-buttons {
     display: flex;
     gap: 4px;
 }
 
-.sie-text-align-btn {
+.altegena-text-align-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -611,19 +611,19 @@
     transition: background 0.1s, color 0.1s, border-color 0.1s;
 }
 
-.sie-text-align-btn:hover {
+.altegena-text-align-btn:hover {
     background: #2271b1;
     border-color: #2271b1;
     color: #fff;
 }
 
-.sie-text-align-btn.active {
+.altegena-text-align-btn.active {
     background: #2271b1;
     border-color: #2271b1;
     color: #fff;
 }
 
-.sie-text-align-btn .dashicons {
+.altegena-text-align-btn .dashicons {
     font-size: 16px;
     width: 16px;
     height: 16px;
@@ -631,13 +631,13 @@
 }
 
 /* Properties Panel Specific */
-.sie-admin-prop-actions {
+.altegena-admin-prop-actions {
     display: flex;
     gap: 6px;
     margin-top: 12px;
 }
 
-.sie-admin-prop-actions .button {
+.altegena-admin-prop-actions .button {
     flex: 1;
     text-align: center;
     font-size: 12px !important;
@@ -646,25 +646,25 @@
     line-height: 26px !important;
 }
 
-.sie-admin-prop-actions .button-link-delete {
+.altegena-admin-prop-actions .button-link-delete {
     color: #d63638;
 }
 
-.sie-admin-prop-actions .button-link-delete:hover {
+.altegena-admin-prop-actions .button-link-delete:hover {
     color: #a00;
 }
 
 /* Color Picker Integration */
-.sie-admin-field .wp-picker-container {
+.altegena-admin-field .wp-picker-container {
     display: block;
 }
 
-.sie-admin-field .wp-picker-container .wp-color-result {
+.altegena-admin-field .wp-picker-container .wp-color-result {
     margin: 0;
 }
 
 /* No Selection State */
-.sie-admin-no-selection {
+.altegena-admin-no-selection {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -677,12 +677,12 @@
 
 /* Responsive: Stack panels vertically */
 @media screen and (max-width: 1400px) {
-    .sie-admin-editor {
+    .altegena-admin-editor {
         flex-wrap: wrap;
         min-height: auto;
     }
 
-    .sie-admin-left-panel {
+    .altegena-admin-left-panel {
         width: 100%;
         min-width: 0;
         border-right: none;
@@ -690,19 +690,19 @@
         max-height: 300px;
     }
 
-    .sie-admin-canvas-area {
+    .altegena-admin-canvas-area {
         width: 100%;
         min-height: 400px;
     }
 
-    .sie-admin-right-panel {
+    .altegena-admin-right-panel {
         width: 100%;
         min-width: 0;
         border-left: none;
         border-top: 1px solid #c3c4c7;
     }
 
-    .sie-admin-right-panel.hidden {
+    .altegena-admin-right-panel.hidden {
         display: none;
     }
 }

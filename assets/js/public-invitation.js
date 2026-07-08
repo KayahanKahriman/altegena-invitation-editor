@@ -9,30 +9,30 @@
      * page matches the captured PNG pixel-for-pixel. Key difference: other people's
      * text is rendered, so it is HTML-escaped (with \n -> <br>) instead of using .text().
      */
-    const SIE_Public = {
+    const Altegena_Public = {
         config: null,
         stage: null,
         canvas: null,
         scaleFactor: 1,
 
         init: function () {
-            if (typeof sie_share === 'undefined' || !sie_share.config) return;
+            if (typeof altegena_share === 'undefined' || !altegena_share.config) return;
 
             try {
-                this.config = (typeof sie_share.config === 'string')
-                    ? JSON.parse(sie_share.config)
-                    : sie_share.config;
+                this.config = (typeof altegena_share.config === 'string')
+                    ? JSON.parse(altegena_share.config)
+                    : altegena_share.config;
             } catch (e) {
-                console.error('SIE Public: invalid config', e);
+                console.error('Altegena Public: invalid config', e);
                 return;
             }
             if (!this.config || !this.config.canvas || !Array.isArray(this.config.layers)) return;
 
-            this.stage = $('.sie-public-stage');
+            this.stage = $('.altegena-public-stage');
             if (!this.stage.length) return;
 
-            // The #sie-public-app wrapper only holds the <noscript> fallback; replace it.
-            $('#sie-public-app').remove();
+            // The #altegena-public-app wrapper only holds the <noscript> fallback; replace it.
+            $('#altegena-public-app').remove();
 
             this.buildCanvas();
             this.renderLayers();
@@ -48,7 +48,7 @@
 
         buildCanvas: function () {
             const bg = this.config.canvas.bg_image || '';
-            this.canvas = $('<div>', { class: 'sie-canvas' }).css({
+            this.canvas = $('<div>', { class: 'altegena-canvas' }).css({
                 'background-image': bg ? "url('" + bg + "')" : 'none'
             });
             this.stage.append(this.canvas);
@@ -86,8 +86,8 @@
             style.transform = transform;
 
             const $el = $('<div>', {
-                class: 'sie-layer sie-layer--readonly',
-                id: 'sie-layer-' + layer.id
+                class: 'altegena-layer altegena-layer--readonly',
+                id: 'altegena-layer-' + layer.id
             }).css(style);
 
             // Escape (rendering another user's text) then honor line breaks.
@@ -130,11 +130,11 @@
         },
 
         wireShareButton: function () {
-            const $btn = $('#sie-public-share');
+            const $btn = $('#altegena-public-share');
             if (!$btn.length) return;
 
-            const pageUrl = (sie_share.page_url) || window.location.href;
-            const waText = (sie_share.wa_text) || 'Davetiyemize göz atın:';
+            const pageUrl = (altegena_share.page_url) || window.location.href;
+            const waText = (altegena_share.wa_text) || 'Davetiyemize göz atın:';
 
             // Progressive enhancement: use the native share sheet when available,
             // otherwise fall back to the static wa.me href already on the anchor.
@@ -161,7 +161,7 @@
     };
 
     $(document).ready(function () {
-        SIE_Public.init();
+        Altegena_Public.init();
     });
 
 })(jQuery);
