@@ -1,10 +1,15 @@
 <?php
 /**
  * Plugin Name: Altegena Invitation Editor
+ * Plugin URI: https://github.com/KayahanKahriman/altegena-invitation-editor
  * Description: A lightweight, DOM-based invitation editor for WooCommerce with WhatsApp sharing.
  * Version: 1.2.0
  * Author: Kayahan
+ * Author URI: https://github.com/KayahanKahriman
  * Text Domain: altegena-invitation-editor
+ * Requires at least: 6.0
+ * Requires PHP: 7.4
+ * License: MIT
  */
 
 if (!defined('ABSPATH')) {
@@ -112,3 +117,14 @@ register_activation_hook(__FILE__, function () {
 });
 
 Altegena_Invitation_Editor::get_instance();
+
+// GitHub-based automatic updates: WordPress checks the plugin repo's releases
+// and offers a one-click update when a newer tagged release is published.
+require_once ALTEGENA_PLUGIN_DIR . 'includes/plugin-update-checker/plugin-update-checker.php';
+$altegena_update_checker = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+	'https://github.com/KayahanKahriman/altegena-invitation-editor/',
+	ALTEGENA_PLUGIN_FILE,
+	'altegena-invitation-editor'
+);
+// Prefer stable GitHub releases; fall back to tags, then the main branch.
+$altegena_update_checker->setBranch('main');

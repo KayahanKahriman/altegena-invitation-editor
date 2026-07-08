@@ -1,0 +1,5 @@
+# Exclude development-only files from distributed release archives (git archive / GitHub zips).
+/.claude/ export-ignore
+/.gitignore export-ignore
+/.gitattributes export-ignore
+/CLAUDE.md export-ignore
