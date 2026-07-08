@@ -55,6 +55,7 @@ class SIE_Cart_Handler
         echo '<div class="sie-modal-header">';
         echo '<h2>Tasarımcı</h2>';
         echo '<button type="button" id="sie-add-to-cart-btn" class="sie-add-to-cart-btn">Sepete Ekle</button>';
+        echo '<button type="button" id="sie-share-btn" class="sie-share-btn">WhatsApp\'ta Paylaş</button>';
         echo '<button type="button" id="close-card-designer" class="sie-close-btn">&times;</button>';
         echo '</div>';
         echo '<div id="sie-editor-app"></div>';

@@ -1,0 +1,100 @@
+/* Simple Invitation Editor - Public shared invitation page */
+
+html,
+body.sie-public-page {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 100%;
+    background: #1c1c1c;
+}
+
+/* Full-viewport stage that centers the card. padding here MUST match the
+   `pad` constant in public-invitation.js (40 desktop / 20 mobile). */
+.sie-public-stage {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: safe center;
+    justify-content: safe center;
+    overflow: auto;
+    padding: 40px;
+    box-sizing: border-box;
+    background: #1c1c1c;
+}
+
+/* Base canvas + layer rules duplicated from editor.css so the public page
+   does not depend on the editor stylesheet. Interactive states are omitted. */
+.sie-canvas {
+    position: relative;
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+    flex-shrink: 0;
+}
+
+.sie-layer {
+    position: absolute;
+    white-space: pre;
+    overflow: visible;
+    outline: none;
+}
+
+.sie-layer--readonly {
+    cursor: default;
+    user-select: text;
+}
+
+.sie-public-fallback-img {
+    max-width: 100%;
+    height: auto;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Floating WhatsApp share button */
+.sie-public-share {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #25D366;
+    color: #ffffff;
+    text-decoration: none;
+    border: none;
+    border-radius: 28px;
+    padding: 14px 22px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.sie-public-share:hover {
+    background: #1ebe5b;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
+.sie-public-share-icon {
+    display: inline-flex;
+    align-items: center;
+}
+
+@media (max-width: 900px) {
+    .sie-public-stage {
+        padding: 20px;
+    }
+
+    .sie-public-share {
+        bottom: 16px;
+        right: 16px;
+        padding: 12px 18px;
+        font-size: 14px;
+    }
+}

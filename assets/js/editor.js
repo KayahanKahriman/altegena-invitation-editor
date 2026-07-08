@@ -286,6 +286,11 @@
                     }
                 });
             });
+
+            // Share Button (event delegation since modal is moved to body)
+            $(document).on('click', '#sie-share-btn', function () {
+                self.shareHandler($(this));
+            });
         },
 
 
@@ -400,6 +405,214 @@
                     });
                 });
             }
+        },
+
+        /* ------------------------------------------------------------------
+         * WhatsApp Share
+         * ---------------------------------------------------------------- */
+
+        // Text-only map, same shape as #sie-custom-data ({id:{label,text,fontFamily}}).
+        // The server merges this into the trusted product template.
+        buildTextMap: function () {
+            const data = {};
+            this.config.layers.forEach(layer => {
+                const $group = $(`.sie-input-group[data-layer-id="${layer.id}"]`);
+                const text = $group.find('.sie-layer-input').val();
+                data[layer.id] = {
+                    label: layer.label,
+                    text: text !== undefined ? text : (layer.default_text || ''),
+                    fontFamily: layer.style.fontFamily
+                };
+            });
+            return data;
+        },
+
+        // Wait for the specific custom fonts used by the layers so the PNG does
+        // not capture the swap fallback (fonts.css uses font-display: swap).
+        waitForFonts: function () {
+            if (!document.fonts || !document.fonts.ready) return Promise.resolve();
+
+            const families = [];
+            this.config.layers.forEach(layer => {
+                const fam = layer.style && layer.style.fontFamily;
+                if (fam && families.indexOf(fam) === -1) families.push(fam);
+            });
+
+            return document.fonts.ready.then(() => {
+                const missing = families.filter(f => {
+                    try { return !document.fonts.check("1em '" + f + "'"); }
+                    catch (e) { return false; }
+                });
+                if (!missing.length) return;
+                return Promise.race([
+                    Promise.all(missing.map(f => document.fonts.load("1em '" + f + "'").catch(() => { }))),
+                    new Promise(resolve => setTimeout(resolve, 1500))
+                ]);
+            });
+        },
+
+        // Capture the card at native resolution. The live .sie-canvas carries a
+        // transform: scale() from fitCanvas(), which html2canvas does not honor
+        // reliably, so we capture an un-scaled off-screen clone instead.
+        captureCard: function () {
+            const self = this;
+            const baseW = this.config.canvas.width;
+            const baseH = this.config.canvas.height;
+
+            return this.waitForFonts().then(() => {
+                const clone = self.preview[0].cloneNode(true);
+                clone.style.transform = 'none';
+                clone.style.margin = '0';
+                clone.style.width = baseW + 'px';
+                clone.style.height = baseH + 'px';
+                clone.style.boxShadow = 'none';
+
+                const host = document.createElement('div');
+                host.style.cssText = 'position:fixed;left:-100000px;top:0;width:' + baseW + 'px;height:' + baseH + 'px;overflow:hidden;';
+                host.appendChild(clone);
+                document.body.appendChild(host);
+
+                return html2canvas(clone, {
+                    backgroundColor: null,
+                    scale: 1,
+                    width: baseW,
+                    height: baseH,
+                    windowWidth: baseW,
+                    windowHeight: baseH,
+                    useCORS: true,
+                    logging: false
+                }).then(canvas => {
+                    document.body.removeChild(host);
+                    return canvas.toDataURL('image/png');
+                }).catch(err => {
+                    if (host.parentNode) document.body.removeChild(host);
+                    throw err;
+                });
+            });
+        },
+
+        shareHandler: function ($btn) {
+            const self = this;
+            if ($btn.hasClass('sie-loading')) return;
+
+            if (typeof html2canvas === 'undefined') {
+                alert('Paylaşım aracı yüklenemedi. Lütfen sayfayı yenileyin.');
+                return;
+            }
+
+            const originalText = $btn.text();
+            $btn.addClass('sie-loading').text('Hazırlanıyor...').prop('disabled', true);
+
+            self.updateHiddenInput();
+            const textMap = self.buildTextMap();
+
+            self.captureCard().then(imageDataUrl => {
+                return $.ajax({
+                    url: sie_config.ajax_url,
+                    type: 'POST',
+                    data: {
+                        action: sie_config.share_action,
+                        nonce: sie_config.share_nonce,
+                        product_id: sie_config.product_id,
+                        custom_data: JSON.stringify(textMap),
+                        image: imageDataUrl
+                    }
+                }).then(res => {
+                    if (!res || !res.success || !res.data || !res.data.url) {
+                        throw new Error('bad response');
+                    }
+                    self.showShareDialog({
+                        url: res.data.url,
+                        imageUrl: res.data.image_url,
+                        imageDataUrl: imageDataUrl
+                    });
+                });
+            }).catch(err => {
+                console.error('SIE share error', err);
+                alert('Paylaşım oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
+            }).then(() => {
+                $btn.removeClass('sie-loading').text(originalText).prop('disabled', false);
+            });
+        },
+
+        showShareDialog: function (opts) {
+            const message = 'Davetiyemize göz atın:';
+            const waHref = 'https://wa.me/?text=' + encodeURIComponent(message + ' ' + opts.url);
+
+            $('.sie-share-overlay').remove();
+
+            const $overlay = $(`
+                <div class="sie-share-overlay">
+                    <div class="sie-share-dialog" role="dialog" aria-label="Paylaş">
+                        <button type="button" class="sie-share-close" aria-label="Kapat">&times;</button>
+                        <h3>Davetiyeni Paylaş</h3>
+                        <img class="sie-share-preview" alt="Davetiye">
+                        <div class="sie-share-actions">
+                            <a class="sie-share-action sie-wa-link" target="_blank" rel="noopener">WhatsApp'ta bağlantı gönder</a>
+                            <button type="button" class="sie-share-action sie-wa-image">Görseli paylaş</button>
+                            <button type="button" class="sie-share-action sie-copy-link">Bağlantıyı kopyala</button>
+                            <a class="sie-share-action sie-download-img" download="davetiye.png">Görseli indir</a>
+                        </div>
+                    </div>
+                </div>
+            `);
+
+            $overlay.find('.sie-share-preview').attr('src', opts.imageUrl || opts.imageDataUrl);
+            $overlay.find('.sie-wa-link').attr('href', waHref);
+            $overlay.find('.sie-download-img').attr('href', opts.imageDataUrl);
+
+            // Image share via Web Share API (mobile). Hide when unsupported.
+            const $imgBtn = $overlay.find('.sie-wa-image');
+            let shareFile = null;
+            try {
+                const bstr = atob(opts.imageDataUrl.split(',')[1]);
+                let n = bstr.length;
+                const u8 = new Uint8Array(n);
+                while (n--) u8[n] = bstr.charCodeAt(n);
+                shareFile = new File([u8], 'davetiye.png', { type: 'image/png' });
+            } catch (e) { shareFile = null; }
+
+            if (shareFile && navigator.canShare && navigator.canShare({ files: [shareFile] })) {
+                $imgBtn.on('click', function () {
+                    navigator.share({
+                        files: [shareFile],
+                        title: 'Davetiye',
+                        text: message + ' ' + opts.url
+                    }).catch(function () { /* cancelled/unsupported */ });
+                });
+            } else {
+                $imgBtn.remove();
+            }
+
+            // Copy link
+            $overlay.find('.sie-copy-link').on('click', function () {
+                const $b = $(this);
+                const restore = $b.text();
+                const done = function () { $b.text('Kopyalandı ✓'); setTimeout(() => $b.text(restore), 1500); };
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(opts.url).then(done).catch(done);
+                } else {
+                    const $tmp = $('<input>').val(opts.url).appendTo('body').select();
+                    try { document.execCommand('copy'); } catch (e) { }
+                    $tmp.remove();
+                    done();
+                }
+            });
+
+            // Close interactions
+            const close = function () {
+                $(document).off('keydown.sie-share');
+                $overlay.remove();
+            };
+            $overlay.find('.sie-share-close').on('click', close);
+            $overlay.on('click', function (e) {
+                if (e.target === this) close();
+            });
+            $(document).on('keydown.sie-share', function (e) {
+                if (e.key === 'Escape') close();
+            });
+
+            $('#card-designer').append($overlay);
         }
     };
 
