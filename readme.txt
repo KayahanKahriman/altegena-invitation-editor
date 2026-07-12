@@ -36,3 +36,5 @@ usual "update available" notice when a newer release is tagged.
 
 = 1.0.0 =
 * Initial release: visual invitation editor + WooCommerce cart/order integration.
+
+Specially made for www.davetiyemakinesi.com
