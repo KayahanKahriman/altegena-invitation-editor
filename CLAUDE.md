@@ -5,7 +5,7 @@
 A lightweight, DOM-based invitation card editor for WooCommerce. Customers can customize text layers on invitation card templates directly on the product page before adding to cart, or share the finished card via WhatsApp. The customized text data flows through the WooCommerce cart and order system.
 
 **Author:** Kayahan
-**Version:** 1.2.0
+**Version:** 1.2.1
 **Text Domain:** `altegena-invitation-editor`
 **Constants prefix:** `ALTEGENA_`
 **UI Language:** Turkish (button labels, error messages)

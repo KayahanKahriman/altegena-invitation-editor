@@ -3,7 +3,7 @@ Contributors: kayahan
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -23,6 +23,11 @@ Updates are delivered from the plugin's GitHub repository — WordPress shows th
 usual "update available" notice when a newer release is tagged.
 
 == Changelog ==
+
+= 1.2.1 =
+* Fix: text typed directly on the invitation canvas now reaches the cart and share data, with line breaks preserved.
+* Fix: the editor's WhatsApp share dialog uses the share message from Settings instead of a hardcoded one.
+* Fix: in the admin visual editor, the Delete key and "Sil" button remove all selected layers (confirmation shows the count).
 
 = 1.2.0 =
 * Decouple from theme: extension API (filters + admin settings page + CSS variables).
