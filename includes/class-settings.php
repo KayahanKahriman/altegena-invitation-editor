@@ -58,6 +58,7 @@ class Altegena_Settings
             'share_message'     => '',
             'og_title'          => '',
             'og_description'    => '',
+            'print_default_line_height' => 1.55,
         );
     }
 
@@ -129,12 +130,31 @@ class Altegena_Settings
             '--altegena-share-dark'  => self::darken($share, 10),
         ));
 
+        // Not a color, so it is added after the altegena_colors filter.
+        $vars['--altegena-line-height'] = self::css_number(self::line_height());
+
         $out = ':root{';
         foreach ($vars as $k => $v) {
             $out .= $k . ':' . $v . ';';
         }
         $out .= '}';
         return $out;
+    }
+
+    /** Unitless line-height for layers without their own (editor, share page and print PDF). */
+    public static function line_height()
+    {
+        $value = (float) self::get('print_default_line_height', 1.55);
+        if ($value <= 0 || $value > 5) {
+            $value = 1.55;
+        }
+        return (float) apply_filters('altegena_default_line_height', $value);
+    }
+
+    /** Locale-independent number formatting for CSS output. */
+    private static function css_number($value)
+    {
+        return rtrim(rtrim(sprintf('%.4F', (float) $value), '0'), '.');
     }
 
     /** Darken a hex color by an absolute amount (percent of 255). */
@@ -196,6 +216,9 @@ class Altegena_Settings
             $out[$tk] = isset($input[$tk]) ? sanitize_text_field($input[$tk]) : '';
         }
 
+        $line_height = isset($input['print_default_line_height']) ? (float) str_replace(',', '.', (string) $input['print_default_line_height']) : 0;
+        $out['print_default_line_height'] = ($line_height > 0 && $line_height <= 5) ? round($line_height, 3) : $d['print_default_line_height'];
+
         return $out;
     }
 
@@ -231,9 +254,22 @@ class Altegena_Settings
                 esc_html($desc)
             );
         };
+        $tab = (isset($_GET['tab']) && $_GET['tab'] === 'fonts') ? 'fonts' : 'general';
+        $page_url = admin_url('options-general.php?page=' . self::MENU_SLUG);
         ?>
         <div class="wrap">
             <h1>Altegena Davetiye Ayarları</h1>
+            <nav class="nav-tab-wrapper">
+                <a href="<?php echo esc_url($page_url); ?>" class="nav-tab<?php echo $tab === 'general' ? ' nav-tab-active' : ''; ?>">Genel</a>
+                <a href="<?php echo esc_url(add_query_arg('tab', 'fonts', $page_url)); ?>" class="nav-tab<?php echo $tab === 'fonts' ? ' nav-tab-active' : ''; ?>">Font denetimi</a>
+            </nav>
+            <?php
+            if ($tab === 'fonts') {
+                Altegena_Print_Font_Audit::get_instance()->render();
+                echo '</div>';
+                return;
+            }
+            ?>
             <form method="post" action="options.php">
                 <?php settings_fields(self::GROUP); ?>
                 <table class="form-table" role="presentation">
@@ -260,6 +296,12 @@ class Altegena_Settings
                         <th scope="row"><label for="altegena-share">WhatsApp buton rengi</label></th>
                         <td><input type="text" id="altegena-share" class="altegena-color-field" name="<?php echo esc_attr(self::OPTION); ?>[share_color]" value="<?php echo esc_attr($o['share_color']); ?>" data-default-color="#25D366" />
                             <p class="description">Paylaş butonlarının rengi.</p></td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row"><label for="altegena-line-height">Varsayılan satır yüksekliği</label></th>
+                        <td><input type="number" step="0.01" min="0.1" max="5" id="altegena-line-height" class="small-text" name="<?php echo esc_attr(self::OPTION); ?>[print_default_line_height]" value="<?php echo esc_attr(self::css_number($o['print_default_line_height'])); ?>" />
+                            <p class="description">Kendi satır yüksekliği olmayan katmanlarda kullanılır. Editör, paylaşım sayfası ve baskı PDF'i aynı değeri kullanır (varsayılan: 1.55).</p></td>
                     </tr>
 
                     <?php

@@ -3,7 +3,7 @@
  * Plugin Name: Altegena Invitation Editor
  * Plugin URI: https://github.com/KayahanKahriman/altegena-invitation-editor
  * Description: A lightweight, DOM-based invitation editor for WooCommerce with WhatsApp sharing.
- * Version: 1.2.1
+ * Version: 1.3.0
  * Author: Kayahan
  * Author URI: https://github.com/KayahanKahriman
  * Text Domain: altegena-invitation-editor
@@ -41,7 +41,7 @@ class Altegena_Invitation_Editor
 		define('ALTEGENA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 		define('ALTEGENA_PLUGIN_URL', plugin_dir_url(__FILE__));
 		define('ALTEGENA_PLUGIN_FILE', __FILE__);
-		define('ALTEGENA_VERSION', '1.2.1');
+		define('ALTEGENA_VERSION', '1.3.0');
 
 		// Share feature payload limits
 		define('ALTEGENA_SHARE_MAX_CONFIG_BYTES', 262144);   // 256 KB of layer text JSON
@@ -51,10 +51,16 @@ class Altegena_Invitation_Editor
 	private function includes()
 	{
 		require_once ALTEGENA_PLUGIN_DIR . 'includes/class-settings.php';
+		require_once ALTEGENA_PLUGIN_DIR . 'includes/class-design-config.php';
+		require_once ALTEGENA_PLUGIN_DIR . 'includes/print/class-print-text.php';
+		require_once ALTEGENA_PLUGIN_DIR . 'includes/print/class-print-font.php';
+		require_once ALTEGENA_PLUGIN_DIR . 'includes/print/class-print-font-registry.php';
 		require_once ALTEGENA_PLUGIN_DIR . 'includes/class-product-meta.php';
 		require_once ALTEGENA_PLUGIN_DIR . 'includes/class-cart-handler.php';
 		require_once ALTEGENA_PLUGIN_DIR . 'includes/class-product-page-handler.php';
 		require_once ALTEGENA_PLUGIN_DIR . 'includes/class-share-handler.php';
+		require_once ALTEGENA_PLUGIN_DIR . 'includes/class-print-order-handler.php';
+		require_once ALTEGENA_PLUGIN_DIR . 'includes/class-print-font-audit.php';
 	}
 
 	private function init_hooks()
@@ -67,6 +73,8 @@ class Altegena_Invitation_Editor
 		Altegena_Cart_Handler::get_instance();
 		Altegena_Product_Page_Handler::get_instance();
 		Altegena_Share_Handler::get_instance();
+		Altegena_Print_Order_Handler::get_instance();
+		Altegena_Print_Font_Audit::get_instance();
 	}
 
 	public function enqueue_scripts()
@@ -118,6 +126,13 @@ register_activation_hook(__FILE__, function () {
 });
 
 Altegena_Invitation_Editor::get_instance();
+
+// Declare WooCommerce HPOS (custom order tables) compatibility: order data is only touched through WC CRUD.
+add_action('before_woocommerce_init', function () {
+	if (class_exists('\Automattic\WooCommerce\Utilities\FeaturesUtil')) {
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', ALTEGENA_PLUGIN_FILE, true);
+	}
+});
 
 // GitHub-based automatic updates: WordPress checks the plugin repo's releases
 // and offers a one-click update when a newer tagged release is published.

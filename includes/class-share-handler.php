@@ -22,7 +22,6 @@ class Altegena_Share_Handler
     // Abuse limits (fall back to sane defaults if constants are undefined).
     const RATE_LIMIT_MAX = 10;      // saves allowed per window, per IP
     const RATE_LIMIT_WINDOW = 600;  // window in seconds (10 minutes)
-    const MAX_TEXT_LENGTH = 2000;   // per layer text cap
     const MAX_IMAGE_W = 3000;
     const MAX_IMAGE_H = 4500;
 
@@ -215,35 +214,7 @@ class Altegena_Share_Handler
      */
     private function build_merged_config($product_id, $text_map)
     {
-        $raw = get_post_meta($product_id, '_invitation_json_config', true);
-        if (empty($raw)) {
-            return new WP_Error('bad_config', 'Şablon bulunamadı.');
-        }
-
-        $config = json_decode($raw, true);
-        if (!is_array($config) || !isset($config['canvas']) || !isset($config['layers']) || !is_array($config['layers'])) {
-            return new WP_Error('bad_config', 'Şablon geçersiz.');
-        }
-
-        foreach ($config['layers'] as &$layer) {
-            if (!isset($layer['id'])) {
-                continue;
-            }
-            $id = $layer['id'];
-            if (isset($text_map[$id]) && is_array($text_map[$id]) && isset($text_map[$id]['text'])) {
-                $text = (string) $text_map[$id]['text'];
-                $text = sanitize_textarea_field($text);
-                if (function_exists('mb_substr')) {
-                    $text = mb_substr($text, 0, self::MAX_TEXT_LENGTH);
-                } else {
-                    $text = substr($text, 0, self::MAX_TEXT_LENGTH);
-                }
-                $layer['default_text'] = $text;
-            }
-        }
-        unset($layer);
-
-        return $config;
+        return Altegena_Design_Config::merge($product_id, $text_map, array('Altegena_Design_Config', 'sanitize_share_text'));
     }
 
     /* ---------------------------------------------------------------------

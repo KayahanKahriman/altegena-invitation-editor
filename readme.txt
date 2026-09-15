@@ -3,7 +3,7 @@ Contributors: kayahan
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 1.3.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -23,6 +23,14 @@ Updates are delivered from the plugin's GitHub repository — WordPress shows th
 usual "update available" notice when a newer release is tagged.
 
 == Changelog ==
+
+= 1.3.0 =
+* Print groundwork: every invitation order item now stores an immutable design snapshot (template layout plus the text the customer saw) for print-ready PDFs.
+* Product editor: print size in mm (ratio lock), optional high-resolution print background, and DPI/aspect-ratio checks.
+* New Settings > Altegena Davetiye > Font denetimi tab. It lists template layers whose font has no file, applies safe spelling-only fixes, and reports missing Turkish characters per font.
+* The admin font list only offers bundled fonts (no system fonts, since print never falls back to another font).
+* The default layer line-height is now a setting (1.55) pinned on the canvas, so the editor, share page and admin preview render identically.
+* Cart text is sanitized without trimming (visible spaces and blank lines are kept). WooCommerce HPOS compatibility is declared.
 
 = 1.2.1 =
 * Fix: text typed directly on the invitation canvas now reaches the cart and share data, with line breaks preserved.

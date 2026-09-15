@@ -129,11 +129,44 @@ class Altegena_Cart_Handler
 
     public function add_cart_item_data($cart_item_data, $product_id, $variation_id)
     {
-        if (isset($_POST['altegena_custom_data']) && !empty($_POST['altegena_custom_data'])) {
-            $custom_data = json_decode(stripslashes($_POST['altegena_custom_data']), true);
-            if ($custom_data) {
-                $cart_item_data['altegena_design_data'] = $custom_data;
+        if (empty($_POST['altegena_custom_data']) || !is_string($_POST['altegena_custom_data'])) {
+            return $cart_item_data;
+        }
+
+        $raw = wp_unslash($_POST['altegena_custom_data']);
+        if (strlen($raw) > 262144) {
+            return $cart_item_data;
+        }
+
+        $custom_data = json_decode($raw, true);
+        if (!is_array($custom_data)) {
+            return $cart_item_data;
+        }
+
+        // Keep only the known string fields. Text uses the print sanitizer (no trimming),
+        // because leading/trailing spaces and blank lines are visible on the card.
+        $clean = array();
+        foreach ($custom_data as $layer_id => $layer_info) {
+            $layer_id = preg_replace('/[^A-Za-z0-9_-]/', '', (string) $layer_id);
+            if ($layer_id === '' || !is_array($layer_info) || count($clean) >= 200) {
+                continue;
             }
+
+            $entry = array();
+            if (isset($layer_info['label']) && is_scalar($layer_info['label'])) {
+                $entry['label'] = sanitize_text_field((string) $layer_info['label']);
+            }
+            if (isset($layer_info['text']) && is_scalar($layer_info['text'])) {
+                $entry['text'] = Altegena_Print_Text::sanitize((string) $layer_info['text']);
+            }
+            if (isset($layer_info['fontFamily']) && is_scalar($layer_info['fontFamily'])) {
+                $entry['fontFamily'] = sanitize_text_field((string) $layer_info['fontFamily']);
+            }
+            $clean[$layer_id] = $entry;
+        }
+
+        if ($clean) {
+            $cart_item_data['altegena_design_data'] = $clean;
         }
         return $cart_item_data;
     }

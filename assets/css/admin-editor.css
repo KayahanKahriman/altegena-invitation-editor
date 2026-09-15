@@ -271,6 +271,62 @@
     background: #d63638;
 }
 
+/* Print settings (mm size, print background, DPI notes) */
+.altegena-admin-print-bg-preview {
+    margin-top: 6px;
+    position: relative;
+}
+
+.altegena-admin-print-bg-preview img {
+    max-width: 100%;
+    max-height: 80px;
+    border: 1px solid #c3c4c7;
+    border-radius: 3px;
+    display: block;
+}
+
+.altegena-admin-print-bg-remove {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 14px;
+    line-height: 18px;
+    text-align: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+.altegena-admin-print-bg-remove:hover {
+    background: #d63638;
+}
+
+.altegena-print-note {
+    margin: 6px 0 0;
+    padding: 4px 8px;
+    border-left: 3px solid #c3c4c7;
+    background: #f6f7f7;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.altegena-print-note.is-green {
+    border-left-color: #00a32a;
+}
+
+.altegena-print-note.is-amber {
+    border-left-color: #dba617;
+}
+
+.altegena-print-note.is-red {
+    border-left-color: #d63638;
+}
+
 /* Layer List */
 .altegena-admin-layer-list {
     list-style: none;
@@ -486,6 +542,8 @@
 
 .altegena-admin-canvas {
     position: relative;
+    /* Same pinned default as the customer editor; wp-admin's own line-height must not leak in. */
+    line-height: var(--altegena-line-height, 1.55);
     background-size: 100% 100%;
     background-position: center;
     background-repeat: no-repeat;

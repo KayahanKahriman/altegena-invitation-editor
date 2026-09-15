@@ -337,6 +337,8 @@ body.admin-bar #card-designer.altegena-modal {
 /* Canvas (sized by JS to maintain exact aspect ratio from JSON config) */
 .altegena-canvas {
     position: relative;
+    /* Pinned here (not inherited from the theme) so the editor, share page and print PDF agree. */
+    line-height: var(--altegena-line-height, 1.55);
     background-size: 100% 100%;
     background-position: center;
     background-repeat: no-repeat;
