@@ -3,7 +3,7 @@ Contributors: kayahan
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -23,6 +23,13 @@ Updates are delivered from the plugin's GitHub repository — WordPress shows th
 usual "update available" notice when a newer release is tagged.
 
 == Changelog ==
+
+= 1.4.0 =
+* Print-ready PDFs: after payment, every invitation order item gets two PDFs at the product's physical size — "konturlu" (text as vector outlines) and "metinli" (selectable text with embedded fonts).
+* Pure-PHP print engine (no Chromium/Ghostscript/Imagick, works on shared hosting): browser-identical layout, OpenType shaping (Turkish locl, ligatures, kerning), synthetic bold/italic, rotation, letter spacing, print background with DPI checks. No fallback fonts: a missing font or glyph stops that item with a clear reason.
+* Order screen box "Davetiye baskı PDF'leri": download, regenerate, and correct layer texts before printing (the customer's original text is kept); "Baskı PDF" column in the orders list.
+* Generation runs in the background (Action Scheduler) with retries; PDFs are stored in a protected folder and downloaded through wp-admin only.
+* WP-CLI: `wp altegena print-proof <product_id>` renders proof PDFs for a template.
 
 = 1.3.0 =
 * Print groundwork: every invitation order item now stores an immutable design snapshot (template layout plus the text the customer saw) for print-ready PDFs.

@@ -1,0 +1,133 @@
+/* Altegena print PDFs: order meta box and orders list column */
+
+.altegena-print-item {
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    padding: 12px;
+    margin: 0 0 12px;
+    background: #fff;
+}
+
+.altegena-print-item.is-busy {
+    opacity: 0.6;
+}
+
+.altegena-print-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.altegena-print-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.6;
+    background: #f0f0f1;
+    color: #50575e;
+}
+
+.altegena-print-badge.is-done {
+    background: #edfaef;
+    color: #007017;
+}
+
+.altegena-print-badge.is-warning {
+    background: #fcf9e8;
+    color: #8a6100;
+}
+
+.altegena-print-badge.is-failed {
+    background: #fcf0f1;
+    color: #b32d2e;
+}
+
+.altegena-print-badge.is-queued,
+.altegena-print-badge.is-running {
+    background: #f0f6fc;
+    color: #135e96;
+}
+
+.altegena-print-meta {
+    color: #646970;
+    font-size: 12px;
+}
+
+.altegena-print-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin: 10px 0;
+}
+
+.altegena-print-actions .spinner,
+.altegena-print-save-row .spinner {
+    float: none;
+    margin: 0;
+}
+
+.altegena-print-item .notice.inline {
+    margin: 8px 0;
+}
+
+.altegena-print-item .notice ul {
+    margin: 6px 0;
+    padding-left: 16px;
+    list-style: disc;
+}
+
+.altegena-print-texts summary {
+    cursor: pointer;
+    font-weight: 600;
+    margin: 8px 0;
+}
+
+.altegena-print-text-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.altegena-print-text-table th {
+    text-align: left;
+    width: 180px;
+    vertical-align: top;
+    padding: 8px 8px 8px 0;
+    font-weight: 500;
+}
+
+.altegena-print-text-table td {
+    padding: 6px 0;
+}
+
+.altegena-print-text-table textarea {
+    width: 100%;
+    white-space: pre;
+}
+
+.altegena-print-text-table .altegena-print-section th {
+    padding-top: 14px;
+    color: #646970;
+    text-transform: uppercase;
+    font-size: 11px;
+}
+
+.altegena-print-original {
+    margin: 4px 0 0;
+    color: #646970;
+    font-size: 12px;
+    white-space: pre-wrap;
+}
+
+.altegena-print-save-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.altegena-print-column {
+    color: #a7aaad;
+}

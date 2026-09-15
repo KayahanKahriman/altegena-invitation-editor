@@ -3,7 +3,7 @@
  * Plugin Name: Altegena Invitation Editor
  * Plugin URI: https://github.com/KayahanKahriman/altegena-invitation-editor
  * Description: A lightweight, DOM-based invitation editor for WooCommerce with WhatsApp sharing.
- * Version: 1.3.0
+ * Version: 1.4.0
  * Author: Kayahan
  * Author URI: https://github.com/KayahanKahriman
  * Text Domain: altegena-invitation-editor
@@ -41,7 +41,7 @@ class Altegena_Invitation_Editor
 		define('ALTEGENA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 		define('ALTEGENA_PLUGIN_URL', plugin_dir_url(__FILE__));
 		define('ALTEGENA_PLUGIN_FILE', __FILE__);
-		define('ALTEGENA_VERSION', '1.3.0');
+		define('ALTEGENA_VERSION', '1.4.0');
 
 		// Share feature payload limits
 		define('ALTEGENA_SHARE_MAX_CONFIG_BYTES', 262144);   // 256 KB of layer text JSON
@@ -55,11 +55,22 @@ class Altegena_Invitation_Editor
 		require_once ALTEGENA_PLUGIN_DIR . 'includes/print/class-print-text.php';
 		require_once ALTEGENA_PLUGIN_DIR . 'includes/print/class-print-font.php';
 		require_once ALTEGENA_PLUGIN_DIR . 'includes/print/class-print-font-registry.php';
+		require_once ALTEGENA_PLUGIN_DIR . 'includes/print/class-print-shaper.php';
+		require_once ALTEGENA_PLUGIN_DIR . 'includes/print/class-print-layout.php';
+		require_once ALTEGENA_PLUGIN_DIR . 'includes/print/class-print-pdf-writer.php';
+		require_once ALTEGENA_PLUGIN_DIR . 'includes/print/class-print-outline-emitter.php';
+		require_once ALTEGENA_PLUGIN_DIR . 'includes/print/class-print-text-emitter.php';
+		require_once ALTEGENA_PLUGIN_DIR . 'includes/print/class-print-generator.php';
+		if (defined('WP_CLI') && WP_CLI) {
+			require_once ALTEGENA_PLUGIN_DIR . 'includes/print/class-print-cli.php';
+		}
 		require_once ALTEGENA_PLUGIN_DIR . 'includes/class-product-meta.php';
 		require_once ALTEGENA_PLUGIN_DIR . 'includes/class-cart-handler.php';
 		require_once ALTEGENA_PLUGIN_DIR . 'includes/class-product-page-handler.php';
 		require_once ALTEGENA_PLUGIN_DIR . 'includes/class-share-handler.php';
+		require_once ALTEGENA_PLUGIN_DIR . 'includes/class-print-storage.php';
 		require_once ALTEGENA_PLUGIN_DIR . 'includes/class-print-order-handler.php';
+		require_once ALTEGENA_PLUGIN_DIR . 'includes/class-print-admin.php';
 		require_once ALTEGENA_PLUGIN_DIR . 'includes/class-print-font-audit.php';
 	}
 
@@ -74,6 +85,7 @@ class Altegena_Invitation_Editor
 		Altegena_Product_Page_Handler::get_instance();
 		Altegena_Share_Handler::get_instance();
 		Altegena_Print_Order_Handler::get_instance();
+		Altegena_Print_Admin::get_instance();
 		Altegena_Print_Font_Audit::get_instance();
 	}
 

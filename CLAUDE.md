@@ -2,10 +2,14 @@
 
 ## Overview
 
-A lightweight, DOM-based invitation card editor for WooCommerce. Customers can customize text layers on invitation card templates directly on the product page before adding to cart, or share the finished card via WhatsApp. The customized text data flows through the WooCommerce cart and order system, and every order item keeps an immutable design snapshot for print-ready PDF generation (PDF engine in progress).
+A lightweight, DOM-based invitation card editor for WooCommerce. Customers customize text layers on invitation card templates directly on the product page, then add to cart or share the finished card via WhatsApp. The customized text flows through the WooCommerce cart and order system.
+
+When an order is paid, the plugin renders two print-ready PDFs per invitation item and shows them on the admin order screen:
+- **Konturlu:** text converted to vector outlines.
+- **Metinli:** selectable text with embedded fonts.
 
 **Author:** Kayahan
-**Version:** 1.3.0
+**Version:** 1.4.0
 **Text Domain:** `altegena-invitation-editor`
 **Constants prefix:** `ALTEGENA_`
 **UI Language:** Turkish (button labels, error messages)
@@ -13,11 +17,12 @@ A lightweight, DOM-based invitation card editor for WooCommerce. Customers can c
 ## Architecture
 
 ### Design Philosophy
-- **No canvas editing** - Uses pure DOM elements (divs with `contenteditable`) positioned absolutely over a background image via CSS. Orders store text data plus a layout snapshot. A PNG is rendered client-side (html2canvas) solely for the WhatsApp share feature.
+- **No canvas editing** - Uses pure DOM elements (divs with `contenteditable`) positioned absolutely over a background image via CSS. A PNG is rendered client-side (html2canvas) solely for the WhatsApp share feature.
 - **JSON-driven configuration** - Each invitation product stores its entire design layout as a JSON blob in post meta. The JSON defines the canvas size, background image, print size and text layers with their positions/styles.
-- **Singleton pattern** - Hook-owning PHP classes use `get_instance()` singletons.
-- **No build step** - Plain jQuery-based JS, no bundler/transpiler.
-- **No fallback fonts for print** - Every layer is printed with its own bundled font file. A missing family, file or glyph is an error, never a silent substitution.
+- **Singleton pattern** - Hook-owning PHP classes use `get_instance()` singletons; print engine classes are plain classes.
+- **No build step** - Plain jQuery-based JS, no bundler/transpiler. No composer: the print engine is dependency-free PHP (runs on shared hosting without Chromium/Ghostscript/Imagick).
+- **No fallback fonts for print** - Every layer is printed with its own bundled font file. A missing family, file or glyph is an error that blocks that item's PDF, never a silent substitution.
+- **Print = what the customer saw** - The print layout reproduces the browser's CSS layout and HarfBuzz shaping (verified against Chrome and HarfBuzz, see Development Notes).
 
 ### Data Flow
 ```
@@ -31,6 +36,11 @@ Add to cart (AJAX) --> `altegena_custom_data` POST param --> sanitized --> `alte
                                         |
 Checkout --> `_altegena_design_data` order item meta + individual layer labels as separate meta
          --> `_altegena_print_snapshot` order item meta (template layout + the text each layer showed)
+                                        |
+Payment (payment_complete / processing / completed) --> Action Scheduler job `altegena_print_generate_item`
+         --> Altegena_Print_Generator::render() --> 2 PDFs in protected storage --> `_altegena_print_state`
+                                        |
+Admin order screen --> download / regenerate / correct texts (`_altegena_print_text_overrides`)
 
 Share (optional) --> PNG + text map to admin-ajax `altegena_save_share` --> `altegena_invitation` post at /davetiye/{token}
 ```
@@ -47,12 +57,21 @@ altegena-invitation-editor/
 │   ├── class-cart-handler.php        # Cart/order integration + editor modal HTML + trigger button
 │   ├── class-product-page-handler.php # Hides default add-to-cart & quantity for invitation products
 │   ├── class-share-handler.php       # WhatsApp share: CPT, AJAX save, public page, OG tags, migration
-│   ├── class-print-order-handler.php # Order-side print: design snapshot at checkout
+│   ├── class-print-order-handler.php # Snapshot at checkout, payment triggers, jobs, state, text overrides
+│   ├── class-print-storage.php       # Protected PDF storage (random folders, .htaccess, access probe)
+│   ├── class-print-admin.php         # Order meta box, AJAX regenerate/save texts, download, list column
 │   ├── class-print-font-audit.php    # Font audit: fonts without files, safe fixes, glyph coverage
-│   ├── print/
+│   ├── print/                        # Print engine (pure PHP)
 │   │   ├── class-print-text.php      # Print text sanitizer (no trimming) + code point helpers
-│   │   ├── class-print-font.php      # Minimal sfnt reader (table directory, cmap, fsType)
-│   │   └── class-print-font-registry.php # fonts.css @font-face parsing + CSS font matching (no fallback)
+│   │   ├── class-print-font.php      # sfnt reader: cmap, metrics, hmtx, glyf outlines, kern, GDEF, name
+│   │   ├── class-print-font-registry.php # fonts.css @font-face parsing + CSS font matching (no fallback)
+│   │   ├── class-print-shaper.php    # OpenType GSUB/GPOS subset (HarfBuzz-compatible for these fonts)
+│   │   ├── class-print-layout.php    # Browser-identical layout → positioned glyphs (canvas px)
+│   │   ├── class-print-pdf-writer.php # Minimal PDF 1.7 writer (Flate, JPEG pass-through, GD fallback)
+│   │   ├── class-print-outline-emitter.php # Glyphs as vector paths (konturlu PDF)
+│   │   ├── class-print-text-emitter.php # CID TrueType fonts + ToUnicode/ActualText (metinli PDF)
+│   │   ├── class-print-generator.php # render(): one layout → both PDFs; background resolution/DPI
+│   │   └── class-print-cli.php       # `wp altegena print-proof` (development tool, WP-CLI only)
 │   └── plugin-update-checker/        # Vendored YahnisElsts/plugin-update-checker v5.7 (do not edit)
 ├── templates/
 │   └── single-invitation.php         # Theme-independent public share page (/davetiye/{token})
@@ -60,14 +79,17 @@ altegena-invitation-editor/
 │   ├── js/
 │   │   ├── editor.js                 # Frontend editor logic (Altegena_Editor object)
 │   │   ├── admin-editor.js           # Admin visual editor logic (Altegena_AdminEditor object)
+│   │   ├── admin-print.js            # Order screen print box (regenerate, save texts, revert)
 │   │   ├── public-invitation.js      # Read-only renderer for the public share page
 │   │   └── vendor/html2canvas.min.js # Bundled html2canvas 1.4.1 (same-origin, untainted capture)
 │   ├── css/
 │   │   ├── editor.css                # Full-screen modal layout, sidebar, canvas, layers, share dialog
 │   │   ├── admin-editor.css          # Admin visual editor styles (three-panel layout, properties, print notes)
+│   │   ├── admin-print.css           # Order print box + orders list column
 │   │   ├── public-invitation.css     # Public share page styles
 │   │   └── fonts.css                 # @font-face declarations (48 faces, 45 families) — also the print font registry
 │   ├── fonts/                        # 45 .ttf + 3 .otf font files + .htaccess
+│   │   └── print/                    # Offline TrueType conversions of the 3 CFF .otf fonts (+ README with SHA-1s)
 │   └── backgrounds/                  # Invitation background images (referenced by JSON config)
 ├── readme.txt                        # Update-modal metadata + changelog (plugin-update-checker)
 └── CLAUDE.md                         # This file
@@ -76,388 +98,369 @@ altegena-invitation-editor/
 ## PHP Classes
 
 ### `Altegena_Invitation_Editor` (altegena-invitation-editor.php)
-- **Role:** Plugin bootstrap. Defines constants, includes files, initializes all handler classes, declares WooCommerce HPOS compatibility (`before_woocommerce_init` → `FeaturesUtil::declare_compatibility('custom_order_tables', …)`), registers the GitHub update checker.
-- **Constants:** `ALTEGENA_PLUGIN_DIR`, `ALTEGENA_PLUGIN_URL`, `ALTEGENA_PLUGIN_FILE`, `ALTEGENA_VERSION`, `ALTEGENA_SHARE_MAX_CONFIG_BYTES`, `ALTEGENA_SHARE_MAX_IMAGE_BYTES`
+- **Role:** Plugin bootstrap. Defines constants, includes files, initializes the handler classes, declares WooCommerce HPOS compatibility (`before_woocommerce_init` → `FeaturesUtil::declare_compatibility('custom_order_tables', …)`), registers the GitHub update checker. Loads `class-print-cli.php` only under WP-CLI.
+- **Constants:** `ALTEGENA_PLUGIN_DIR`, `ALTEGENA_PLUGIN_URL`, `ALTEGENA_PLUGIN_FILE`, `ALTEGENA_VERSION`, `ALTEGENA_SHARE_MAX_CONFIG_BYTES`, `ALTEGENA_SHARE_MAX_IMAGE_BYTES`. Optional (wp-config.php): `ALTEGENA_PRINT_DIR`.
 - **Enqueue logic:** Only loads assets on single product pages (`is_product()`) that have `_invitation_json_config` meta set.
 - **Script dependencies:** `jquery`, `wc-add-to-cart`, `altegena-html2canvas`
-- **Localized data (`altegena_config`):**
-  - `raw_config` - The raw JSON string from post meta
-  - `is_admin_mode` - Boolean, true when user has `manage_options` cap AND `?mode=admin` query param is present
-  - `ajax_url`, `share_nonce`, `share_action`, `product_id` - Share endpoint parameters
-  - `share_message` - WhatsApp message prefix from `Altegena_Settings::text('share_message')`
+- **Localized data (`altegena_config`):** `raw_config`, `is_admin_mode` (`manage_options` + `?mode=admin`), `ajax_url`, `share_nonce`, `share_action`, `product_id`, `share_message`.
 
 ### `Altegena_Settings` (class-settings.php)
-- **Role:** Settings page (**Settings → Altegena Davetiye**, option `altegena_settings`) with two tabs: **Genel** (labels, colors, visibility, default line-height) and **Font denetimi** (rendered by `Altegena_Print_Font_Audit`). Static read API used by every other class for user-facing text, colors, visibility and the default layer line-height. See Theme Integration below.
-- **`line_height()`** - Unitless default line-height for layers without their own `lineHeight` (setting `print_default_line_height`, default 1.55, filter `altegena_default_line_height`). Output as `--altegena-line-height` by `css_vars()`.
-- **Adding a setting:** update `defaults()`, `text_defaults()` (for labels), the key list in `sanitize()`, and `render_page()`. If JS needs it, add it to the relevant `wp_localize_script` call — otherwise the JS side silently keeps a hardcoded default.
+- **Role:** Settings page (**Settings → Altegena Davetiye**, option `altegena_settings`).
+  - **Genel** tab: labels, colors, visibility, default line-height.
+  - **Font denetimi** tab: rendered by `Altegena_Print_Font_Audit`.
+  - Static read API used by every other class for user-facing text, colors, visibility and the default layer line-height.
+- **`line_height()`** - Unitless default line-height for layers without their own `lineHeight` (setting `print_default_line_height`, default 1.55, filter `altegena_default_line_height`). Output as `--altegena-line-height` by `css_vars()`; the print layout uses the same value.
+- **Adding a setting:** update `defaults()`, `text_defaults()` (for labels), the key list in `sanitize()`, and `render_page()`. If JS needs it, add it to the relevant `wp_localize_script` call.
 
 ### `Altegena_Design_Config` (class-design-config.php)
 - **Role:** Single place that reads the trusted template (`_invitation_json_config`). Styles, positions, fonts and canvas always come from the template, never from the client.
 - **`get_template($product_id)`** → `{raw, config}` or `WP_Error`.
-- **`merge($product_id, $text_map, $sanitizer)`** - Template + client text (used by the share handler with `sanitize_share_text`, which trims/strips tags as before).
+- **`merge($product_id, $text_map, $sanitizer)`** - Template + client text (share handler, with `sanitize_share_text`).
 - **`template_text($layer)`** - `default_text` with literal `\n` as real newlines (as editor.js renders it).
-- **`clean_print_keys($canvas)`** - Validates `print_width_mm`, `print_height_mm`, `print_bg_image`, `print_bg_image_id`, `print_bg_px`; other canvas keys untouched.
-- **`build_snapshot($product_id, $variation_id, $text_map, $backfilled)`** - Immutable print snapshot: `{schema, captured_at, product_id, variation_id, template_sha1, backfilled, canvas, layers[{id,label,hidden_on_frontend,style,text}], fonts{"Family|weight|style": {file, sha1, synthetic_bold, synthetic_italic} | {error}}}`. Hidden (fixed) layers always use template text.
+- **`clean_print_keys($canvas)`** - Validates `print_width_mm`, `print_height_mm`, `print_bg_image`, `print_bg_image_id`, `print_bg_px`.
+- **`build_snapshot($product_id, $variation_id, $text_map, $backfilled)`** - Immutable print snapshot:
+  ```
+  {schema, captured_at, product_id, variation_id, template_sha1, backfilled, canvas,
+   layers[{id, label, hidden_on_frontend, style, text}],
+   fonts{"Family|weight|style": {file, sha1, synthetic_bold, synthetic_italic} | {error}}}
+  ```
+  Hidden (fixed) layers always use template text.
 
 ### `Altegena_Product_Meta` (class-product-meta.php)
-- **Role:** Registers a standalone WordPress metabox ("Invitation Editor") on the product edit screen with a full visual editor.
-- **Metabox:** Registered via `add_meta_boxes` hook, rendered by `render_meta_box()`. Context: `normal`, priority: `high`.
-- **Meta key:** `_invitation_json_config` (stored via hidden input, synced from visual editor or JSON textarea)
-- **Admin asset enqueue:** Hooks `admin_enqueue_scripts`, guarded to `post.php`/`post-new.php` on `product` post type. Loads `wp.media`, `wp-color-picker`, `jquery-ui-sortable`, fonts CSS, `admin-editor.css` (+ inline `Altegena_Settings::css_vars()`), `admin-editor.js`.
-- **Localized data (`altegena_admin_config`):** `fonts` (array of 45 font family names), `plugin_url`
-- **`get_available_fonts()`** - Returns all custom font family names; must match `fonts.css` declarations.
-- **Save validation:** `save_product_data_tab()` validates JSON structure (must have `canvas` and `layers` keys), runs `Altegena_Design_Config::clean_print_keys()` (re-encoding only if something invalid was dropped), and uses `wp_slash()` before `update_post_meta()` to prevent double-unslashing of backslash sequences (e.g., `\n` in JSON). Empty values delete the meta.
-- **Metabox HTML:** Two tabs (Visual Editor / JSON). Visual tab contains a three-panel layout: left (canvas settings + print settings + layer list), center (live canvas preview), right (layer properties). JSON tab contains a raw textarea with validate button.
+- **Role:** Registers the "Invitation Editor" metabox on the product edit screen with the visual editor.
+- **Meta key:** `_invitation_json_config` (hidden input synced from the visual editor or JSON textarea).
+- **Admin asset enqueue:** `post.php`/`post-new.php` on `product`. Loads:
+  - `wp.media`, `wp-color-picker`, `jquery-ui-sortable`;
+  - fonts CSS;
+  - `admin-editor.css` (+ inline `Altegena_Settings::css_vars()`);
+  - `admin-editor.js`.
+- **Localized data (`altegena_admin_config`):** `fonts` (45 bundled family names), `plugin_url`.
+- **Save validation:** `save_product_data_tab()` checks the JSON has `canvas` and `layers`, runs `clean_print_keys()` (re-encoding only when something invalid was dropped), and `wp_slash()`es before `update_post_meta()`. Empty values delete the meta.
 
 ### `Altegena_Cart_Handler` (class-cart-handler.php)
-- **Role:** Handles:
-  1. **Editor trigger button** - Renders the customize button (label from settings), disabled until a variation is selected
-  2. **Modal HTML** - Full-screen modal with header (title, add-to-cart button, share button, close button) and `#altegena-editor-app` container
-  3. **Inline JS** - Modal open/close logic, variation-aware button enable/disable
-  4. **Cart item data** - Decodes `altegena_custom_data` (≤256 KB, ≤200 layers) and keeps only `label` (sanitize_text_field), `text` (`Altegena_Print_Text::sanitize`, no trimming) and `fontFamily` per layer as `altegena_design_data`
-  5. **Cart display** - Shows customized text per layer at checkout (hidden on cart page, only when visibility is `customer_and_admin`)
-  6. **Order meta** - Stores `_altegena_design_data` blob + individual layer labels as separate order item meta
-  7. **Order meta visibility** - `filter_order_item_meta()` hides per-layer rows according to the visibility setting
-- **Hook:** Uses `woocommerce_single_variation` (priority 15) instead of `woocommerce_single_product_summary` for FSE/block theme compatibility.
-- **Modal z-index:** `2147483647` (max int) - moved to `document.body` via JS to avoid stacking context issues.
+- **Editor trigger button + modal HTML + inline JS:** variation-aware; the modal is moved to `document.body`, z-index max.
+- **Cart item data:** decodes `altegena_custom_data` (≤256 KB, ≤200 layers). Per layer it keeps only `label` (sanitize_text_field), `text` (`Altegena_Print_Text::sanitize`, no trimming) and `fontFamily`, stored as `altegena_design_data`.
+- **Cart/checkout display:** gated by personalization visibility; hidden on the cart page.
+- **Order meta:** `_altegena_design_data` blob plus one visible meta row per layer; `filter_order_item_meta()` hides those rows per visibility.
+- **Hook:** `woocommerce_single_variation` (priority 15) for FSE/block theme compatibility.
 
 ### `Altegena_Product_Page_Handler` (class-product-page-handler.php)
-- **Role:** Injects CSS via `wp_head` to hide the default WooCommerce add-to-cart button and quantity input for invitation products. Uses CSS `display: none !important` rather than removing template hooks, so the variation form stays functional.
+- Injects CSS via `wp_head` to hide the default add-to-cart button and quantity input for invitation products (the variation form stays functional).
 
 ### `Altegena_Share_Handler` (class-share-handler.php)
-- **Role:** WhatsApp sharing of a finished design.
-- **CPT:** `altegena_invitation`, rewrite slug `davetiye` (public URL `/davetiye/{token}`, token = 12-char random slug). Rewrite rules are flushed once per `ALTEGENA_VERSION`.
-- **AJAX:** `wp_ajax(_nopriv)_altegena_save_share` → `ajax_save_share()`: nonce check, per-IP rate limit (10 per 10 min, transients), payload size cap, PNG/JPEG magic-byte + dimension validation, sideload into the media library.
-- **Trusted merge:** `build_merged_config()` delegates to `Altegena_Design_Config::merge()`; the client supplies layer text only (sanitized, 2000 chars per layer).
-- **Share post meta:** `_altegena_share_config`, `_altegena_share_image_id/_url/_dims`, `_altegena_share_product_id`, `_altegena_share_ip` (salted hash).
-- **Public page:** `template_include` → `templates/single-invitation.php`; assets `public-invitation.js/.css`; `output_og_tags()` prints OG/Twitter tags at `wp_head` priority 1 and suppresses other SEO output (`altegena_seo_suppress_actions`, Yoast/Rank Math filters).
-- **Migration:** `maybe_migrate()` (version-gated) renames the old `sie_*` meta keys / post type to `altegena_*`.
+- **CPT:** `altegena_invitation`, rewrite slug `davetiye` (public URL `/davetiye/{token}`). Rewrite rules are flushed once per `ALTEGENA_VERSION`.
+- **AJAX:** `wp_ajax(_nopriv)_altegena_save_share`:
+  - nonce;
+  - per-IP rate limit (10 per 10 min);
+  - payload caps;
+  - PNG/JPEG magic-byte + dimension validation;
+  - media library sideload.
+- **Trusted merge:** `build_merged_config()` → `Altegena_Design_Config::merge()`.
+- **Public page:** `templates/single-invitation.php`, `public-invitation.js/.css`, OG/Twitter tags at `wp_head` priority 1 with SEO de-duplication.
+- **Migration:** `maybe_migrate()` renames old `sie_*` identifiers.
 
 ### `Altegena_Print_Order_Handler` (class-print-order-handler.php)
-- **Role:** Order-side print integration. Currently: on `woocommerce_checkout_create_order_line_item` (priority 20; fires for the classic checkout and the Checkout block / Store API) builds `_altegena_print_snapshot` via `Altegena_Design_Config::build_snapshot()` for items with `altegena_design_data`. Logs failures to `wc_get_logger()` source `altegena-print`.
-- **Planned (print PDF phases):** payment triggers (`woocommerce_payment_complete`, processing/completed) → Action Scheduler job, outlined + selectable-text PDFs, protected storage/download, HPOS order meta box with text overrides and regenerate.
+- **Snapshot:** `woocommerce_checkout_create_order_line_item` priority 20 (classic checkout and Checkout block / Store API) → `_altegena_print_snapshot` (array, stored `wp_slash`ed).
+- **Triggers:**
+  - `woocommerce_payment_complete`, `woocommerce_order_status_processing` and `woocommerce_order_status_completed` → `enqueue_order()`.
+  - `enqueue_order()` queues one unique `as_enqueue_async_action('altegena_print_generate_item', {order_id, item_id}, 'altegena-print', true)` per invitation item not already queued/running/done.
+  - Without Action Scheduler it generates synchronously.
+- **Job:** `run_job()` → `generate_item()`.
+  - Retries with backoff (up to 3 attempts) unless the error is permanent (`PERMANENT_ERRORS`: missing font/glyph/background, bad print size, …).
+  - A `locked` item is retried in 60 s.
+- **`generate_item($order, $item, $force)`:**
+  - **Before rendering:**
+    - Lock (`altegena_print_lock_{item}` option, 300 s TTL).
+    - `ensure_snapshot()` backfills from the current template for pre-snapshot orders and adds a warning.
+    - `with_current_print_settings()` takes print size / print background from the current template when the snapshot has none and the canvas px are unchanged.
+    - `input_hash` covers snapshot, overrides, engine version, default line-height, current font file SHA-1s and background file size/mtime. It skips work when the hash is unchanged and the files exist (unless `$force`).
+  - **Rendering and storage:**
+    - `Altegena_Print_Generator::render()` produces both PDFs.
+    - They are written as `siparis-{no}-kalem-{item}-r{rev}-{rand}-konturlu|metinli.pdf`.
+    - Old revision files are deleted after success.
+  - **Recording:** order notes on success and on new failures; logs to `wc_get_logger()` source `altegena-print`.
+- **Stored data:**
+  - **Order item JSON strings** (written via delete + add meta, so WooCommerce's string slashing round-trips them):
+    - `_altegena_print_state` — `{status queued|running|done|failed, attempts, rev, input_hash, generated_at, duration_ms, page_mm, files{outline,text}{file,bytes}, background{source,px,dpi}, warnings[], error{code,message,at}}`
+    - `_altegena_print_text_overrides` — `{rev, layers{id:{text,by,at}}, history[]}`
+  - **Order meta:** `_altegena_print_summary` (`done|warning|queued|failed`). `update_summary()` reads item states from the DB, because `WC_Order::get_item()` returns fresh instances.
+- **`save_texts($order, $item, $texts, $user_id)`:**
+  - Validates layer ids against the snapshot and sanitizes.
+  - Stores only differences from the customer's text; reverting to the original removes the override.
+  - Increments `rev`, keeps the last 50 history entries and adds an order note.
+  - The snapshot, customer-facing order rows and emails are never changed.
+- **Cleanup:** `woocommerce_before_delete_order` / `before_delete_post` (legacy `shop_order`) remove the order's PDF folder.
+
+### `Altegena_Print_Admin` (class-print-admin.php)
+- **Meta box** "Davetiye baskı PDF'leri": screen `wc_get_page_screen_id('shop-order')` (HPOS) or `shop_order`, only for orders with invitation items. Per item it shows:
+  - status badge, page mm, time, rev;
+  - "Konturlu PDF indir" / "Metinli PDF indir";
+  - "Yeniden oluştur";
+  - errors and warnings;
+  - a `<details>` "Metinleri düzenle" table: editable layers, then "Sabit metinler". Each row has a textarea (no `name`, so WooCommerce's order save ignores it), a "Müşteri: …" line when overridden, "Orijinale dön", and "Kaydet ve PDF'leri yeniden oluştur".
+  - A storage exposure warning when `Altegena_Print_Storage::is_publicly_accessible()`.
+- **AJAX:**
+  - Endpoints: `wp_ajax_altegena_print_regenerate` and `wp_ajax_altegena_print_save_texts`.
+  - Checks: nonce `altegena_print_{order_id}`, capability `edit_shop_orders`, item must belong to the order.
+  - Both regenerate synchronously and return the re-rendered panel HTML.
+- **Download:** `admin-post.php?action=altegena_print_download&order_id&item_id&kind=outline|text&_wpnonce`.
+  - Checks: nonce `altegena_print_download_{order_id}` + `edit_shop_orders`.
+  - The file comes only from the stored state, via `Altegena_Print_Storage::path()`.
+  - Response: `litespeed_control_set_nocache`, `nocache_headers`, `application/pdf` attachment `siparis-{no}-kalem-{item}-konturlu|metinli.pdf`.
+- **Orders list column** "Baskı PDF": `manage_woocommerce_page_wc-orders_columns` / `_custom_column` (HPOS) and the legacy `manage_edit-shop_order_columns` / `manage_shop_order_posts_custom_column`. Reads `_altegena_print_summary`.
+
+### `Altegena_Print_Storage` (class-print-storage.php)
+- **Base folder:** `ALTEGENA_PRINT_DIR`, else `uploads/altegena-print-{16-char secret}` (option `altegena_print_storage_secret`); filter `altegena_print_storage_dir`.
+- **Folder contents:** `.htaccess` (`Require all denied` + `Deny from all`), `index.php`, one `{order_id}-{16 random}` folder per order (order meta `_altegena_print_dir`).
+- **Methods:**
+  - `write()` — temp file + rename;
+  - `path()` — filename pattern + `realpath` containment;
+  - `delete_file()`, `delete_order()`.
+- **`is_publicly_accessible()`:** loopback probe of `altegena-probe.pdf`, cached 12 h in transient `altegena_print_storage_public`. nginx ignores `.htaccess`, so locally it reports accessible; on LiteSpeed/Apache it should not.
 
 ### `Altegena_Print_Font_Audit` (class-print-font-audit.php)
-- **Role:** "Font denetimi" settings tab.
-  - Lists template layers whose font family/file doesn't exist in `fonts.css`.
-  - **Safe fixes** (`admin_post_altegena_font_safe_fix`, `manage_options` + nonce): spelling-only matches whose exact weight/style file exists (e.g. `TrajanPro-Bold` → `Trajan Pro` + bold). The pre-fix template is kept once in `_invitation_json_config_font_fix_backup`; JSON is decoded as objects so `{}` survives re-encoding.
-  - **Coverage report:** per font, missing Turkish letters (ÇçĞğİıÖöŞşÜü) and characters used in its layers' template texts; flags restricted embedding (fsType) and CFF outlines.
+- **Font denetimi tab:**
+  - Lists template layers whose font family/file doesn't exist.
+  - **Safe fixes** (`admin_post_altegena_font_safe_fix`): spelling-only, exact weight/style file must exist, backup in `_invitation_json_config_font_fix_backup`.
+  - Per-font coverage of Turkish letters and template characters.
+  - Flags restricted embedding (fsType) and CFF.
   - Lists layers that get synthetic bold/italic.
 
-### Print helpers (includes/print/)
-- **`Altegena_Print_Text`** - `sanitize()`: invalid UTF-8, CRLF/CR/U+2028/U+2029 → LF, tab → space, strips control characters (except LF) and bidi overrides, NFC, 2000 chars. **Never trims or strips tags** (layers use `white-space: pre`). Also `codepoints()` / `chr_utf8()`.
-- **`Altegena_Print_Font`** - `load($path)` (cached) reads the sfnt table directory; cmap (format 12 > format 4 > symbol (3,0) with U+F000 mapping), `glyph_id()`, `has_glyph()`, `missing_codepoints()`, `fs_type()`, `embedding_allowed()`, `is_cff()`. Later phases add metrics/outlines/layout tables.
-- **`Altegena_Print_Font_Registry`** - Parses `assets/css/fonts.css` @font-face blocks; `match($family, $weight, $style)` applies CSS weight/style matching within the family and reports `synthetic_bold` (≥600 requested, face <600) / `synthetic_italic`. Unknown family or missing file → `WP_Error('font_missing')`. `clean_family()`, `normalize_weight()`, `normalize_style()`, `file_sha1()`.
+### Print engine (includes/print/)
+- **`Altegena_Print_Text`** - `sanitize()`:
+  - invalid UTF-8 handled; CR/CRLF/U+2028/U+2029 → LF; tab → space;
+  - strips controls (except LF) and bidi overrides;
+  - NFC; 2000 chars.
+  - Never trims. Also `codepoints()` / `chr_utf8()`.
+- **`Altegena_Print_Font`** - `load($path)` (cached). Reads:
+  - cmap (fmt 12 > fmt 4 > symbol 3,0);
+  - `vertical_metrics()` (FreeType/Skia rule: typo metrics if USE_TYPO_METRICS else hhea, zero fallbacks);
+  - `advance_width()`, `glyph_contours()` (simple + composite glyf);
+  - `legacy_kern()`, GDEF `glyph_class()` / `mark_attach_class()`, `read_coverage()` / `read_class_def()`;
+  - PDF descriptor data: `bbox()`, `italic_angle()`, `cap_height()`, `postscript_name()`;
+  - `fs_type()` / `embedding_allowed()`, `is_cff()`, `bytes()`.
+- **`Altegena_Print_Font_Registry`**:
+  - Parses `assets/css/fonts.css`.
+  - `match($family, $weight, $style)` does CSS weight/style matching within the family → `{face, synthetic_bold (≥600 requested, face <600), synthetic_italic}` or `WP_Error('font_missing')`.
+  - `print_file($face)` uses `assets/fonts/print/{name}.ttf` when present (CFF conversions).
+- **`Altegena_Print_Shaper`** - `for_font($font)->shape($codepoints, {language, disable})` → glyphs `{gid, start, end, advance, dx, dy}` in font units.
+  - Script `latn`→`DFLT`; language `TRK ` → default LangSys.
+  - Features: required + `ccmp locl rlig calt clig liga`.
+  - GSUB lookup types 1, 2, 4, 5, 6, 7 with lookup flags / mark attach classes / mark filtering sets.
+  - GPOS `kern` via types 1, 2, 9; the legacy `kern` table only when GPOS has no kern feature.
+  - `LETTER_SPACING_DISABLED` (`liga clig calt dlig hlig`) mirrors Blink when letter-spacing ≠ 0.
+- **`Altegena_Print_Layout`** - `layout($snapshot, $texts)` → scene (canvas px, y down):
+  - `white-space: pre` lines (one trailing LF ignored); box width = widest line (ceil to 1/64 px); height = lines × line-height.
+  - line-height: number × font-size / px / % / normal, else `Settings::line_height()` (1/64 px).
+  - Ascent/descent rounded to px; baseline_i = i·LH + floor((LH − (A+D))/2) + A.
+  - letter-spacing added after every cluster.
+  - textAlign offset; X0 = (left + width/2)% when both are set (else left); top %.
+  - Layer matrix = T(−W/2, −H/2) · R(θ) · T(X0, top + H/2).
+  - Page scale k = print_width_mm/25.4·72 / canvas.width; mm/canvas ratio must match within 1%.
+  - Errors: `font_missing`, `font_unsupported`, `missing_glyph` (all layers' missing chars listed), `print_size_missing`, `print_ratio_mismatch`.
+- **`Altegena_Print_Pdf_Writer`** - Objects/xref, Flate streams.
+  - `add_image()`: JPEG pass-through (DCT, Gray/RGB/CMYK); other formats via GD → JPEG 95 with a memory check.
+  - `add_page()` (MediaBox = TrimBox), `output()`, `num()` (locale-independent), `text_string()` (UTF-16BE).
+- **`Altegena_Print_Outline_Emitter`** - TrueType quadratics → cubic paths (implied on-curve points), cached per glyph, one `cm` per glyph, nonzero fill.
+  - Synthetic bold: `B` with width upm/24 (= font-size/24 px), round joins.
+  - Synthetic italic: skew 0.25.
+- **`Altegena_Print_Text_Emitter`** - Type0/Identity-H + CIDFontType2 (CID = glyph id) with the full TrueType embedded as FontFile2, `/W` widths and a ToUnicode CMap (ligature → cluster text).
+  - One `BT` per layer; per line: `/Span << /ActualText >> BDC`, `Tm` (y flip, italic skew), `TJ` adjustments to the layout's positions.
+  - Synthetic bold: `2 Tr` + width font-size/24.
+  - Fonts whose fsType forbids embedding (Lovely Home, Riesling) are drawn as outlines (not selectable) with a warning.
+- **`Altegena_Print_Generator`**:
+  - `render($snapshot, $texts)` → `{outline, text, scene, background, warnings}` (one layout, two writers).
+  - `resolve_background()`: print background attachment → print background URL → `bg_image`, mapped to local uploads/plugin files by URL path (host-independent, remote never fetched). Returns DPI and aspect warnings (min 300 DPI).
+  - `layout_debug()` for DOM comparison.
+- **`Altegena_Print_CLI`** - `wp altegena print-proof <product_id> [--texts=<json>] [--width-mm=<mm>] [--out=<dir>] [--layout]`: writes both proof PDFs (default `uploads/altegena-print-proof/`) and optionally the layout JSON.
 
 ## JavaScript: Altegena_Editor (editor.js)
 
-Single IIFE-wrapped object, jQuery-based. Key behaviors:
+Single IIFE-wrapped object, jQuery-based.
 
-### Initialization
-1. Parses `altegena_config.raw_config` JSON
-2. Builds layout: sidebar (left, 360px) + preview area (right, flexible)
-3. Renders text layers on canvas and input fields in sidebar (layers with `hidden_on_frontend` get no sidebar input and are not editable)
-4. Loads autosaved data from `localStorage`
-5. Binds all events
-
-### Canvas Scaling
-- Uses `ResizeObserver` on `.altegena-preview-area`
-- Canvas is rendered at its natural pixel size from JSON config (`config.canvas.width`/`height`)
-- CSS `transform: scale()` is applied to fit within the preview area while preserving aspect ratio
-- `scaleFactor` is stored for coordinate translation
-
-### Layer Positioning
-- Layers use absolute positioning with percentage-based `left`/`top` values
-- `left` + `width` from JSON config are converted to a center-point: `left = (left + width/2)%` with `transform: translateX(-50%)` for horizontal centering
-- `width` is deleted after conversion (layers are auto-width, `white-space: pre`)
-- `style.rotate` (degrees) is appended to the transform as `rotate(Ndeg)`
-- Layer line-height comes from `style.lineHeight`, else the canvas' pinned `line-height: var(--altegena-line-height, 1.55)` (editor.css, public-invitation.css and admin-editor.css all pin it, so the theme/wp-admin line-height never leaks in)
-
-### Two-Way Binding
-- Sidebar textarea (`.altegena-layer-input`) input updates the preview layer text
-- Preview `contenteditable` div input updates the sidebar textarea, reading `innerText` so line breaks typed on the canvas are kept
-- The hidden input / cart data is always built from the sidebar textareas
-- Focus on either highlights the counterpart (gold border/background)
-
-### Admin Mode (`?mode=admin`)
-- Activated when: user has `manage_options` AND URL has `?mode=admin`
-- Layers become **draggable** (not contenteditable)
-- Drag updates layer position in the config object
-- "Copy Updated JSON" button appears in sidebar
-- Updated JSON is logged to console on every drag
-
-### Add to Cart
-- Serializes `form.cart` (so variation attributes/ID are included), appends `add-to-cart={productId}`, and POSTs via AJAX to the form action
-- Requires a selected variation on variable products (Turkish alert otherwise)
-- On success: shows "Eklendi ✓" and redirects to the cart page
-- On error: Turkish alert message, button restored
-
-### WhatsApp Share
-- Waits for the layers' custom fonts, captures an un-scaled off-screen clone of the canvas with html2canvas at native resolution
-- POSTs the PNG data URL + text map to `altegena_save_share`, then shows a dialog: wa.me link, Web Share API image share (when supported), copy link, download image
-- Message prefix comes from `altegena_config.share_message`
-
-### Autosave
-- Saves to `localStorage` with key `altegena_autosave_{productId}`
-- Loads on init, restoring text values to both sidebar inputs and preview layers
+- **Init:** parses the config, builds the sidebar (360px) + preview, renders layers (hidden layers get no input and aren't editable), loads the localStorage autosave, binds events.
+- **Canvas scaling:** `ResizeObserver` + CSS `transform: scale()`; the canvas is rendered at config px size.
+- **Layer positioning:**
+  - `left + width/2` % center point with `translateX(-50%)` (+ `rotate(Ndeg)`); `white-space: pre`, auto width.
+  - line-height from `style.lineHeight`, else the canvas' pinned `line-height: var(--altegena-line-height, 1.55)`. editor.css, public-invitation.css and admin-editor.css all pin it.
+- **Two-way binding:** the sidebar textarea updates the layer; the contenteditable layer updates the textarea via `innerText` (line breaks kept); cart data is built from the textareas.
+- **Admin mode (`?mode=admin`):** draggable layers + "Copy Updated JSON".
+- **Add to cart:** serializes `form.cart`, AJAX POST, redirects to the cart.
+- **WhatsApp share:** waits for fonts, html2canvas capture of an unscaled clone, `altegena_save_share`, share dialog (message from `altegena_config.share_message`).
+- **Autosave:** `localStorage` key `altegena_autosave_{productId}`.
 
 ## JavaScript: Altegena_AdminEditor (admin-editor.js)
 
-Single IIFE-wrapped object, jQuery-based. Provides a visual design editor inside a standalone WordPress metabox on the product edit screen.
+Visual design editor in the product metabox.
 
-### Three-Panel Layout
-```
-┌─ Left (280px) ─┐  ┌─ Center (flex) ──────┐  ┌─ Right (300px) ─┐
-│ Canvas Settings │  │   Live Canvas        │  │ Layer Properties │
-│  - Width/Height │  │   Preview            │  │  - ID, Label     │
-│  - BG Image     │  │   (scaled to fit)    │  │  - Group         │
-│ Print (Baskı)   │  │                      │  │  - Default Text  │
-│  - mm, BG, DPI  │  │  [draggable layers]  │  │  - Font/Size     │
-│ Layer List      │  │                      │  │  - Color/Align   │
-│  - Groups       │  │  [fullscreen toggle] │  │  - Position %    │
-│  + Add Layer    │  │                      │  │  - Width %       │
-└─────────────────┘  └──────────────────────┘  │  - Rotate        │
-                                               │  [Duplicate/Del] │
-                                               └─────────────────┘
-```
+- **Layout:**
+  - **Left:** canvas settings, **Baskı** (print mm with ratio lock, print background picker, DPI/ratio notes), layer list with groups.
+  - **Center:** live canvas (fullscreen toggle).
+  - **Right:** layer properties and alignment.
+- **Print settings:**
+  - `bindPrintSettings()`, `openPrintBgPicker()` (stores `print_bg_image`, `print_bg_image_id`, `print_bg_px`), `renderPrintFields()`.
+  - `updatePrintInfo()` runs from `updateCanvas()`. It shows: missing mm (red), mm/canvas ratio >1% (red), and background DPI = px/(mm/25.4) (red <150, amber <300, green ≥300) using the print background or the site background's natural size.
+- **Layer management:**
+  - Add / duplicate / delete (all selected, confirmation shows the count).
+  - Shift+click multi-select; mousedown deselect; `hidden_on_frontend` toggle.
+  - Flat `jquery-ui-sortable` list with group headers: collapse, rename, duplicate.
+- **Drag & keyboard:** multi-layer drag compensated by `scaleFactor`; arrows 1px (Shift 10px); Escape deselects; Delete removes the selection.
+- **Undo/redo:** snapshot history (50) pushed from the `syncConfigToHiddenField()` chokepoint; `_isRestoring` guard.
+- **Alignment:** align to canvas (1+ selected), align/distribute selection (2+/3+) on stored % values.
+- **Properties:**
+  - ID, label, group, default text, hidden;
+  - font: 45 bundled fonts only; a template font without a file shows as "(dosyası yok)";
+  - size, color, weight, style, textAlign, letterSpacing, lineHeight, left/top/width %, rotate.
+- **Form submission:** applies the JSON tab if it is active, then `syncConfigToHiddenField()`.
 
-### Tab Switching
-- **Visual → JSON:** `syncVisualToJson()` serializes config to formatted JSON in textarea
-- **JSON → Visual:** `syncJsonToVisual()` parses textarea, validates structure, rebuilds editor
-- Validate button checks JSON syntax + required `canvas`/`layers` keys
+## JavaScript: admin-print.js
 
-### Canvas Scaling
-- Same pattern as frontend: `ResizeObserver` + CSS `transform: scale()` + `transformOrigin: top left`
-- Scale is not capped, so small canvases are enlarged for visibility
-- `scaleFactor` stored for drag coordinate compensation
-- **Fullscreen:** toggle button in the canvas area adds `.altegena-admin-fullscreen` and refits after the transition
-
-### Print Settings (Baskı)
-- **Fields:** `#altegena-print-width-mm` / `#altegena-print-height-mm` → `canvas.print_width_mm` / `print_height_mm` (0.1 mm rounding). "Oranı tuvale kilitle" (checked by default) derives the other dimension from the canvas px ratio.
-- **Print background:** `openPrintBgPicker()` (wp.media) stores `canvas.print_bg_image`, `print_bg_image_id`, `print_bg_px {w,h}` (attachment size); remove button clears them.
-- **Notes:** `updatePrintInfo()` (called from `updateCanvas()` and every print change) shows:
-  - missing mm size (red, PDF can't be generated);
-  - mm/canvas ratio mismatch >1% (red);
-  - background DPI = px / (mm/25.4), using the print background or else the site `bg_image` (natural size loaded via `Image`): red <150, amber 150–299, green ≥300;
-  - background/canvas ratio mismatch >1% (amber).
-- `renderPrintFields()` runs from `renderCanvasSettings()`, so undo/redo and JSON edits refresh the fields.
-
-### Layer Management
-- **Add:** Creates layer with unique timestamp ID, default styles, selects it
-- **Duplicate:** Deep clones selected layer, generates new ID, offsets top by 3%
-- **Delete:** Removes all selected layers (confirmation shows the count when more than one), deselects, re-renders
-- **Selection:** Click layer in list or on canvas; highlights both; shows properties panel
-- **Multi-select:** Shift+click on layers (canvas or layer list) toggles them in/out of the selection. Regular click resets to single selection. `selectedLayerIds` array tracks all selected layers; `selectedLayerId` tracks the primary (last-clicked) layer for the properties panel.
-- **Deselect:** Uses `mousedown` (not `click`) on the canvas background to avoid conflicts with layer mousedown/click event ordering.
-- **Frontend visibility:** eye icon in the layer list / "Önyüzde Gizle" checkbox toggles `hidden_on_frontend` (fixed text the customer cannot edit)
-
-### Layer List Sorting & Groups
-- Single flat `jquery-ui-sortable` list; only layer items are draggable, group headers are fixed dividers. Array order = render order.
-- Dropping a layer under a group header assigns that `group`; above all headers removes it.
-- Group headers: collapse/expand, inline rename (updates every layer in the group), duplicate group (clones all its layers into `"<name> (kopya)"`)
-
-### Drag & Drop
-- Mousedown on canvas layer starts drag tracking
-- **Multi-layer drag:** When dragging a layer that is part of a multi-selection, all selected layers move together by the same delta
-- Mouse deltas compensated by `scaleFactor`: `dx / scaleFactor`
-- Converts pixel position to percentage of canvas dimensions
-- Reverse center-point conversion when storing back to config (`left - width/2`)
-- Syncs property panel fields in real-time during drag (for the primary selected layer)
-
-### Undo/Redo
-- **Ctrl+Z:** Undo last change (works globally, no layer selection required)
-- **Ctrl+Y / Ctrl+Shift+Z:** Redo
-- Uses config snapshot history (`history[]` array of JSON strings, `historyIndex` pointer)
-- `pushHistory()` is called from `syncConfigToHiddenField()`, which is the single chokepoint for all mutations
-- Duplicate snapshots are skipped; history is capped at 50 entries (`maxHistory`)
-- `_isRestoring` flag prevents `syncConfigToHiddenField` from pushing to history during undo/redo restore
-- Initial state is pushed after `initializeConfig()` so it can always be reached via undo
-
-### Keyboard Controls
-- **Ctrl+Z:** Undo (see Undo/Redo section)
-- **Ctrl+Y / Ctrl+Shift+Z:** Redo (see Undo/Redo section)
-- **Arrow keys:** Move all selected layers 1px (10px with Shift)
-- **Escape:** Deselect all layers
-- **Delete:** Delete all selected layers (with confirmation)
-- All keyboard handlers skip when focus is on input/textarea/select elements
-
-### Text Rendering
-- Layer text is rendered using `.html()` with escaped content and `<br>` tags for newlines (not `.text()`, which would strip line breaks)
-- `escapeHtml()` sanitizes text first, then `\n` characters are converted to `<br>`
-
-### Alignment & Distribution
-- **Align to canvas** (1+ layers selected, `.altegena-admin-canvas-align-section`): left/center/right set `left` to `0` / `50 - width/2` / `100 - width`; top/center/bottom set `top` to `0%` / `50%` / `100%`
-- **Align selection** (2+ layers selected, `.altegena-admin-align-section`): 8 buttons - Align Left, Center H, Right, Top, Center V, Bottom, Distribute H, Distribute V
-- All operations work on stored config percentage values (`left`, `top`, `width`); layers have no stored height so vertical ops use `top` only
-- Distribute requires 3+ layers; evenly spaces center-points (horizontal) or `top` values (vertical) between extremes
-- Each alignment action calls `renderLayers()` + `refreshSelectionUI()` + `syncConfigToHiddenField()`, so undo/redo works automatically
-- Methods: `bindAlignmentButtons()`, `getSelectedLayersBounds()`, `alignLayers(type)`, `alignLayersToCanvas(type)`
-
-### Properties Panel
-- **Text fields:** ID (alphanumeric + underscore/dash only), label, group, default_text, hidden on frontend
-- **Style fields:**
-  - fontFamily: dropdown with the 45 bundled fonts only. System fonts are not offered, because print has no fallback. A template font without a file is shown as "(dosyası yok)".
-  - fontSize, textAlign (4 buttons), color (WordPress `wpColorPicker`), fontWeight, fontStyle, letterSpacing, lineHeight
-- **Position fields:** left %, top %, width % (all use `step="any"` to accept any decimal value), rotate (degrees)
-- Changes apply immediately to canvas DOM and config object
-- Properties panel always shows the primary (last-clicked) selected layer
-
-### Form Submission
-- Hooks `#post` form submit event
-- If the JSON tab is active, parses and applies the textarea first
-- Calls `syncConfigToHiddenField()` → `JSON.stringify(config)` → hidden input value
-- WordPress saves via standard `$_POST` processing
+- **Regenerate:** `.altegena-print-regenerate` → `altegena_print_regenerate`.
+- **Save texts:** `.altegena-print-save` collects `textarea[data-layer]` values → `altegena_print_save_texts` (`texts` JSON).
+- **Revert:** `.altegena-print-revert` restores `data-original` into the textarea (saved on the next "Kaydet").
+- **Response handling:** replaces the item panel with the returned HTML, keeping `<details>` open. Errors go to `alert`.
 
 ## JSON Configuration Format
 
-Stored in `_invitation_json_config` post meta. Expected structure:
+Stored in `_invitation_json_config` post meta:
 
 ```json
 {
   "canvas": {
-    "width": 1200,
-    "height": 1800,
+    "width": 1200, "height": 1800,
     "bg_image": "https://example.com/wp-content/uploads/invitation-bg.jpg",
-    "print_width_mm": 145,
-    "print_height_mm": 217.5,
+    "print_width_mm": 145, "print_height_mm": 217.5,
     "print_bg_image": "https://example.com/wp-content/uploads/invitation-bg-print.jpg",
-    "print_bg_image_id": 987,
-    "print_bg_px": { "w": 1713, "h": 2569 }
+    "print_bg_image_id": 987, "print_bg_px": { "w": 1713, "h": 2569 }
   },
   "layers": [
     {
-      "id": "names",
-      "type": "text",
-      "label": "Isimler",
-      "group": "Ön Yüz",
-      "default_text": "Ad & Soyad",
-      "hidden_on_frontend": false,
-      "style": {
-        "left": "10%",
-        "top": "40%",
-        "width": "80%",
-        "rotate": "0",
-        "fontFamily": "Darleston",
-        "fontSize": "48px",
-        "color": "#333333",
-        "textAlign": "center"
-      }
+      "id": "names", "type": "text", "label": "Isimler", "group": "Ön Yüz",
+      "default_text": "Ad & Soyad", "hidden_on_frontend": false,
+      "style": { "left": "10%", "top": "40%", "width": "80%", "rotate": "0",
+        "fontFamily": "Darleston", "fontSize": "48px", "color": "#333333", "textAlign": "center" }
     }
   ]
 }
 ```
 
-### Fields
-- **canvas.width/height** - Base dimensions in pixels (used for aspect ratio and scale calculations)
-- **canvas.bg_image** - Absolute URL to background image
-- **canvas.print_width_mm/print_height_mm** - Physical print size (optional; required for print PDFs; ratio must match the canvas within 1%)
-- **canvas.print_bg_image / print_bg_image_id / print_bg_px** - Optional high-resolution print background (falls back to `bg_image`)
-- **layers[].id** - Unique identifier, used as key in cart/order data
-- **layers[].type** - Only `"text"` is implemented
-- **layers[].label** - Human-readable name shown in sidebar and order meta
-- **layers[].group** - Optional; admin layer-list grouping only (no frontend effect)
-- **layers[].default_text** - Pre-filled text; supports `\n` for newlines
-- **layers[].hidden_on_frontend** - Optional; fixed layer rendered on the card but without a customer input
-- **layers[].style** - CSS properties applied directly to the layer div. Key properties:
-  - `left`, `top` - Percentage positioning
-  - `width` - Percentage width (converted to center-point positioning by JS)
-  - `rotate` - Degrees; converted to a `rotate()` transform (not a CSS property)
-  - `fontFamily` - Must match a name defined in `fonts.css` (no fallback in print)
-  - Any valid CSS property (fontSize, color, textAlign, letterSpacing, lineHeight, etc.)
+- **canvas.width/height** - Base px size (aspect ratio, scaling, print page ratio).
+- **canvas.bg_image** - Site background URL. Printed when no print background is set; it must resolve to a local uploads/plugin file.
+- **canvas.print_width_mm/print_height_mm** - Physical print size; required for print PDFs; ratio must match the canvas within 1%. When an order's snapshot lacks it, the current product value is used.
+- **canvas.print_bg_image / print_bg_image_id / print_bg_px** - Optional high-resolution print background (stretched to the page like `background-size: 100% 100%`).
+- **layers[].id / type ("text") / label / group / default_text (`\n` newlines) / hidden_on_frontend**.
+- **layers[].style** - CSS applied to the layer div:
+  - `left`, `top`, `width` in %;
+  - `rotate` in degrees (transform);
+  - `fontFamily` must match `fonts.css` (no print fallback);
+  - `fontSize` px;
+  - `lineHeight` number/px/%/normal;
+  - `letterSpacing` px, `color`, `textAlign`, `fontWeight`, `fontStyle`.
 
 ## Custom Fonts
 
-48 font files (45 `.ttf` + 3 `.otf`) bundled in `assets/fonts/`, declared by 48 `@font-face` rules (45 families) in `fonts.css` with `font-display: swap`. Decorative/script faces suitable for wedding/event invitations.
-- **Admin dropdown:** the authoritative family list is `Altegena_Product_Meta::get_available_fonts()`. Add a font there and in `fonts.css` together.
-- **Print:** `Altegena_Print_Font_Registry` reads `fonts.css`, so it is the print font registry too.
-- **CFF outlines:** Champignon, Christmas Wish Calligraphy and Marquette are CFF-outline OTFs, which need an offline TTF conversion for print.
-- **Glyph gaps:** check Settings → Altegena Davetiye → Font denetimi for missing Turkish characters.
+- **Files:** 48 files (45 `.ttf` + 3 `.otf`) in `assets/fonts/`, 48 `@font-face` rules / 45 families in `fonts.css` (`font-display: swap`).
+- **Admin dropdown:** the family list is `Altegena_Product_Meta::get_available_fonts()`; add fonts there and in `fonts.css` together.
+- **Print:** reads the same `fonts.css`.
+  - The CFF fonts Champignon, Christmas Wish Calligraphy and Marquette print from `assets/fonts/print/*.ttf` (fontTools otf2ttf; glyph ids, advances, cmap, GSUB/GPOS/GDEF verified identical).
+  - **When a source `.otf` changes, re-convert and update that README.**
+- **Font updates:** replacing a font file (e.g. adding missing Turkish glyphs) changes its SHA-1, so "Yeniden oluştur" re-renders affected items. Check Settings → Altegena Davetiye → Font denetimi for gaps.
+- **Embedding restrictions:** Lovely Home (fsType 0x0102) and Riesling (0x0002) forbid embedding → outlines only in the metinli PDF.
 
 ## WooCommerce Integration Points
 
 | Hook | Class | Purpose |
 |------|-------|---------|
-| `add_meta_boxes` | Product_Meta | Register "Invitation Editor" metabox on product screen |
-| `woocommerce_process_product_meta` | Product_Meta | Save JSON config (with validation, print key cleaning + wp_slash) |
-| `admin_enqueue_scripts` | Product_Meta, Settings | Load admin editor assets / settings page color picker |
-| `admin_menu`, `admin_init` | Settings | Register settings page and option |
-| `admin_post_altegena_font_safe_fix` | Print_Font_Audit | Apply spelling-only template font fixes |
-| `before_woocommerce_init` | Main file | Declare HPOS (custom order tables) compatibility |
-| `woocommerce_single_variation` | Cart_Handler | Render trigger button + modal |
-| `woocommerce_add_cart_item_data` | Cart_Handler | Capture (sanitized) design data into cart |
-| `woocommerce_get_item_data` | Cart_Handler | Display design data at checkout |
-| `woocommerce_checkout_create_order_line_item` | Cart_Handler (10), Print_Order_Handler (20) | Save design data / print snapshot to order item |
-| `woocommerce_order_item_get_formatted_meta_data` | Cart_Handler | Hide per-layer rows per visibility setting |
-| `wp_enqueue_scripts` | Main class, Share_Handler | Load CSS/JS on product pages / public share page |
-| `wp_head` | Product_Page_Handler, Share_Handler | Hide default buttons / print OG tags |
-| `init` | Share_Handler | Migration, CPT registration, rewrite flush |
+| `add_meta_boxes` | Product_Meta, Print_Admin | Product "Invitation Editor" metabox / order "Davetiye baskı PDF'leri" box |
+| `woocommerce_process_product_meta` | Product_Meta | Save JSON config (validation, print key cleaning, wp_slash) |
+| `admin_enqueue_scripts` | Product_Meta, Settings, Print_Admin | Admin editor assets / settings color picker / order print box assets |
+| `admin_menu`, `admin_init` | Settings | Settings page and option |
+| `admin_post_altegena_font_safe_fix` | Print_Font_Audit | Spelling-only template font fixes |
+| `before_woocommerce_init` | Main file | Declare HPOS compatibility |
+| `woocommerce_single_variation` | Cart_Handler | Trigger button + modal |
+| `woocommerce_add_cart_item_data` | Cart_Handler | Sanitized design data into cart |
+| `woocommerce_get_item_data` | Cart_Handler | Checkout display |
+| `woocommerce_checkout_create_order_line_item` | Cart_Handler (10), Print_Order_Handler (20) | Design data / print snapshot on the order item |
+| `woocommerce_order_item_get_formatted_meta_data` | Cart_Handler | Hide per-layer rows per visibility |
+| `woocommerce_payment_complete`, `woocommerce_order_status_processing`, `woocommerce_order_status_completed` | Print_Order_Handler | Queue print jobs |
+| `altegena_print_generate_item` (Action Scheduler, group `altegena-print`) | Print_Order_Handler | Render both PDFs for one item |
+| `woocommerce_before_delete_order`, `before_delete_post` | Print_Order_Handler | Delete the order's PDF folder |
+| `wp_ajax_altegena_print_regenerate`, `wp_ajax_altegena_print_save_texts` | Print_Admin | Regenerate / save text corrections |
+| `admin_post_altegena_print_download` | Print_Admin | Capability-checked PDF download |
+| `manage_woocommerce_page_wc-orders_columns` (+ legacy `manage_edit-shop_order_columns`) | Print_Admin | "Baskı PDF" orders list column |
+| `wp_enqueue_scripts` | Main class, Share_Handler | Product page / share page assets |
+| `wp_head` | Product_Page_Handler, Share_Handler | Hide default buttons / OG tags |
+| `init` | Share_Handler | Migration, CPT, rewrite flush |
 | `wp_ajax(_nopriv)_altegena_save_share` | Share_Handler | Save a shared invitation |
-| `template_include` | Share_Handler | Serve `templates/single-invitation.php` |
+| `template_include` | Share_Handler | Share page template |
 
-## Admin Visual Editor Usage
+## Admin Usage
 
-The primary way to design invitation layouts:
-1. Go to **Products → Edit Product** in wp-admin
-2. Scroll to the **"Invitation Editor"** metabox below the product data panel
-3. The **Visual Editor** tab is active by default — set canvas dimensions, pick a background image
-4. In **Baskı**, enter the print size in mm and optionally pick a high-resolution print background (check the DPI note)
-5. Click **"+ Katman Ekle"** to add text layers
-6. Drag layers on the canvas to position them, or use arrow keys for fine control (Shift for 10px steps)
-7. **Shift+click** multiple layers to select them, then drag or arrow-key to move them together
-8. Select a layer to edit its properties in the right panel (font, size, color, alignment, position)
-9. Switch to the **JSON** tab to view/edit raw JSON, or validate it
-10. Click **Update** to save the product — the config is stored as `_invitation_json_config` post meta
+**Designing a product:**
+1. Open Products → Edit Product → **Invitation Editor**.
+2. Set the canvas and background.
+3. In **Baskı**, enter the print size in mm and optionally a high-resolution print background (aim for green ≥300 DPI).
+4. Add and style layers, then **Update**.
 
-### Frontend Admin Mode (legacy)
+**Print PDFs:**
+- They are generated automatically after payment (Action Scheduler relies on WP-Cron; configure a real cron on low-traffic sites).
+- On the order screen, use **Davetiye baskı PDF'leri** to download "Konturlu" (outlines, for print) or "Metinli" (selectable), regenerate, or fix texts under "Metinleri düzenle" → "Kaydet ve PDF'leri yeniden oluştur".
+- Items that fail (missing glyph/font/size/background) show the reason; fix the font/template and click "Yeniden oluştur".
 
-Still available for quick position tweaks on the live product page:
-1. Navigate to the product page as a logged-in admin
-2. Append `?mode=admin` to the URL
-3. Open the editor modal
-4. Drag layers to desired positions
-5. Click "Copy Updated JSON" in the sidebar
-6. Paste the updated JSON into the product's "Invitation Editor" metabox in wp-admin
+**Proofs without orders (WP-CLI):** `wp altegena print-proof <product_id> --width-mm=160 --layout`.
+
+**Frontend admin mode (legacy):** `?mode=admin` on the product page lets you drag layers and "Copy Updated JSON" into the metabox.
 
 ## Key Implementation Details
 
-- **Block theme (FSE) compatibility:** The editor button hooks into `woocommerce_single_variation` rather than `woocommerce_single_product_summary` because FSE themes don't fire the latter.
-- **Modal is moved to `document.body`** via JS to escape z-index stacking contexts from theme containers.
-- **WordPress admin bar offset:** The modal CSS accounts for the admin bar (32px desktop, 46px mobile).
-- **Variation awareness:** The "customize" button is disabled until a product variation is selected (listens for `found_variation`/`reset_data` jQuery events).
-- **Cart page suppression:** Design data is intentionally hidden on the cart page (`is_cart()` check) but shown at checkout.
-- **Print output:** Orders store text data plus `_altegena_print_snapshot`. The print-ready PDF engine (outlined + selectable text, pure PHP for shared hosting) is being built on top of the snapshot; the share PNG is a preview, not a print asset.
+- **Block theme (FSE) compatibility:** the editor button hooks `woocommerce_single_variation`.
+- **Modal is moved to `document.body`** to escape stacking contexts; the admin bar offset is handled in CSS.
+- **Variation awareness:** the customize button is disabled until a variation is selected.
+- **Cart page suppression:** design data is hidden on the cart page, shown at checkout (per visibility).
+- **Print vs share:** the share PNG is a screen preview; print output is the PDF engine's vector output at physical size.
 
 ## Development Notes
 
-- No npm/composer dependencies - pure WordPress + jQuery (vendored: html2canvas, plugin-update-checker)
-- No REST API endpoints - uses WooCommerce's form-based `add-to-cart` POST and one admin-ajax action (`altegena_save_share`)
-- Custom post type `altegena_invitation` for shares; everything else lives in post meta, order item meta and the `altegena_settings` option
-- Settings page: **Settings → Altegena Davetiye** (`Altegena_Settings`, option `altegena_settings`) for visibility, colors, labels, share message, OG title/desc, default line-height; **Font denetimi** tab for fonts. Per-product design is still JSON post meta.
-- JS strings are mostly hardcoded Turkish; PHP labels/messages are configurable via settings + `altegena_*` filters (see Theme Integration below). Full `__()` i18n not yet done.
-- PHP code must stay compatible with PHP 7.4 (plugin header) through 8.4: no `match`, nullsafe operator, named arguments, union types or `str_contains`.
-- **wp_slash gotcha (post meta):** `update_post_meta()` internally calls `wp_unslash()`, so if you've already unslashed `$_POST` data, you must wrap with `wp_slash()` before saving — otherwise backslash sequences like `\n` in JSON get stripped. This applies to any meta value containing JSON with escape sequences.
-- **wp_slash gotcha (WC order item meta arrays):** `WC_Data_Store_WP::add_meta()` only slashes string values, but `add_metadata()` / `update_metadata_by_mid()` unslash arrays too. Always store meta arrays as `wp_slash($array)` (e.g. `_altegena_print_snapshot`), or backslashes inside customer text are lost. In-request reads after such a write return the slashed copy.
-- **Updates / releases:** `plugin-update-checker` watches the GitHub repo (`setBranch('main')`: releases → tags → branch). Bump `Version:` in the plugin header, `ALTEGENA_VERSION` and `Stable tag` in readme.txt together, then tag a release (tag name = version, no `v`) so sites receive it.
+- No npm/composer dependencies (vendored: html2canvas, plugin-update-checker). PHP 7.4–8.4 compatible: no `match`, nullsafe, named arguments, union types or `str_contains`.
+- **Settings page:** Settings → Altegena Davetiye (Genel, Font denetimi). Per-product design is JSON post meta.
+- **Strings:** JS strings are mostly hardcoded Turkish; PHP labels/messages are configurable via settings + `altegena_*` filters. Full `__()` i18n not done.
+- **wp_slash gotcha (post meta):** `update_post_meta()` unslashes internally; wrap unslashed JSON with `wp_slash()` or `\n` escapes are lost.
+- **wp_slash gotcha (WC meta):**
+  - `WC_Data_Store_WP::add_meta()` only slashes strings, while `add_metadata()` / `update_metadata_by_mid()` unslash arrays too, so store arrays as `wp_slash($array)` (e.g. `_altegena_print_snapshot`).
+  - Alternatively store JSON strings through delete + add meta (state/overrides), which round-trips without manual slashing.
+  - `WC_Order::get_item($id)` loads a fresh instance, distinct from `$order->get_items()`.
+- **Print verification (how the engine was validated; repeat after engine changes):**
+  - **Shaping:** compare `Altegena_Print_Shaper` against uharfbuzz (HarfBuzz 14) for every font using absolute glyph positions. All template fonts matched within 1 font unit. HarfBuzz splits legacy kern between two glyphs, but the positions are the same.
+  - **Layout:** measure an untransformed clone of the editor canvas in Chrome (`Range.getClientRects`, set `transition: none` before removing transforms) against `print-proof --layout`. Tested templates: rotation, letter-spacing, synthetic bold, line-height 0, left/right alignment. Result: ≤0.36 px everywhere.
+  - **PDFs:** PyMuPDF checks (no fonts in konturlu; embedded Type0 fonts and extractable Turkish text in metinli; both rasterize nearly identically).
+- **Known print limits:**
+  - Not supported: GPOS mark attachment (4/5/6), contextual positioning (7/8), GSUB 8, and Apple-style kern format 2 (only Anthem Of The Angels, unused).
+  - Characters missing as precomposed glyphs are an error (HarfBuzz would compose base + mark from the same font).
+  - Vertical metrics follow FreeType/Skia (Chrome on Linux/Android/ChromeOS). Windows/macOS browsers may place some script fonts' baselines differently.
+- **Storage security:** LiteSpeed/Apache honor the storage `.htaccess`; nginx does not (the random folder names still apply). The order box warns when the probe finds the folder publicly reachable; set `ALTEGENA_PRINT_DIR` outside the web root in that case.
+- **Updates / releases:** plugin-update-checker watches GitHub (`setBranch('main')`: releases → tags → branch). Bump `Version:`, `ALTEGENA_VERSION` and readme `Stable tag` together, then tag a release (tag = version, no `v`).
 
 ## Theme Integration / Extension API
 
-The plugin is theme-agnostic: it ships sensible defaults and works on any theme. A theme/site integrates through settings (**Settings → Altegena Davetiye**), the documented filters, and CSS custom properties — never by depending on the plugin's internals. `Altegena_Settings` (includes/class-settings.php) is the hub: `::text($key)` (label/message with built-in default + `altegena_$key` filter), `::visibility()`, `::css_vars()`, `::line_height()`, `::get()`.
+The plugin is theme-agnostic: sensible defaults, settings (**Settings → Altegena Davetiye**), documented filters and CSS custom properties — never theme dependencies on plugin internals. `Altegena_Settings` is the hub: `::text($key)`, `::visibility()`, `::css_vars()`, `::line_height()`, `::get()`.
 
 ### Filters
-- `altegena_label_customize`, `altegena_label_add_to_cart`, `altegena_label_share`, `altegena_modal_title` — UI button/title text
-- `altegena_share_message` — WhatsApp message prefix; `altegena_og_title`, `altegena_og_description` — share-page OG text
+- `altegena_label_customize`, `altegena_label_add_to_cart`, `altegena_label_share`, `altegena_modal_title` — UI text
+- `altegena_share_message`, `altegena_og_title`, `altegena_og_description` — share message / OG text
 - `altegena_personalization_visibility` — `admin_only` (default) | `customer_and_admin` | `hidden`
-- `altegena_colors` — assoc array of CSS variable → value (overrides settings)
-- `altegena_default_line_height` — unitless default layer line-height (editor, share page, print)
-- `altegena_seo_suppress_actions` — array of `['callback'=>fn, 'priority'=>n]`; on share pages the plugin `remove_action`s each from `wp_head` (theme opts in to prevent duplicate OG — replaces any hardcoded theme knowledge)
+- `altegena_colors` — CSS variable → value
+- `altegena_default_line_height` — default layer line-height (editor, share page, print)
+- `altegena_print_storage_dir` — print PDF storage folder
+- `altegena_seo_suppress_actions` — `wp_head` callbacks to remove on share pages
 
-### CSS custom properties (overridable by theme/settings)
-- **Fed from settings** via `wp_add_inline_style` on `:root`: `--altegena-accent`, `--altegena-accent-dark`, `--altegena-share`, `--altegena-share-dark`, `--altegena-line-height`.
+### CSS custom properties
+- **Fed from settings on `:root`:** `--altegena-accent`, `--altegena-accent-dark`, `--altegena-share`, `--altegena-share-dark`, `--altegena-line-height`.
 - **Fallback-only:** `--altegena-danger`, `--altegena-stage-bg`.
-- Used in editor.css / public-invitation.css / admin-editor.css as `var(--altegena-*, <default>)`.
 
 ### Personalization visibility
-The plugin owns whether the per-layer text rows appear to the customer. `Altegena_Cart_Handler::get_item_data()` only adds cart/checkout rows when `customer_and_admin`; `Altegena_Cart_Handler::filter_order_item_meta()` (on `woocommerce_order_item_get_formatted_meta_data`) hides the per-layer rows on the frontend for `admin_only` (kept in wp-admin) or everywhere for `hidden`, matching labels against the `_altegena_design_data` blob. Themes should NOT read the plugin's cart/order keys to hide these rows.
+- **Checkout rows:** `get_item_data()` only adds them for `customer_and_admin`.
+- **Order rows:** `filter_order_item_meta()` hides them on the frontend for `admin_only` and everywhere for `hidden`.
+- **Themes:** should not read the plugin's cart/order keys.
 
 ### dm-omni theme note
-The active `dm-omni` theme integrates via `altegena_seo_suppress_actions` (registers its `dm_seo_print_*` callbacks) and decorates the modal via stable `altegena-*` classes. It no longer contains the old hardcoded data-key hiding filters (the plugin handles visibility).
+The active `dm-omni` theme integrates via `altegena_seo_suppress_actions` and decorates the modal via stable `altegena-*` classes.

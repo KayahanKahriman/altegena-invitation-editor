@@ -231,6 +231,16 @@ class Altegena_Print_Font_Registry
         return $by_weight[$order[0]];
     }
 
+    /**
+     * File the print engine reads for a face. CFF-outline fonts have an offline
+     * TrueType conversion (same glyph ids/metrics) in assets/fonts/print/.
+     */
+    public static function print_file($face)
+    {
+        $converted = ALTEGENA_PLUGIN_DIR . 'assets/fonts/print/' . pathinfo($face['basename'], PATHINFO_FILENAME) . '.ttf';
+        return is_readable($converted) ? $converted : $face['file'];
+    }
+
     public static function file_sha1($path)
     {
         if (!isset(self::$sha1_cache[$path])) {
