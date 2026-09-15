@@ -105,6 +105,7 @@ class Altegena_Invitation_Editor
 			'share_nonce' => wp_create_nonce('altegena_share'),
 			'share_action' => 'altegena_save_share',
 			'product_id' => $post->ID,
+			'share_message' => Altegena_Settings::text('share_message'),
 		));
 	}
 }

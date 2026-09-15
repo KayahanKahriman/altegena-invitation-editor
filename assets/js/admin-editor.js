@@ -776,9 +776,7 @@
 
             this.$rightPanel.on('click', '#altegena-prop-delete', function (e) {
                 e.preventDefault();
-                if (confirm('Bu katmanı silmek istediğinize emin misiniz?')) {
-                    self.deleteSelectedLayer();
-                }
+                self.confirmDeleteSelectedLayers();
             });
         },
 
@@ -1009,12 +1007,24 @@
             this.syncConfigToHiddenField();
         },
 
-        deleteSelectedLayer: function () {
-            if (!this.selectedLayerId) return;
-            var idx = this.getLayerIndex(this.selectedLayerId);
-            if (idx === -1) return;
+        confirmDeleteSelectedLayers: function () {
+            var count = this.selectedLayerIds.length;
+            if (!count) return;
+            var message = count > 1
+                ? count + ' katmanı silmek istediğinize emin misiniz?'
+                : 'Bu katmanı silmek istediğinize emin misiniz?';
+            if (confirm(message)) {
+                this.deleteSelectedLayers();
+            }
+        },
 
-            this.config.layers.splice(idx, 1);
+        deleteSelectedLayers: function () {
+            var ids = this.selectedLayerIds.slice();
+            if (!ids.length) return;
+
+            this.config.layers = this.config.layers.filter(function (layer) {
+                return ids.indexOf(layer.id) === -1;
+            });
             this.deselectLayer();
             this.renderVisualEditor();
             this.syncConfigToHiddenField();
@@ -1131,9 +1141,7 @@
                 }
 
                 if (key === 'Delete') {
-                    if (confirm('Bu katmanı silmek istediğinize emin misiniz?')) {
-                        self.deleteSelectedLayer();
-                    }
+                    self.confirmDeleteSelectedLayers();
                     return;
                 }
 

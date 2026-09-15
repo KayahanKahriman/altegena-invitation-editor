@@ -159,8 +159,9 @@
             this.preview.on('input', '.altegena-layer', function () {
                 const $layer = $(this);
                 const layerId = $layer.attr('id').replace('altegena-layer-', '');
-                const text = $layer.text();
-                $(`.altegena-input-group[data-layer-id="${layerId}"] input`).val(text);
+                // innerText keeps the line breaks the browser inserts on Enter (<br>/<div>); .text() drops them
+                const text = this.innerText;
+                $(`.altegena-input-group[data-layer-id="${layerId}"] .altegena-layer-input`).val(text);
                 self.updateHiddenInput();
             });
 
@@ -536,7 +537,7 @@
         },
 
         showShareDialog: function (opts) {
-            const message = 'Davetiyemize göz atın:';
+            const message = altegena_config.share_message || 'Davetiyemize göz atın:';
             const waHref = 'https://wa.me/?text=' + encodeURIComponent(message + ' ' + opts.url);
 
             $('.altegena-share-overlay').remove();

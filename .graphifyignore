@@ -1,0 +1,4 @@
+# Third-party vendor code — keep the graph focused on the plugin itself
+includes/plugin-update-checker/
+assets/js/vendor/
+assets/fonts/
