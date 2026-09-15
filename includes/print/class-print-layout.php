@@ -10,8 +10,9 @@
  * - Blink metrics: ascent/descent rounded to px, half-leading floored;
  * - letter-spacing after every glyph cluster (and ligatures off when it's non-zero).
  *
- * Output coordinates are canvas pixels (y down). No fallback font: a missing
- * font file or glyph is an error.
+ * Output coordinates are canvas pixels (y down). The PDF page is the canvas at
+ * CSS size (1 px = 0.75 pt); the output is vector, so the print shop scales it
+ * freely. No fallback font: a missing font file or glyph is an error.
  */
 
 if (!defined('ABSPATH')) {
@@ -22,9 +23,11 @@ class Altegena_Print_Layout
 {
     const LANGUAGE = 'TRK ';
     const DEFAULT_FONT_SIZE = 16.0;
+    /** CSS reference pixel: 1px = 1/96 in = 0.75 pt. */
+    const PX_TO_PT = 0.75;
 
     /**
-     * @param array $snapshot _altegena_print_snapshot (canvas incl. print_* keys; layers with text)
+     * @param array $snapshot _altegena_print_snapshot (canvas; layers with text)
      * @param array $texts    optional {layer_id: text} overriding snapshot texts
      * @return array|WP_Error scene
      */
@@ -35,23 +38,6 @@ class Altegena_Print_Layout
         $height = isset($canvas['height']) ? (float) $canvas['height'] : 0.0;
         if ($width <= 0 || $height <= 0) {
             return new WP_Error('bad_canvas', 'Tuval ölçüsü geçersiz.');
-        }
-        if (empty($canvas['print_width_mm']) || empty($canvas['print_height_mm'])) {
-            return new WP_Error('print_size_missing', 'Ürün şablonunda baskı ölçüsü (mm) girilmemiş.');
-        }
-
-        $k = (float) $canvas['print_width_mm'] / 25.4 * 72 / $width;
-        $page_width = $width * $k;
-        $page_height = $height * $k;
-        $expected_height = (float) $canvas['print_height_mm'] / 25.4 * 72;
-        if (abs($expected_height - $page_height) / $page_height > 0.01) {
-            return new WP_Error('print_ratio_mismatch', sprintf(
-                'Baskı ölçüsü oranı tuvalle uyuşmuyor (%s × %s mm, tuval %s × %s px).',
-                $canvas['print_width_mm'],
-                $canvas['print_height_mm'],
-                $width,
-                $height
-            ));
         }
 
         $registry = Altegena_Print_Font_Registry::get_instance();
@@ -215,7 +201,7 @@ class Altegena_Print_Layout
 
         return array(
             'canvas' => array('width' => $width, 'height' => $height),
-            'page' => array('width_pt' => $page_width, 'height_pt' => $page_height, 'k' => $k),
+            'page' => array('width_pt' => $width * self::PX_TO_PT, 'height_pt' => $height * self::PX_TO_PT, 'k' => self::PX_TO_PT),
             'layers' => $layers,
             'warnings' => $warnings,
         );

@@ -29,7 +29,7 @@ class Altegena_Print_Order_Handler
 
     /** Errors retrying can't fix: they need a template, font, image or text change. */
     const PERMANENT_ERRORS = array(
-        'no_design', 'bad_config', 'bad_canvas', 'print_size_missing', 'print_ratio_mismatch',
+        'no_design', 'bad_config', 'bad_canvas',
         'font_missing', 'font_unsupported', 'missing_glyph',
         'background_missing', 'background_unreadable', 'background_unsupported', 'background_too_large',
     );
@@ -288,7 +288,6 @@ class Altegena_Print_Order_Handler
             if (!empty($snapshot['backfilled'])) {
                 $notes[] = 'Sipariş eski: tasarım, siparişteki metinler ile ürünün güncel şablonundan oluşturuldu.';
             }
-            $snapshot = self::with_current_print_settings($snapshot, $notes);
             $overrides = self::get_overrides($item);
             $hash = self::input_hash($snapshot, $overrides);
 
@@ -342,16 +341,8 @@ class Altegena_Print_Order_Handler
                 'input_hash' => $hash,
                 'generated_at' => gmdate('c'),
                 'duration_ms' => (int) round((microtime(true) - $started) * 1000),
-                'page_mm' => array(
-                    round($result['scene']['page']['width_pt'] / 72 * 25.4, 1),
-                    round($result['scene']['page']['height_pt'] / 72 * 25.4, 1),
-                ),
+                'page_px' => array((int) round($result['scene']['canvas']['width']), (int) round($result['scene']['canvas']['height'])),
                 'files' => $files,
-                'background' => array(
-                    'source' => $result['background']['source'],
-                    'px' => $result['background']['px'],
-                    'dpi' => (int) round($result['background']['dpi']),
-                ),
                 'warnings' => array_values(array_unique(array_merge($notes, $result['warnings']))),
                 'error' => null,
             );
@@ -397,47 +388,6 @@ class Altegena_Print_Order_Handler
             }
         }
         return true;
-    }
-
-    /**
-     * Print size and print background are product settings, not customer design:
-     * when the snapshot has none (e.g. the admin added them after the order), take
-     * them from the current template — only if the canvas pixel size is unchanged.
-     */
-    private static function with_current_print_settings($snapshot, &$notes)
-    {
-        $canvas = $snapshot['canvas'];
-        $needs_size = empty($canvas['print_width_mm']) || empty($canvas['print_height_mm']);
-        $needs_background = empty($canvas['print_bg_image']);
-        if (!$needs_size && !$needs_background) {
-            return $snapshot;
-        }
-
-        $template = Altegena_Design_Config::get_template($snapshot['product_id']);
-        if (is_wp_error($template)) {
-            return $snapshot;
-        }
-        $current = Altegena_Design_Config::clean_print_keys($template['config']['canvas']);
-        if (!isset($current['width'], $current['height']) || (float) $current['width'] !== (float) $canvas['width'] || (float) $current['height'] !== (float) $canvas['height']) {
-            return $snapshot;
-        }
-
-        if ($needs_size && !empty($current['print_width_mm']) && !empty($current['print_height_mm'])) {
-            $canvas['print_width_mm'] = $current['print_width_mm'];
-            $canvas['print_height_mm'] = $current['print_height_mm'];
-            $notes[] = 'Baskı ölçüsü siparişten sonra üründen alındı.';
-        }
-        if ($needs_background && !empty($current['print_bg_image'])) {
-            foreach (array('print_bg_image', 'print_bg_image_id', 'print_bg_px') as $key) {
-                if (isset($current[$key])) {
-                    $canvas[$key] = $current[$key];
-                }
-            }
-            $notes[] = 'Baskı arka planı siparişten sonra üründen alındı.';
-        }
-
-        $snapshot['canvas'] = $canvas;
-        return $snapshot;
     }
 
     /** Everything that changes the output: design, corrections, engine, default line-height, font files, background file. */

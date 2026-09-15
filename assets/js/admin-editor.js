@@ -37,7 +37,6 @@
             this.initializeConfig();
             this.bindTabSwitching();
             this.bindCanvasSettings();
-            this.bindPrintSettings();
             this.bindLayerManagement();
             this.bindPropertyPanel();
             this.bindFormSubmission();
@@ -237,7 +236,6 @@
                     : 'none'
             });
             this.fitCanvas();
-            this.updatePrintInfo();
             this.syncConfigToHiddenField();
         },
 
@@ -271,180 +269,6 @@
                     self.fitCanvas();
                 });
                 this._resizeObserver.observe(this.$canvasArea[0]);
-            }
-        },
-
-        // ─── Print Settings ──────────────────────────────────────
-
-        _imageSizes: {},
-        _printInfoToken: 0,
-
-        bindPrintSettings: function () {
-            var self = this;
-
-            this.$leftPanel.on('change', '#altegena-print-width-mm, #altegena-print-height-mm', function () {
-                var canvas = self.config.canvas;
-                var isWidth = this.id === 'altegena-print-width-mm';
-                var key = isWidth ? 'print_width_mm' : 'print_height_mm';
-                var otherKey = isWidth ? 'print_height_mm' : 'print_width_mm';
-                var locked = $('#altegena-print-lock-ratio').is(':checked') && canvas.width > 0 && canvas.height > 0;
-                var val = parseFloat($(this).val());
-
-                if (val > 0) {
-                    canvas[key] = self.roundMm(val);
-                    if (locked) {
-                        var ratio = isWidth ? canvas.height / canvas.width : canvas.width / canvas.height;
-                        canvas[otherKey] = self.roundMm(val * ratio);
-                    }
-                } else {
-                    delete canvas[key];
-                    if (locked) {
-                        delete canvas[otherKey];
-                    }
-                }
-
-                self.renderPrintFields();
-                self.updatePrintInfo();
-                self.syncConfigToHiddenField();
-            });
-
-            this.$leftPanel.on('click', '#altegena-print-bg-select-btn', function (e) {
-                e.preventDefault();
-                self.openPrintBgPicker();
-            });
-
-            this.$leftPanel.on('click', '.altegena-admin-print-bg-remove', function (e) {
-                e.preventDefault();
-                delete self.config.canvas.print_bg_image;
-                delete self.config.canvas.print_bg_image_id;
-                delete self.config.canvas.print_bg_px;
-                self.renderPrintFields();
-                self.updatePrintInfo();
-                self.syncConfigToHiddenField();
-            });
-        },
-
-        roundMm: function (value) {
-            return Math.round(value * 10) / 10;
-        },
-
-        openPrintBgPicker: function () {
-            var self = this;
-            var frame = wp.media({
-                title: 'Baskı Arka Planı Seç',
-                button: { text: 'Seç' },
-                multiple: false,
-                library: { type: 'image' }
-            });
-
-            frame.on('select', function () {
-                var attachment = frame.state().get('selection').first().toJSON();
-                var canvas = self.config.canvas;
-                canvas.print_bg_image = attachment.url;
-                canvas.print_bg_image_id = attachment.id;
-                if (attachment.width && attachment.height) {
-                    canvas.print_bg_px = { w: attachment.width, h: attachment.height };
-                } else {
-                    delete canvas.print_bg_px;
-                }
-                self.renderPrintFields();
-                self.updatePrintInfo();
-                self.syncConfigToHiddenField();
-            });
-
-            frame.open();
-        },
-
-        renderPrintFields: function () {
-            var canvas = this.config.canvas;
-            $('#altegena-print-width-mm').val(canvas.print_width_mm || '');
-            $('#altegena-print-height-mm').val(canvas.print_height_mm || '');
-            $('#altegena-print-bg-url').val(canvas.print_bg_image || '');
-
-            var $preview = this.$leftPanel.find('.altegena-admin-print-bg-preview').empty();
-            if (canvas.print_bg_image) {
-                $preview.append($('<img>', { src: canvas.print_bg_image, alt: '' }));
-                $preview.append('<button type="button" class="altegena-admin-print-bg-remove" title="Kaldır">&times;</button>');
-            }
-        },
-
-        getImageSize: function (url, callback) {
-            var self = this;
-            if (self._imageSizes[url]) {
-                callback(self._imageSizes[url]);
-                return;
-            }
-            var img = new Image();
-            img.onload = function () {
-                self._imageSizes[url] = { w: img.naturalWidth, h: img.naturalHeight };
-                callback(self._imageSizes[url]);
-            };
-            img.onerror = function () {
-                callback(null);
-            };
-            img.src = url;
-        },
-
-        // Print notes: mm size present, mm/canvas ratio, background DPI (pixels / print inches).
-        updatePrintInfo: function () {
-            var self = this;
-            var canvas = this.config.canvas;
-            var $info = this.$leftPanel.find('.altegena-admin-print-info');
-            var token = ++this._printInfoToken;
-            if (!$info.length) return;
-
-            var show = function (notes) {
-                if (token !== self._printInfoToken) return;
-                $info.empty();
-                notes.forEach(function (note) {
-                    $('<p>', { 'class': 'altegena-print-note ' + note.cls, text: note.text }).appendTo($info);
-                });
-            };
-
-            if (!(canvas.print_width_mm > 0) || !(canvas.print_height_mm > 0)) {
-                show([{ cls: 'is-red', text: 'Baskı ölçüsü girilmedi — bu ürün için PDF üretilemez.' }]);
-                return;
-            }
-
-            var canvasRatio = canvas.width / canvas.height;
-            var notes = [];
-            var mmDelta = Math.abs((canvas.print_width_mm / canvas.print_height_mm) / canvasRatio - 1);
-            if (mmDelta > 0.01) {
-                notes.push({ cls: 'is-red', text: 'Baskı ölçüsü oranı tuvalle uyuşmuyor (%' + (mmDelta * 100).toFixed(1) + ') — PDF üretilemez.' });
-            }
-
-            var isPrint = !!canvas.print_bg_image;
-            var url = isPrint ? canvas.print_bg_image : canvas.bg_image;
-            var label = isPrint ? 'Baskı arka planı' : 'Site arka planı';
-
-            var withSize = function (size) {
-                var out = notes.slice();
-                if (size && size.w && size.h) {
-                    var dpi = Math.min(size.w / (canvas.print_width_mm / 25.4), size.h / (canvas.print_height_mm / 25.4));
-                    var text = label + ': ' + Math.round(dpi) + ' DPI';
-                    if (dpi < 300) {
-                        text += isPrint ? ' (önerilen ≥ 300)' : ' — yüksek çözünürlüklü baskı arka planı yükleyin.';
-                    }
-                    out.push({ cls: dpi >= 300 ? 'is-green' : (dpi >= 150 ? 'is-amber' : 'is-red'), text: text });
-
-                    var bgDelta = Math.abs((size.w / size.h) / canvasRatio - 1);
-                    if (bgDelta > 0.01) {
-                        out.push({ cls: 'is-amber', text: label + ' oranı tuvalle uyuşmuyor (%' + (bgDelta * 100).toFixed(1) + ').' });
-                    }
-                } else if (url) {
-                    out.push({ cls: 'is-amber', text: label + ' çözünürlüğü okunamadı.' });
-                } else {
-                    out.push({ cls: 'is-amber', text: 'Arka plan görseli yok.' });
-                }
-                show(out);
-            };
-
-            if (isPrint && canvas.print_bg_px) {
-                withSize(canvas.print_bg_px);
-            } else if (url) {
-                this.getImageSize(url, withSize);
-            } else {
-                withSize(null);
             }
         },
 
@@ -543,7 +367,6 @@
             $('#altegena-canvas-height').val(this.config.canvas.height);
             $('#altegena-bg-url').val(this.config.canvas.bg_image || '');
             this.renderBgPreview();
-            this.renderPrintFields();
         },
 
         collapsedGroups: {},

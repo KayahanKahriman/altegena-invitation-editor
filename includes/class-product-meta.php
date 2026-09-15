@@ -180,32 +180,6 @@ class Altegena_Product_Meta
                         </div>
                     </div>
 
-                    <div class="altegena-admin-panel-section">
-                        <h4>Baskı</h4>
-                        <div class="altegena-admin-field-row">
-                            <div class="altegena-admin-field">
-                                <label for="altegena-print-width-mm">Genişlik (mm)</label>
-                                <input type="number" id="altegena-print-width-mm" min="1" max="5000" step="0.1">
-                            </div>
-                            <div class="altegena-admin-field">
-                                <label for="altegena-print-height-mm">Yükseklik (mm)</label>
-                                <input type="number" id="altegena-print-height-mm" min="1" max="5000" step="0.1">
-                            </div>
-                        </div>
-                        <div class="altegena-admin-field altegena-admin-field-checkbox">
-                            <label><input type="checkbox" id="altegena-print-lock-ratio" checked> Oranı tuvale kilitle</label>
-                        </div>
-                        <div class="altegena-admin-field">
-                            <label>Baskı Arka Planı (yüksek çözünürlük)</label>
-                            <div class="altegena-admin-bg-field">
-                                <input type="text" id="altegena-print-bg-url" readonly placeholder="Seçilmedi — site görseli kullanılır">
-                                <button type="button" class="button" id="altegena-print-bg-select-btn">Seç</button>
-                            </div>
-                            <div class="altegena-admin-print-bg-preview"></div>
-                        </div>
-                        <div class="altegena-admin-print-info"></div>
-                    </div>
-
                     <div class="altegena-admin-panel-section" style="flex: 1;">
                         <h4>Katmanlar</h4>
                         <ul class="altegena-admin-layer-list"></ul>
@@ -416,14 +390,6 @@ class Altegena_Product_Meta
             if (!empty($raw)) {
                 $decoded = json_decode($raw, true);
                 if (json_last_error() === JSON_ERROR_NONE && isset($decoded['canvas']) && isset($decoded['layers'])) {
-                    // Drop invalid print keys (mm size, print background). Re-encode only when
-                    // something was dropped, so the admin's JSON is otherwise stored as sent.
-                    $canvas = Altegena_Design_Config::clean_print_keys($decoded['canvas']);
-                    if ($canvas != $decoded['canvas']) {
-                        $object = json_decode($raw);
-                        $object->canvas = $canvas;
-                        $raw = wp_json_encode($object, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                    }
                     // wp_slash to compensate for update_post_meta's internal wp_unslash
                     update_post_meta($post_id, '_invitation_json_config', wp_slash($raw));
                 }

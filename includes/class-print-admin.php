@@ -123,8 +123,8 @@ class Altegena_Print_Admin
         }
 
         $meta = array();
-        if (!empty($state['page_mm'])) {
-            $meta[] = sprintf('%s × %s mm', $state['page_mm'][0], $state['page_mm'][1]);
+        if (!empty($state['page_px'])) {
+            $meta[] = sprintf('%d × %d px', $state['page_px'][0], $state['page_px'][1]);
         }
         if (!empty($state['generated_at'])) {
             $meta[] = wp_date(get_option('date_format') . ' ' . get_option('time_format'), strtotime($state['generated_at']));

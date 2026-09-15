@@ -3,7 +3,7 @@ Contributors: kayahan
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -24,10 +24,21 @@ usual "update available" notice when a newer release is tagged.
 
 == Changelog ==
 
+= 1.4.1 =
+* Print size removed: PDFs no longer need a print size (mm) on the product. The page is the canvas at its CSS size (1 px = 0.75 pt), and the print shop scales the vector output and adds bleed as needed.
+* Removed the product editor's "Baskı" section (mm fields, ratio lock, print background picker, DPI notes). PDFs always use the template background.
+* The order screen shows the page size in pixels; DPI and aspect-ratio warnings are gone.
+* `wp altegena print-proof` no longer takes `--width-mm`.
+
 = 1.4.0 =
 * Print-ready PDFs: after payment, every invitation order item gets two PDFs at the product's physical size — "konturlu" (text as vector outlines) and "metinli" (selectable text with embedded fonts).
-* Pure-PHP print engine (no Chromium/Ghostscript/Imagick, works on shared hosting): browser-identical layout, OpenType shaping (Turkish locl, ligatures, kerning), synthetic bold/italic, rotation, letter spacing, print background with DPI checks. No fallback fonts: a missing font or glyph stops that item with a clear reason.
-* Order screen box "Davetiye baskı PDF'leri": download, regenerate, and correct layer texts before printing (the customer's original text is kept); "Baskı PDF" column in the orders list.
+* Pure-PHP print engine that works on shared hosting, with no Chromium/Ghostscript/Imagick:
+  * Browser-identical layout.
+  * OpenType shaping: Turkish locl, ligatures, kerning.
+  * Synthetic bold/italic, rotation and letter spacing.
+  * Print background with DPI checks.
+  * No fallback fonts: a missing font or glyph stops that item with a clear reason.
+* Order screen box "Davetiye baskı PDF'leri": download, regenerate, and correct layer texts before printing (the customer's original text is kept). The orders list gets a "Baskı PDF" column.
 * Generation runs in the background (Action Scheduler) with retries; PDFs are stored in a protected folder and downloaded through wp-admin only.
 * WP-CLI: `wp altegena print-proof <product_id>` renders proof PDFs for a template.
 

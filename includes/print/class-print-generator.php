@@ -2,9 +2,8 @@
 /**
  * Builds print PDFs from a design snapshot.
  *
- * One layout feeds every output; this class resolves the background (print
- * background first, then the site background), checks its resolution and
- * assembles the PDF.
+ * One layout feeds both outputs; the background is the template's site
+ * background image, stretched to the page like `background-size: 100% 100%`.
  */
 
 if (!defined('ABSPATH')) {
@@ -13,8 +12,6 @@ if (!defined('ABSPATH')) {
 
 class Altegena_Print_Generator
 {
-    const MIN_DPI = 300;
-
     /**
      * Both print PDFs from a single layout: 'outline' (text converted to vector
      * paths, no fonts) and 'text' (selectable text with embedded fonts).
@@ -61,35 +58,19 @@ class Altegena_Print_Generator
             'text' => $writer->output('Davetiye (metinli)'),
             'scene' => $scene,
             'background' => $background,
-            'warnings' => array_values(array_unique(array_merge($scene['warnings'], $background['warnings'], $text->warnings()))),
+            'warnings' => array_values(array_unique(array_merge($scene['warnings'], $text->warnings()))),
         );
     }
 
     /**
-     * @return array|WP_Error {path, source, px: [w, h], dpi, warnings}
+     * The template's background image (`canvas.bg_image`) as a local file.
+     *
+     * @return array|WP_Error {path, px: [w, h]}
      */
     public static function resolve_background($canvas)
     {
-        $path = null;
-        $source = 'bg_image';
         $reference = isset($canvas['bg_image']) ? (string) $canvas['bg_image'] : '';
-
-        if (!empty($canvas['print_bg_image_id'])) {
-            $attached = get_attached_file((int) $canvas['print_bg_image_id']);
-            if ($attached && is_readable($attached)) {
-                $path = $attached;
-                $source = 'print_bg';
-            }
-        }
-        if ($path === null && !empty($canvas['print_bg_image'])) {
-            $path = self::url_to_path((string) $canvas['print_bg_image']);
-            $source = 'print_bg';
-            $reference = (string) $canvas['print_bg_image'];
-        }
-        if ($path === null && $source !== 'print_bg') {
-            $path = self::url_to_path($reference);
-        }
-
+        $path = $reference !== '' ? self::url_to_path($reference) : null;
         if ($path === null) {
             return new WP_Error('background_missing', sprintf('Arka plan görseli bulunamadı: %s', $reference !== '' ? $reference : '(boş)'));
         }
@@ -99,28 +80,7 @@ class Altegena_Print_Generator
             return new WP_Error('background_unreadable', sprintf('Arka plan görseli okunamadı: %s', basename($path)));
         }
 
-        $warnings = array();
-        $dpi = 0;
-        if (!empty($canvas['print_width_mm']) && !empty($canvas['print_height_mm'])) {
-            $dpi = min($size[0] / ((float) $canvas['print_width_mm'] / 25.4), $size[1] / ((float) $canvas['print_height_mm'] / 25.4));
-            if ($dpi < self::MIN_DPI) {
-                $warnings[] = sprintf('Arka plan çözünürlüğü düşük: %d DPI (önerilen ≥ %d)%s.', round($dpi), self::MIN_DPI, $source === 'print_bg' ? '' : ' — ürüne yüksek çözünürlüklü baskı arka planı ekleyin');
-            }
-        }
-        if (!empty($canvas['width']) && !empty($canvas['height'])) {
-            $delta = abs(($size[0] / $size[1]) / ((float) $canvas['width'] / (float) $canvas['height']) - 1);
-            if ($delta > 0.01) {
-                $warnings[] = sprintf('Arka plan oranı tuvalle uyuşmuyor (%%%.1f); görsel sayfaya esnetilir.', $delta * 100);
-            }
-        }
-
-        return array(
-            'path' => $path,
-            'source' => $source,
-            'px' => array($size[0], $size[1]),
-            'dpi' => $dpi,
-            'warnings' => $warnings,
-        );
+        return array('path' => $path, 'px' => array($size[0], $size[1]));
     }
 
     /**

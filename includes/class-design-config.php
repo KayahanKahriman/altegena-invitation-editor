@@ -79,61 +79,6 @@ class Altegena_Design_Config
     }
 
     /**
-     * Validate the print-related canvas keys; every other canvas key is left untouched.
-     */
-    public static function clean_print_keys($canvas)
-    {
-        $canvas = is_array($canvas) ? $canvas : array();
-
-        foreach (array('print_width_mm', 'print_height_mm') as $key) {
-            if (!isset($canvas[$key])) {
-                continue;
-            }
-            $value = is_numeric($canvas[$key]) ? round((float) $canvas[$key], 2) : 0;
-            if ($value >= 1 && $value <= 5000) {
-                $canvas[$key] = $value;
-            } else {
-                unset($canvas[$key]);
-            }
-        }
-
-        if (isset($canvas['print_bg_image'])) {
-            $url = is_string($canvas['print_bg_image']) ? esc_url_raw($canvas['print_bg_image']) : '';
-            if ($url !== '') {
-                $canvas['print_bg_image'] = $url;
-            } else {
-                unset($canvas['print_bg_image']);
-            }
-        }
-
-        if (isset($canvas['print_bg_image_id'])) {
-            $id = absint($canvas['print_bg_image_id']);
-            if ($id) {
-                $canvas['print_bg_image_id'] = $id;
-            } else {
-                unset($canvas['print_bg_image_id']);
-            }
-        }
-
-        if (isset($canvas['print_bg_px'])) {
-            $px = $canvas['print_bg_px'];
-            $w = is_array($px) && isset($px['w']) ? absint($px['w']) : 0;
-            $h = is_array($px) && isset($px['h']) ? absint($px['h']) : 0;
-            if ($w && $h) {
-                $canvas['print_bg_px'] = array('w' => $w, 'h' => $h);
-            } else {
-                unset($canvas['print_bg_px']);
-            }
-        }
-
-        if (empty($canvas['print_bg_image'])) {
-            unset($canvas['print_bg_image_id'], $canvas['print_bg_px']);
-        }
-
-        return $canvas;
-    }
-
-    /**
      * Immutable per-order-item snapshot for print: the trusted template layout
      * plus the text each layer showed to the customer.
      *
@@ -207,7 +152,7 @@ class Altegena_Design_Config
             'variation_id' => (int) $variation_id,
             'template_sha1' => sha1($template['raw']),
             'backfilled' => (bool) $backfilled,
-            'canvas' => self::clean_print_keys($config['canvas']),
+            'canvas' => is_array($config['canvas']) ? $config['canvas'] : array(),
             'layers' => $layers,
             'fonts' => $fonts,
         );

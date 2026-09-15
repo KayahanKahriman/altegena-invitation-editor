@@ -10,7 +10,7 @@ if (!defined('ABSPATH') || !defined('WP_CLI') || !WP_CLI) {
 class Altegena_Print_CLI
 {
     /**
-     * Render a print proof PDF for a product template.
+     * Render print proof PDFs for a product template.
      *
      * ## OPTIONS
      *
@@ -20,9 +20,6 @@ class Altegena_Print_CLI
      * [--texts=<json>]
      * : JSON object {layer_id: text} replacing the template texts.
      *
-     * [--width-mm=<mm>]
-     * : Print width to use when the template has no print size (height follows the canvas ratio).
-     *
      * [--out=<dir>]
      * : Output directory. Default: uploads/altegena-print-proof
      *
@@ -31,7 +28,7 @@ class Altegena_Print_CLI
      *
      * ## EXAMPLES
      *
-     *     wp altegena print-proof 3906 --width-mm=160 --layout
+     *     wp altegena print-proof 3906 --layout
      *
      * @subcommand print-proof
      */
@@ -55,15 +52,6 @@ class Altegena_Print_CLI
             WP_CLI::error($snapshot->get_error_message());
         }
 
-        if (isset($assoc_args['width-mm'])) {
-            $mm = (float) $assoc_args['width-mm'];
-            if ($mm <= 0) {
-                WP_CLI::error('--width-mm pozitif olmalı.');
-            }
-            $snapshot['canvas']['print_width_mm'] = $mm;
-            $snapshot['canvas']['print_height_mm'] = round($mm * $snapshot['canvas']['height'] / $snapshot['canvas']['width'], 3);
-        }
-
         $uploads = wp_upload_dir();
         $dir = isset($assoc_args['out']) ? rtrim($assoc_args['out'], '/') : $uploads['basedir'] . '/altegena-print-proof';
         if (!wp_mkdir_p($dir)) {
@@ -82,13 +70,11 @@ class Altegena_Print_CLI
         file_put_contents($text_file, $result['text']);
 
         WP_CLI::log(sprintf(
-            'Sayfa: %.2f × %.2f mm | arka plan: %s %d×%d (%d DPI) | %d katman | konturlu %s KB, metinli %s KB | %.2f sn | tepe bellek %.1f MB',
-            $snapshot['canvas']['print_width_mm'],
-            $snapshot['canvas']['print_height_mm'],
-            $result['background']['source'],
+            'Sayfa: %s × %s px | arka plan: %d×%d | %d katman | konturlu %s KB, metinli %s KB | %.2f sn | tepe bellek %.1f MB',
+            $result['scene']['canvas']['width'],
+            $result['scene']['canvas']['height'],
             $result['background']['px'][0],
             $result['background']['px'][1],
-            round($result['background']['dpi']),
             count($result['scene']['layers']),
             number_format(strlen($result['outline']) / 1024, 1),
             number_format(strlen($result['text']) / 1024, 1),
@@ -105,7 +91,7 @@ class Altegena_Print_CLI
             WP_CLI::log('Yerleşim: ' . $layout_file);
         }
 
-        WP_CLI::success($file);
+        WP_CLI::success($file . ' + ' . basename($text_file));
     }
 }
 
