@@ -15,8 +15,8 @@ cmap and the GSUB/GPOS/GDEF tables identical to the source.
 | Print file | Source (`assets/fonts/`) | Source SHA-1 | Print file SHA-1 |
 |---|---|---|---|
 | Champignon.ttf | Champignon.otf | 8179653f6c751a1e5cf2999592c14aa1c789b305 | e116fc0972d47379b4c3fc96686e04cc84a1525c |
-| ChristmasWishCalligraphy.ttf | ChristmasWishCalligraphy.otf | f0e7100f39072c6fc870b950cda9155ad93ca188 | 83e42c465450dad405a09b5f0a4002acc17d1e5a |
-| Marquette.ttf | Marquette.otf | bef285331f87bc89b8be6f22fb4161cb5370d96f | f6715c9c3f86751ad5889d04be52509e49b58ae4 |
+| ChristmasWish-TR.ttf | ChristmasWish-TR.otf | 272df431eab1a763465d7316828e647cb66987c4 | 2221929be51312f431209848a104fc75ae954b0c |
+| Marquette-TR.ttf | Marquette-TR.otf | 21d710864451682a8bb01e24330cede11bba60cc | d80831dabdca0319a4749945fee518fa6e06030c |
 
 If a source `.otf` changes (for example to add missing Turkish glyphs),
 re-run the conversion and update this table. Otherwise the print output will

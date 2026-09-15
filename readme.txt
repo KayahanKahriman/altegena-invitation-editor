@@ -3,7 +3,7 @@ Contributors: kayahan
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.4.1
+Stable tag: 1.4.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -23,6 +23,13 @@ Updates are delivered from the plugin's GitHub repository — WordPress shows th
 usual "update available" notice when a newer release is tagged.
 
 == Changelog ==
+
+= 1.4.2 =
+* Turkish letters were added to 7 fonts: Angers Script, Belgedes, Christmas Wish Calligraphy, Lovely Home, Madina, Marquette and Queen Xylophia.
+  * The font files have new `-TR` names, so browsers and page caches cannot keep serving the old files.
+  * Existing letters keep their widths, so current designs don't move. Marquette's previously blank Ç, ç and ı are now drawn.
+* Print TrueType conversions of Christmas Wish Calligraphy and Marquette were regenerated from the new fonts.
+* Print items that failed because of these missing letters can be rebuilt with "Yeniden oluştur".
 
 = 1.4.1 =
 * Print size removed: PDFs no longer need a print size (mm) on the product. The page is the canvas at its CSS size (1 px = 0.75 pt), and the print shop scales the vector output and adds bleed as needed.

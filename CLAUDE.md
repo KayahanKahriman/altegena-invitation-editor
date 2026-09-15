@@ -11,7 +11,7 @@ When an order is paid, the plugin renders two PDFs per invitation item for the p
 The print shop downloads them and handles sizing and bleed itself.
 
 **Author:** Kayahan
-**Version:** 1.4.1
+**Version:** 1.4.2
 **Text Domain:** `altegena-invitation-editor`
 **Constants prefix:** `ALTEGENA_`
 **UI Language:** Turkish (button labels, error messages)

@@ -29,7 +29,7 @@
 
 @font-face {
     font-family: 'Angers Script';
-    src: url('../fonts/AngersScriptTR.ttf') format('truetype');
+    src: url('../fonts/AngersScript-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -69,7 +69,7 @@
 
 @font-face {
     font-family: 'Belgedes';
-    src: url('../fonts/Belgedes.ttf') format('truetype');
+    src: url('../fonts/Belgedes-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -117,7 +117,7 @@
 
 @font-face {
     font-family: 'Christmas Wish Calligraphy';
-    src: url('../fonts/ChristmasWishCalligraphy.otf') format('opentype');
+    src: url('../fonts/ChristmasWish-TR.otf') format('opentype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -181,7 +181,7 @@
 
 @font-face {
     font-family: 'Lovely Home';
-    src: url('../fonts/LovelyHome.ttf') format('truetype');
+    src: url('../fonts/LovelyHome-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -189,7 +189,7 @@
 
 @font-face {
     font-family: 'Madina';
-    src: url('../fonts/Madina.ttf') format('truetype');
+    src: url('../fonts/Madina-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -205,7 +205,7 @@
 
 @font-face {
     font-family: 'Marquette';
-    src: url('../fonts/Marquette.otf') format('opentype');
+    src: url('../fonts/Marquette-TR.otf') format('opentype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -285,7 +285,7 @@
 
 @font-face {
     font-family: 'Queen Xylophia';
-    src: url('../fonts/QueenXylophia.ttf') format('truetype');
+    src: url('../fonts/QueenXylophia-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
