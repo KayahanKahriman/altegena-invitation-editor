@@ -11,7 +11,7 @@ When an order is paid, the plugin renders two PDFs per invitation item for the p
 The print shop downloads them and handles sizing and bleed itself.
 
 **Author:** Kayahan
-**Version:** 1.4.6
+**Version:** 1.4.7
 **Text Domain:** `altegena-invitation-editor`
 **Constants prefix:** `ALTEGENA_`
 **UI Language:** Turkish (button labels, error messages)
@@ -24,6 +24,8 @@ The print shop downloads them and handles sizing and bleed itself.
 - **Singleton pattern** - Hook-owning PHP classes use `get_instance()` singletons; print engine classes are plain classes.
 - **No build step** - Plain jQuery-based JS, no bundler/transpiler. No composer: the print engine is dependency-free PHP (runs on shared hosting without Chromium/Ghostscript/Imagick).
 - **No fallback fonts for print** - Every layer is printed with its own bundled font file. A missing family, file or glyph is an error that blocks that item's PDF, never a silent substitution.
+  - The only exception is the fixed Font denetimi equivalence (`Altegena_Print_Font_Registry::equivalent()`): the same font under another name, or an approved metric-compatible Liberation font.
+  - Orders placed before a template's safe fix still name the old family; they print with that equivalent and show a warning.
 - **Print = what the customer saw** - The print layout reproduces the browser's CSS layout and HarfBuzz shaping (verified against Chrome and HarfBuzz, see Development Notes).
 - **No print size / bleed** - The PDF page is the canvas at CSS size (1 px = 0.75 pt) with the site background stretched to it. Output is vector, so the print shop scales it freely.
 
@@ -185,7 +187,7 @@ altegena-invitation-editor/
 - **`generate_item($order, $item, $force)`:**
   - **Lock:** option `altegena_print_lock_{item}`, 300 s TTL.
   - **Snapshot:** `ensure_snapshot()` backfills from the current template for pre-snapshot orders (with a warning).
-  - **Skip check:** the `input_hash` covers snapshot, overrides, engine version, default line-height, current font file SHA-1s and background file size/mtime. Work is skipped when the hash is unchanged and the files exist, unless `$force`.
+  - **Skip check:** the `input_hash` covers snapshot, overrides, engine version, default line-height, current font file SHA-1s (via registry `resolve()`) and background file size/mtime. Work is skipped when the hash is unchanged and the files exist, unless `$force`.
   - **Render:** `Altegena_Print_Generator::render()`, writing `siparis-{no}-kalem-{item}-r{rev}-{rand}-konturlu|metinli.pdf`.
   - **After success:** old revision files are deleted.
   - **Notes and logging:** order notes on success and on new failures; logs to `wc_get_logger()` source `altegena-print`.
@@ -236,7 +238,8 @@ altegena-invitation-editor/
   - **safe fixes** (`admin_post_altegena_font_safe_fix`):
     - they fix spelling differences;
     - they fix a family that is a bundled file's PostScript name (NeutrafaceCondensed-Medium → Neutraface Condensed);
-    - they apply metric-compatible replacements from `METRIC_COMPATIBLE` (Times New Roman / Times-Roman / Times → Liberation Serif, Arial / ArialMT → Liberation Sans);
+    - they apply metric-compatible replacements from `Altegena_Print_Font_Registry::METRIC_COMPATIBLE` (Times New Roman / Times-Roman / Times → Liberation Serif, Arial / ArialMT → Liberation Sans);
+    - `safe_fix_for()` delegates to the registry's `equivalent()`;
     - the exact weight/style file must exist;
     - a backup goes in `_invitation_json_config_font_fix_backup`;
   - per-font coverage of Turkish letters and template characters;
@@ -257,6 +260,8 @@ altegena-invitation-editor/
 - **`Altegena_Print_Font_Registry`**
   - Parses `assets/css/fonts.css`. A `?v=` query or `#` fragment on a `src` URL is ignored when resolving the file.
   - `match($family, $weight, $style)`: CSS weight/style matching within the family → `{face, synthetic_bold (≥600 requested, face <600), synthetic_italic}` or `WP_Error('font_missing')`.
+  - `equivalent($family, $weight, $style)`: the safe-fix style for an unknown family, or null. It covers the same family spelled differently, a bundled file's PostScript name, and `METRIC_COMPATIBLE` (Times → Liberation Serif, Arial → Liberation Sans). The exact weight/style file must exist.
+  - `resolve()`: `match()`, else `match()` of the `equivalent()` (adds `equivalent_of`). Used by the layout and the order input hash; Font denetimi keeps using `match()` so templates still get listed.
   - `print_file($face)`: uses `assets/fonts/print/{name}.ttf` when present (CFF conversions).
 - **`Altegena_Print_Shaper`** - `for_font($font)->shape($codepoints, {language, disable})` → glyphs `{gid, start, end, advance, dx, dy}` in font units.
   - Script `latn` → `DFLT`; language `TRK ` → default LangSys.
@@ -272,6 +277,7 @@ altegena-invitation-editor/
   - horizontal placement: textAlign offset; X0 = (left + width/2)% when both are set (else left); top %;
   - layer matrix = T(−W/2, −H/2) · R(θ) · T(X0, top + H/2);
   - page = canvas × `PX_TO_PT` (0.75 pt/px);
+  - fonts: registry `resolve()`; a layer printed with an equivalent adds a warning (one per family pair, listing the layers);
   - errors: `bad_canvas`, `font_missing`, `font_unsupported`, `missing_glyph` (all layers' missing chars listed).
 - **`Altegena_Print_Pdf_Writer`**
   - Objects/xref, Flate streams.

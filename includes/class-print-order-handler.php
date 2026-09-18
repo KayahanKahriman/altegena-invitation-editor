@@ -403,7 +403,7 @@ class Altegena_Print_Order_Handler
         $registry = Altegena_Print_Font_Registry::get_instance();
         foreach ((array) $snapshot['layers'] as $layer) {
             $style = isset($layer['style']) && is_array($layer['style']) ? $layer['style'] : array();
-            $match = $registry->match(
+            $match = $registry->resolve(
                 isset($style['fontFamily']) ? $style['fontFamily'] : '',
                 isset($style['fontWeight']) ? $style['fontWeight'] : '',
                 isset($style['fontStyle']) ? $style['fontStyle'] : ''

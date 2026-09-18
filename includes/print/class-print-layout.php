@@ -46,6 +46,7 @@ class Altegena_Print_Layout
         $layers = array();
         $missing = array();
         $warnings = array();
+        $equivalents = array();
 
         foreach ((array) $snapshot['layers'] as $layer) {
             if (!is_array($layer) || !isset($layer['id'])) {
@@ -56,9 +57,12 @@ class Altegena_Print_Layout
             $style = isset($layer['style']) && is_array($layer['style']) ? $layer['style'] : array();
             $text = array_key_exists($id, $texts) ? (string) $texts[$id] : (isset($layer['text']) ? (string) $layer['text'] : '');
 
-            $match = $registry->match(self::prop($style, 'fontFamily'), self::prop($style, 'fontWeight'), self::prop($style, 'fontStyle'));
+            $match = $registry->resolve(self::prop($style, 'fontFamily'), self::prop($style, 'fontWeight'), self::prop($style, 'fontStyle'));
             if (is_wp_error($match)) {
                 return new WP_Error('font_missing', sprintf('"%s" katmanı: %s', $label, $match->get_error_message()), array('layer' => $id));
+            }
+            if (isset($match['equivalent_of'])) {
+                $equivalents[$match['equivalent_of'] . '|' . $match['face']['family']][] = $label;
             }
             $font = Altegena_Print_Font::load(Altegena_Print_Font_Registry::print_file($match['face']));
             if (is_wp_error($font)) {
@@ -189,6 +193,12 @@ class Altegena_Print_Layout
                 'matrix' => $matrix,
                 'lines' => $lines,
             );
+        }
+
+        // Orders placed before a template's Font denetimi fix still name the old family.
+        foreach ($equivalents as $pair => $labels) {
+            list($from, $to) = explode('|', $pair, 2);
+            $warnings[] = sprintf('Şablondaki "%s" fontu yerine Font denetimindeki eşdeğeri "%s" kullanıldı (%s).', $from, $to, implode(', ', array_unique($labels)));
         }
 
         if ($missing) {

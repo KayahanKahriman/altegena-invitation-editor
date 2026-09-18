@@ -3,7 +3,7 @@ Contributors: kayahan
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.4.6
+Stable tag: 1.4.7
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -23,6 +23,12 @@ Updates are delivered from the plugin's GitHub repository — WordPress shows th
 usual "update available" notice when a newer release is tagged.
 
 == Changelog ==
+
+= 1.4.7 =
+* Fix: orders placed before a template's Font denetimi fix failed with "Font dosyası yok" (e.g. TrajanPro-Bold).
+  * Their stored snapshot still names the old family. The print engine now uses the same fixed equivalent the safe fix applies to templates, and the order box shows a warning naming both fonts and the layers.
+  * The equivalents cover the same font under another name and the approved Liberation fonts. Any other unknown font is still an error, never a fallback.
+* The equivalence logic moved from Font denetimi to the print font registry (`equivalent()` / `resolve()`), so templates, PDFs and the order input hash share it.
 
 = 1.4.6 =
 * New font: Liberation Sans (`LiberationSans-Regular-TR.ttf`, SIL Open Font License). It is metric-compatible with Arial and appears in the product editor's font list.

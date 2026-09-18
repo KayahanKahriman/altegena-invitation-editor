@@ -18,19 +18,6 @@ class Altegena_Print_Font_Audit
     const TURKISH_CHARS = 'ÇçĞğİıÖöŞşÜü';
     const BACKUP_META_KEY = '_invitation_json_config_font_fix_backup';
 
-    /**
-     * Fonts templates name but the plugin doesn't ship, mapped to a bundled
-     * metric-compatible replacement (same advance widths and vertical metrics,
-     * so the layout doesn't move). Keys are normalize_name() forms.
-     */
-    const METRIC_COMPATIBLE = array(
-        'timesnewroman' => 'Liberation Serif',
-        'timesroman' => 'Liberation Serif',
-        'times' => 'Liberation Serif',
-        'arial' => 'Liberation Sans',
-        'arialmt' => 'Liberation Sans',
-    );
-
     private static $instance = null;
 
     public static function get_instance()
@@ -57,81 +44,15 @@ class Altegena_Print_Font_Audit
     }
 
     /**
-     * A safe fix for an unknown family, only if that exact weight/style file
-     * exists:
-     * - spelling: an existing family with the same name once spaces/hyphens
-     *   are ignored (e.g. "TrajanPro-Bold" -> "Trajan Pro" + bold);
-     * - PostScript name: a bundled file whose PostScript name is the layer's
-     *   family (e.g. "NeutrafaceCondensed-Medium" -> "Neutraface Condensed");
-     * - metric-compatible replacement (METRIC_COMPATIBLE, e.g. "Times New
-     *   Roman" -> "Liberation Serif").
+     * The safe fix for an unknown family: its bundled equivalent
+     * (Altegena_Print_Font_Registry::equivalent(): spelling, PostScript name or
+     * metric-compatible replacement), only if that exact weight/style file exists.
      *
      * @return array|null style properties to set (null value = remove the property)
      */
     public function safe_fix_for($family, $weight, $style)
     {
-        $registry = Altegena_Print_Font_Registry::get_instance();
-        $suffixes = array(
-            'thin' => array(100, null), 'extralight' => array(200, null), 'light' => array(300, null),
-            'regular' => array(400, null), 'book' => array(400, null), 'medium' => array(500, null),
-            'semibold' => array(600, null), 'demibold' => array(600, null), 'bold' => array(700, null),
-            'extrabold' => array(800, null), 'black' => array(900, null),
-            'italic' => array(null, 'italic'), 'bolditalic' => array(700, 'italic'),
-        );
-
-        $candidates = array(array(self::normalize_name($family), $weight, $style));
-        if (preg_match('/^(.+?)[\s_-]*(' . implode('|', array_keys($suffixes)) . ')$/i', $family, $match)) {
-            list($suffix_weight, $suffix_style) = $suffixes[strtolower($match[2])];
-            $candidates[] = array(
-                self::normalize_name($match[1]),
-                $suffix_weight !== null ? $suffix_weight : $weight,
-                $suffix_style !== null ? $suffix_style : $style,
-            );
-        }
-        // The same font under its PostScript name (e.g. "NeutrafaceCondensed-Medium" is the file
-        // behind "Neutraface Condensed" 400), unless the layer asks for another weight/style.
-        $normalized = self::normalize_name($family);
-        foreach ($registry->all_faces() as $face) {
-            $default_request = $weight === 400 && $style === 'normal';
-            if (!$face['exists'] || !($default_request || ($face['weight'] === $weight && $face['style'] === $style))) {
-                continue;
-            }
-            $font = Altegena_Print_Font::load(Altegena_Print_Font_Registry::print_file($face));
-            if (!is_wp_error($font) && self::normalize_name($font->postscript_name()) === $normalized) {
-                $candidates[] = array(self::normalize_name($face['family']), $face['weight'], $face['style']);
-                break;
-            }
-        }
-
-        $replacements = self::METRIC_COMPATIBLE;
-        if (isset($replacements[$normalized])) {
-            $candidates[] = array(self::normalize_name($replacements[$normalized]), $weight, $style);
-        }
-
-        foreach ($candidates as $candidate) {
-            list($name, $target_weight, $target_style) = $candidate;
-            foreach ($registry->families() as $known) {
-                if (self::normalize_name($known) !== $name) {
-                    continue;
-                }
-                foreach ($registry->faces($known) as $face) {
-                    if ($face['exists'] && $face['weight'] === $target_weight && $face['style'] === $target_style) {
-                        return array(
-                            'fontFamily' => $known,
-                            'fontWeight' => $target_weight === 400 ? null : ($target_weight === 700 ? 'bold' : (string) $target_weight),
-                            'fontStyle' => $target_style === 'italic' ? 'italic' : null,
-                        );
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private static function normalize_name($name)
-    {
-        return preg_replace('/[^a-z0-9]/', '', strtolower((string) $name));
+        return Altegena_Print_Font_Registry::get_instance()->equivalent($family, $weight, $style);
     }
 
     public function analyze()
