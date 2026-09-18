@@ -3,7 +3,7 @@
  * Plugin Name: Altegena Invitation Editor
  * Plugin URI: https://github.com/KayahanKahriman/altegena-invitation-editor
  * Description: A lightweight, DOM-based invitation editor for WooCommerce with WhatsApp sharing.
- * Version: 1.4.3
+ * Version: 1.4.4
  * Author: Kayahan
  * Author URI: https://github.com/KayahanKahriman
  * Text Domain: altegena-invitation-editor
@@ -41,7 +41,7 @@ class Altegena_Invitation_Editor
 		define('ALTEGENA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 		define('ALTEGENA_PLUGIN_URL', plugin_dir_url(__FILE__));
 		define('ALTEGENA_PLUGIN_FILE', __FILE__);
-		define('ALTEGENA_VERSION', '1.4.3');
+		define('ALTEGENA_VERSION', '1.4.4');
 
 		// Share feature payload limits
 		define('ALTEGENA_SHARE_MAX_CONFIG_BYTES', 262144);   // 256 KB of layer text JSON

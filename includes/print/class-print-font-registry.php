@@ -51,14 +51,16 @@ class Altegena_Print_Font_Registry
                 continue;
             }
 
-            $file = $css_dir . $url[1];
+            // A cache-busting query (e.g. "Font-TR.ttf?v=2") is part of the URL, not the file name.
+            $src = preg_replace('/[?#].*$/', '', $url[1]);
+            $file = $css_dir . $src;
             $real = realpath($file);
             $this->faces[strtolower($family)][] = array(
                 'family' => $family,
                 'weight' => self::normalize_weight(self::css_property($block, 'font-weight')),
                 'style' => self::normalize_style(self::css_property($block, 'font-style')),
                 'file' => $real !== false ? $real : $file,
-                'basename' => basename($url[1]),
+                'basename' => basename($src),
                 'exists' => $real !== false,
             );
         }

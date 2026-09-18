@@ -5,7 +5,7 @@
 
 @font-face {
     font-family: 'Aire Light Pro';
-    src: url('../fonts/AireLightPro.ttf') format('truetype');
+    src: url('../fonts/AireLightPro-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -13,7 +13,7 @@
 
 @font-face {
     font-family: 'Amostely Signature';
-    src: url('../fonts/AmostelySignature.ttf') format('truetype');
+    src: url('../fonts/AmostelySignature-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -21,7 +21,7 @@
 
 @font-face {
     font-family: 'Andellia Davilton';
-    src: url('../fonts/AndelliaDavilton-Regular.ttf') format('truetype');
+    src: url('../fonts/AndelliaDavilton-Regular-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -37,7 +37,7 @@
 
 @font-face {
     font-family: 'Anthem Of The Angels';
-    src: url('../fonts/AnthemOfTheAngels.ttf') format('truetype');
+    src: url('../fonts/AnthemOfTheAngels-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -45,7 +45,7 @@
 
 @font-face {
     font-family: 'Ayalena';
-    src: url('../fonts/Ayalena.ttf') format('truetype');
+    src: url('../fonts/Ayalena-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -53,7 +53,7 @@
 
 @font-face {
     font-family: 'Avant Garde';
-    src: url('../fonts/AvantGarde.ttf') format('truetype');
+    src: url('../fonts/AvantGarde-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -61,7 +61,7 @@
 
 @font-face {
     font-family: 'Blacksword';
-    src: url('../fonts/Blacksword.ttf') format('truetype');
+    src: url('../fonts/Blacksword-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -77,7 +77,7 @@
 
 @font-face {
     font-family: 'Breakfast And Chill';
-    src: url('../fonts/BreakfastAndChill.ttf') format('truetype');
+    src: url('../fonts/BreakfastAndChill-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -85,7 +85,7 @@
 
 @font-face {
     font-family: 'CAC Champagne';
-    src: url('../fonts/CACChampagne.ttf') format('truetype');
+    src: url('../fonts/CACChampagne-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -109,7 +109,7 @@
 
 @font-face {
     font-family: 'Darleston';
-    src: url('../fonts/Darleston.ttf') format('truetype');
+    src: url('../fonts/Darleston-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -125,7 +125,7 @@
 
 @font-face {
     font-family: 'Fenice';
-    src: url('../fonts/FeniceRegularTR.ttf') format('truetype');
+    src: url('../fonts/FeniceRegular-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -133,7 +133,7 @@
 
 @font-face {
     font-family: 'Fenice';
-    src: url('../fonts/Fenice-Bold.ttf') format('truetype');
+    src: url('../fonts/Fenice-Bold-TR.ttf') format('truetype');
     font-weight: bold;
     font-style: normal;
     font-display: swap;
@@ -141,7 +141,7 @@
 
 @font-face {
     font-family: 'Flemish Script';
-    src: url('../fonts/FlemishScript.ttf') format('truetype');
+    src: url('../fonts/FlemishScript-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -149,7 +149,7 @@
 
 @font-face {
     font-family: 'Fleur De Leah';
-    src: url('../fonts/FleurDeLeah.ttf') format('truetype');
+    src: url('../fonts/FleurDeLeah-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -157,7 +157,7 @@
 
 @font-face {
     font-family: 'Fragrance';
-    src: url('../fonts/FragranceXRegular.ttf') format('truetype');
+    src: url('../fonts/FragranceXRegular-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -165,7 +165,7 @@
 
 @font-face {
     font-family: 'Futura Book';
-    src: url('../fonts/FuturaBook.ttf') format('truetype');
+    src: url('../fonts/FuturaBook-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -173,7 +173,7 @@
 
 @font-face {
     font-family: 'Kastangel';
-    src: url('../fonts/Kastangel.ttf') format('truetype');
+    src: url('../fonts/Kastangel-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -197,7 +197,7 @@
 
 @font-face {
     font-family: 'Mokka';
-    src: url('../fonts/MokkaSmallCaps.ttf') format('truetype');
+    src: url('../fonts/MokkaSmallCaps-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -221,7 +221,7 @@
 
 @font-face {
     font-family: 'Neutraface Condensed';
-    src: url('../fonts/NeutrafaceCondensedLight.ttf') format('truetype');
+    src: url('../fonts/NeutrafaceCondensedLight-TR.ttf') format('truetype');
     font-weight: 300;
     font-style: normal;
     font-display: swap;
@@ -229,7 +229,7 @@
 
 @font-face {
     font-family: 'Neutraface Condensed';
-    src: url('../fonts/NeutrafaceCondensed.ttf') format('truetype');
+    src: url('../fonts/NeutrafaceCondensed-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -237,7 +237,7 @@
 
 @font-face {
     font-family: 'Nexa Light';
-    src: url('../fonts/NexaLightTR.ttf') format('truetype');
+    src: url('../fonts/NexaLight-TR.ttf') format('truetype');
     font-weight: 300;
     font-style: normal;
     font-display: swap;
@@ -245,7 +245,7 @@
 
 @font-face {
     font-family: 'Opel Sans';
-    src: url('../fonts/OpelSans.ttf') format('truetype');
+    src: url('../fonts/OpelSans-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -253,7 +253,7 @@
 
 @font-face {
     font-family: 'Optimus Princeps';
-    src: url('../fonts/OptimusPrinceps.ttf') format('truetype');
+    src: url('../fonts/OptimusPrinceps-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -261,7 +261,7 @@
 
 @font-face {
     font-family: 'Optimus Princeps';
-    src: url('../fonts/OptimusPrinceps-SemiBold.ttf') format('truetype');
+    src: url('../fonts/OptimusPrinceps-SemiBold-TR.ttf') format('truetype');
     font-weight: 600;
     font-style: normal;
     font-display: swap;
@@ -269,7 +269,7 @@
 
 @font-face {
     font-family: 'Perpetua';
-    src: url('../fonts/PerpetuaStd-Bold_ItalicTR.ttf') format('truetype');
+    src: url('../fonts/PerpetuaStd-Bold_Italic-TR.ttf') format('truetype');
     font-weight: bold;
     font-style: italic;
     font-display: swap;
@@ -277,7 +277,7 @@
 
 @font-face {
     font-family: 'Playball';
-    src: url('../fonts/Playball.ttf') format('truetype');
+    src: url('../fonts/Playball-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -293,7 +293,7 @@
 
 @font-face {
     font-family: 'Riesling';
-    src: url('../fonts/Riesling.ttf') format('truetype');
+    src: url('../fonts/Riesling-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -301,7 +301,7 @@
 
 @font-face {
     font-family: 'Rosellinda Alyamore';
-    src: url('../fonts/RosellindaAlyamore-Regular.ttf') format('truetype');
+    src: url('../fonts/RosellindaAlyamore-Regular-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -309,7 +309,7 @@
 
 @font-face {
     font-family: 'Silk Script';
-    src: url('../fonts/SilkScript.ttf') format('truetype');
+    src: url('../fonts/SilkScript-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -317,7 +317,7 @@
 
 @font-face {
     font-family: 'Silmastin';
-    src: url('../fonts/Silmastin.ttf') format('truetype');
+    src: url('../fonts/Silmastin-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -325,7 +325,7 @@
 
 @font-face {
     font-family: 'Sweety Lovers';
-    src: url('../fonts/SweetyLovers.ttf') format('truetype');
+    src: url('../fonts/SweetyLovers-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -333,7 +333,7 @@
 
 @font-face {
     font-family: 'Trajan Pro';
-    src: url('../fonts/TrajanPro-Bold.ttf') format('truetype');
+    src: url('../fonts/TrajanPro-Bold-TR.ttf') format('truetype');
     font-weight: bold;
     font-style: normal;
     font-display: swap;
@@ -341,7 +341,7 @@
 
 @font-face {
     font-family: 'University Roman';
-    src: url('../fonts/UniversityRomanBoldLetPlain.ttf') format('truetype');
+    src: url('../fonts/UniversityRomanBoldLetPlain-TR.ttf') format('truetype');
     font-weight: bold;
     font-style: normal;
     font-display: swap;
@@ -349,7 +349,7 @@
 
 @font-face {
     font-family: 'Vollkorn SC';
-    src: url('../fonts/VollkornSC-Regular.ttf') format('truetype');
+    src: url('../fonts/VollkornSC-Regular-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -357,7 +357,7 @@
 
 @font-face {
     font-family: 'Vollkorn SC Bold';
-    src: url('../fonts/VollkornSC-Regular__bold.ttf') format('truetype');
+    src: url('../fonts/VollkornSC-Regular__bold-TR.ttf') format('truetype');
     font-weight: bold;
     font-style: normal;
     font-display: swap;
@@ -365,7 +365,7 @@
 
 @font-face {
     font-family: 'Vollkorn SC Bold Italic';
-    src: url('../fonts/VollkornSC-Regular__bolditalic.ttf') format('truetype');
+    src: url('../fonts/VollkornSC-Regular__bolditalic-TR.ttf') format('truetype');
     font-weight: bold;
     font-style: italic;
     font-display: swap;
@@ -373,7 +373,7 @@
 
 @font-face {
     font-family: 'Yaquote Script';
-    src: url('../fonts/YaquoteScript.ttf') format('truetype');
+    src: url('../fonts/YaquoteScript-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -381,7 +381,7 @@
 
 @font-face {
     font-family: 'Zalitta';
-    src: url('../fonts/Zalitta.ttf') format('truetype');
+    src: url('../fonts/Zalitta-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;

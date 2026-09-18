@@ -3,7 +3,7 @@ Contributors: kayahan
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.4.3
+Stable tag: 1.4.4
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -23,6 +23,12 @@ Updates are delivered from the plugin's GitHub repository — WordPress shows th
 usual "update available" notice when a newer release is tagged.
 
 == Changelog ==
+
+= 1.4.4 =
+* Font files follow one naming standard: every file is `<Name>-TR.<ext>`, and every font includes all Turkish letters.
+  * Templates reference font families, not files, so designs and existing orders are unaffected.
+  * The new URLs also make browsers fetch fresh copies.
+* The print engine now ignores a `?v=` query on a font URL in `fonts.css`. An updated font can keep its file name and use `?v=2` to refresh browser and page caches.
 
 = 1.4.3 =
 * Turkish letters for 3 more fonts:

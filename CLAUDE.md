@@ -11,7 +11,7 @@ When an order is paid, the plugin renders two PDFs per invitation item for the p
 The print shop downloads them and handles sizing and bleed itself.
 
 **Author:** Kayahan
-**Version:** 1.4.3
+**Version:** 1.4.4
 **Text Domain:** `altegena-invitation-editor`
 **Constants prefix:** `ALTEGENA_`
 **UI Language:** Turkish (button labels, error messages)
@@ -250,7 +250,7 @@ altegena-invitation-editor/
   - PDF descriptor data: `bbox()`, `italic_angle()`, `cap_height()`, `postscript_name()`;
   - `fs_type()` / `embedding_allowed()`, `is_cff()`, `bytes()`.
 - **`Altegena_Print_Font_Registry`**
-  - Parses `assets/css/fonts.css`.
+  - Parses `assets/css/fonts.css`. A `?v=` query or `#` fragment on a `src` URL is ignored when resolving the file.
   - `match($family, $weight, $style)`: CSS weight/style matching within the family → `{face, synthetic_bold (≥600 requested, face <600), synthetic_italic}` or `WP_Error('font_missing')`.
   - `print_file($face)`: uses `assets/fonts/print/{name}.ttf` when present (CFF conversions).
 - **`Altegena_Print_Shaper`** - `for_font($font)->shape($codepoints, {language, disable})` → glyphs `{gid, start, end, advance, dx, dy}` in font units.
@@ -365,12 +365,19 @@ Stored in `_invitation_json_config` post meta:
 ## Custom Fonts
 
 - **Files:** 48 files (46 `.ttf` + 2 `.otf`) in `assets/fonts/`, declared by 48 `@font-face` rules / 45 families in `fonts.css` (`font-display: swap`).
+- **Naming:** every font file is `<Name>-TR.<ext>`.
+  - `-TR` means the font has every Turkish letter (ÇĞİıÖŞÜ, upper and lower case).
+  - Templates reference font families, never file names, so a rename only touches `fonts.css`.
+  - A print conversion in `assets/fonts/print/` must use the same `<Name>-TR` stem.
 - **Admin dropdown:** the family list is `Altegena_Product_Meta::get_available_fonts()`. Add fonts there and in `fonts.css` together.
 - **Print:** reads the same `fonts.css`.
   - The CFF fonts Christmas Wish Calligraphy and Marquette are printed from `assets/fonts/print/*.ttf`.
   - Those files come from fontTools otf2ttf; glyph ids, advances, cmap and GSUB/GPOS/GDEF were verified identical.
   - **When a source `.otf` changes, re-convert and update that README.**
-- **Updating a font file** (e.g. adding missing Turkish glyphs) changes its SHA-1, so "Yeniden oluştur" re-renders the affected items. Check Settings → Altegena Davetiye → Font denetimi for gaps.
+- **Updating a font file** (e.g. adding missing glyphs):
+  - Keep its file name and add or bump a `?v=N` query on its `src` in `fonts.css`. Browsers and LiteSpeed cache font files for a long time; the new URL makes them fetch the new file, and the print registry ignores the query.
+  - The new file's SHA-1 changes, so "Yeniden oluştur" re-renders the affected items.
+  - Check Settings → Altegena Davetiye → Font denetimi for gaps.
 - **Embedding restrictions:** Lovely Home (fsType 0x0102) and Riesling (0x0002) forbid embedding, so they appear as outlines only in the metinli PDF.
 
 ## WooCommerce Integration Points
