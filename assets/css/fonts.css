@@ -93,7 +93,7 @@
 
 @font-face {
     font-family: 'Champignon';
-    src: url('../fonts/Champignon.otf') format('opentype');
+    src: url('../fonts/Champignon-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -101,7 +101,7 @@
 
 @font-face {
     font-family: 'Candlescript';
-    src: url('../fonts/Candlescript.ttf') format('truetype');
+    src: url('../fonts/Candlescript-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -213,7 +213,7 @@
 
 @font-face {
     font-family: 'Mussica Swash';
-    src: url('../fonts/MussicaSwash.ttf') format('truetype');
+    src: url('../fonts/MussicaSwash-TR.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;

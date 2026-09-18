@@ -3,7 +3,7 @@ Contributors: kayahan
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.4.2
+Stable tag: 1.4.3
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -23,6 +23,15 @@ Updates are delivered from the plugin's GitHub repository — WordPress shows th
 usual "update available" notice when a newer release is tagged.
 
 == Changelog ==
+
+= 1.4.3 =
+* Turkish letters for 3 more fonts:
+  * Champignon gained Ç, and its Turkish accents were redrawn so they sit on their letters.
+  * Mussica Swash gained İ.
+  * Candlescript's demo was replaced with the full font (all letters, digits and punctuation).
+* Champignon is now TrueType (`Champignon-TR.ttf`), so it no longer needs a print conversion.
+  * Its vertical metrics changed, so Champignon text sits 7–9 px lower in templates 4021, 4018 and 3999, on the site and in PDFs alike.
+* The updated font files have new `-TR` names, so browsers and page caches pick them up.
 
 = 1.4.2 =
 * Turkish letters were added to 7 fonts: Angers Script, Belgedes, Christmas Wish Calligraphy, Lovely Home, Madina, Marquette and Queen Xylophia.

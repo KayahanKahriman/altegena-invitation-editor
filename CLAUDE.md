@@ -11,7 +11,7 @@ When an order is paid, the plugin renders two PDFs per invitation item for the p
 The print shop downloads them and handles sizing and bleed itself.
 
 **Author:** Kayahan
-**Version:** 1.4.2
+**Version:** 1.4.3
 **Text Domain:** `altegena-invitation-editor`
 **Constants prefix:** `ALTEGENA_`
 **UI Language:** Turkish (button labels, error messages)
@@ -91,8 +91,8 @@ altegena-invitation-editor/
 │   │   ├── admin-print.css           # Order print box + orders list column
 │   │   ├── public-invitation.css     # Public share page styles
 │   │   └── fonts.css                 # @font-face declarations (48 faces, 45 families) — also the print font registry
-│   ├── fonts/                        # 45 .ttf + 3 .otf font files + .htaccess
-│   │   └── print/                    # Offline TrueType conversions of the 3 CFF .otf fonts (+ README with SHA-1s)
+│   ├── fonts/                        # 46 .ttf + 2 .otf font files + .htaccess
+│   │   └── print/                    # Offline TrueType conversions of the 2 CFF .otf fonts (+ README with SHA-1s)
 │   └── backgrounds/                  # Invitation background images (referenced by JSON config)
 ├── readme.txt                        # Update-modal metadata + changelog (plugin-update-checker)
 └── CLAUDE.md                         # This file
@@ -364,10 +364,10 @@ Stored in `_invitation_json_config` post meta:
 
 ## Custom Fonts
 
-- **Files:** 48 files (45 `.ttf` + 3 `.otf`) in `assets/fonts/`, declared by 48 `@font-face` rules / 45 families in `fonts.css` (`font-display: swap`).
+- **Files:** 48 files (46 `.ttf` + 2 `.otf`) in `assets/fonts/`, declared by 48 `@font-face` rules / 45 families in `fonts.css` (`font-display: swap`).
 - **Admin dropdown:** the family list is `Altegena_Product_Meta::get_available_fonts()`. Add fonts there and in `fonts.css` together.
 - **Print:** reads the same `fonts.css`.
-  - The CFF fonts Champignon, Christmas Wish Calligraphy and Marquette are printed from `assets/fonts/print/*.ttf`.
+  - The CFF fonts Christmas Wish Calligraphy and Marquette are printed from `assets/fonts/print/*.ttf`.
   - Those files come from fontTools otf2ttf; glyph ids, advances, cmap and GSUB/GPOS/GDEF were verified identical.
   - **When a source `.otf` changes, re-convert and update that README.**
 - **Updating a font file** (e.g. adding missing Turkish glyphs) changes its SHA-1, so "Yeniden oluştur" re-renders the affected items. Check Settings → Altegena Davetiye → Font denetimi for gaps.
