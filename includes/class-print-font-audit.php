@@ -27,6 +27,8 @@ class Altegena_Print_Font_Audit
         'timesnewroman' => 'Liberation Serif',
         'timesroman' => 'Liberation Serif',
         'times' => 'Liberation Serif',
+        'arial' => 'Liberation Sans',
+        'arialmt' => 'Liberation Sans',
     );
 
     private static $instance = null;
@@ -59,6 +61,8 @@ class Altegena_Print_Font_Audit
      * exists:
      * - spelling: an existing family with the same name once spaces/hyphens
      *   are ignored (e.g. "TrajanPro-Bold" -> "Trajan Pro" + bold);
+     * - PostScript name: a bundled file whose PostScript name is the layer's
+     *   family (e.g. "NeutrafaceCondensed-Medium" -> "Neutraface Condensed");
      * - metric-compatible replacement (METRIC_COMPATIBLE, e.g. "Times New
      *   Roman" -> "Liberation Serif").
      *
@@ -84,9 +88,24 @@ class Altegena_Print_Font_Audit
                 $suffix_style !== null ? $suffix_style : $style,
             );
         }
+        // The same font under its PostScript name (e.g. "NeutrafaceCondensed-Medium" is the file
+        // behind "Neutraface Condensed" 400), unless the layer asks for another weight/style.
+        $normalized = self::normalize_name($family);
+        foreach ($registry->all_faces() as $face) {
+            $default_request = $weight === 400 && $style === 'normal';
+            if (!$face['exists'] || !($default_request || ($face['weight'] === $weight && $face['style'] === $style))) {
+                continue;
+            }
+            $font = Altegena_Print_Font::load(Altegena_Print_Font_Registry::print_file($face));
+            if (!is_wp_error($font) && self::normalize_name($font->postscript_name()) === $normalized) {
+                $candidates[] = array(self::normalize_name($face['family']), $face['weight'], $face['style']);
+                break;
+            }
+        }
+
         $replacements = self::METRIC_COMPATIBLE;
-        if (isset($replacements[self::normalize_name($family)])) {
-            $candidates[] = array(self::normalize_name($replacements[self::normalize_name($family)]), $weight, $style);
+        if (isset($replacements[$normalized])) {
+            $candidates[] = array(self::normalize_name($replacements[$normalized]), $weight, $style);
         }
 
         foreach ($candidates as $candidate) {
@@ -299,7 +318,7 @@ class Altegena_Print_Font_Audit
                     <input type="hidden" name="action" value="altegena_font_safe_fix">
                     <?php wp_nonce_field('altegena_font_safe_fix'); ?>
                     <p><?php submit_button(sprintf('Güvenli düzeltmeleri uygula (%d katman)', $fixable), 'primary', 'submit', false); ?>
-                        <span class="description">Sadece yazım farkı olan fontlar ve ölçüleri birebir aynı eşdeğerler (Times New Roman → Liberation Serif) eşlenir; aynı kalınlık ve stilde dosyası olmalı. Önceki şablon ürüne yedeklenir.</span></p>
+                        <span class="description">Sadece aynı fontun farklı yazılışları (TrajanPro-Bold → Trajan Pro, NeutrafaceCondensed-Medium → Neutraface Condensed) ve ölçüleri birebir aynı eşdeğerler (Times New Roman → Liberation Serif, Arial → Liberation Sans) eşlenir; aynı kalınlık ve stilde dosyası olmalı. Önceki şablon ürüne yedeklenir.</span></p>
                 </form>
             <?php endif; ?>
             <table class="widefat striped">

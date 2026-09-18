@@ -11,7 +11,7 @@ When an order is paid, the plugin renders two PDFs per invitation item for the p
 The print shop downloads them and handles sizing and bleed itself.
 
 **Author:** Kayahan
-**Version:** 1.4.5
+**Version:** 1.4.6
 **Text Domain:** `altegena-invitation-editor`
 **Constants prefix:** `ALTEGENA_`
 **UI Language:** Turkish (button labels, error messages)
@@ -90,8 +90,8 @@ altegena-invitation-editor/
 │   │   ├── admin-editor.css          # Admin visual editor styles (three-panel layout, properties)
 │   │   ├── admin-print.css           # Order print box + orders list column
 │   │   ├── public-invitation.css     # Public share page styles
-│   │   └── fonts.css                 # @font-face declarations (49 faces, 46 families) — also the print font registry
-│   ├── fonts/                        # 47 .ttf + 2 .otf font files + .htaccess
+│   │   └── fonts.css                 # @font-face declarations (50 faces, 47 families) — also the print font registry
+│   ├── fonts/                        # 48 .ttf + 2 .otf font files + .htaccess
 │   │   └── print/                    # Offline TrueType conversions of the 2 CFF .otf fonts (+ README with SHA-1s)
 │   └── backgrounds/                  # Invitation background images (referenced by JSON config)
 ├── readme.txt                        # Update-modal metadata + changelog (plugin-update-checker)
@@ -142,7 +142,7 @@ altegena-invitation-editor/
   - fonts CSS;
   - `admin-editor.css` (+ inline `Altegena_Settings::css_vars()`);
   - `admin-editor.js`.
-- **Localized data (`altegena_admin_config`):** `fonts` (46 bundled family names), `plugin_url`.
+- **Localized data (`altegena_admin_config`):** `fonts` (47 bundled family names), `plugin_url`.
 - **Save validation:** `save_product_data_tab()` requires `canvas` and `layers` and `wp_slash()`es before `update_post_meta()`. Empty values delete the meta.
 
 ### `Altegena_Cart_Handler` (class-cart-handler.php)
@@ -234,7 +234,9 @@ altegena-invitation-editor/
 - **Font denetimi tab:**
   - lists template layers whose font family/file doesn't exist;
   - **safe fixes** (`admin_post_altegena_font_safe_fix`):
-    - they fix spelling differences, plus metric-compatible replacements from `METRIC_COMPATIBLE` (Times New Roman / Times-Roman / Times → Liberation Serif);
+    - they fix spelling differences;
+    - they fix a family that is a bundled file's PostScript name (NeutrafaceCondensed-Medium → Neutraface Condensed);
+    - they apply metric-compatible replacements from `METRIC_COMPATIBLE` (Times New Roman / Times-Roman / Times → Liberation Serif, Arial / ArialMT → Liberation Sans);
     - the exact weight/style file must exist;
     - a backup goes in `_invitation_json_config_font_fix_backup`;
   - per-font coverage of Turkish letters and template characters;
@@ -323,7 +325,7 @@ Visual design editor in the product metabox.
 - **Alignment:** align to canvas (1+ selected layers); align/distribute the selection (2+/3+) on the stored % values.
 - **Properties:**
   - ID, label, group, default text, hidden;
-  - font: 46 bundled fonts only (a template font without a file shows as "(dosyası yok)");
+  - font: 47 bundled fonts only (a template font without a file shows as "(dosyası yok)");
   - size, color, weight, style, textAlign, letterSpacing, lineHeight;
   - left/top/width %, rotate.
 - **Form submission:** applies the JSON tab if it is active, then `syncConfigToHiddenField()`.
@@ -367,11 +369,14 @@ Stored in `_invitation_json_config` post meta:
 
 ## Custom Fonts
 
-- **Files:** 49 files (47 `.ttf` + 2 `.otf`) in `assets/fonts/`, declared by 49 `@font-face` rules / 46 families in `fonts.css` (`font-display: swap`).
+- **Files:** 50 files (48 `.ttf` + 2 `.otf`) in `assets/fonts/`, declared by 50 `@font-face` rules / 47 families in `fonts.css` (`font-display: swap`).
 - **Naming:** every font file is `<Name>-TR.<ext>`.
   - `-TR` means the font has every Turkish letter (ÇĞİıÖŞÜ, upper and lower case).
   - Templates reference font families, never file names, so a rename only touches `fonts.css`.
   - A print conversion in `assets/fonts/print/` must use the same `<Name>-TR` stem.
+- **Licensing:** the GitHub repo is public, so every bundled font is redistributed publicly.
+  - For system fonts that templates name (Times New Roman, Arial), bundle the metric-compatible, freely licensed Liberation fonts. Font denetimi's safe fix maps the templates to them.
+  - Don't bundle the system fonts themselves.
 - **Admin dropdown:** the family list is `Altegena_Product_Meta::get_available_fonts()`. Add fonts there and in `fonts.css` together.
 - **Print:** reads the same `fonts.css`.
   - The CFF fonts Christmas Wish Calligraphy and Marquette are printed from `assets/fonts/print/*.ttf`.

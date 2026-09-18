@@ -3,7 +3,7 @@ Contributors: kayahan
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.4.5
+Stable tag: 1.4.6
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -23,6 +23,12 @@ Updates are delivered from the plugin's GitHub repository — WordPress shows th
 usual "update available" notice when a newer release is tagged.
 
 == Changelog ==
+
+= 1.4.6 =
+* New font: Liberation Sans (`LiberationSans-Regular-TR.ttf`, SIL Open Font License). It is metric-compatible with Arial and appears in the product editor's font list.
+* Font denetimi safe fix:
+  * It now maps Arial / ArialMT to Liberation Sans.
+  * It maps a family that is a bundled file's PostScript name to that file's family. For example "NeutrafaceCondensed-Medium" is the font inside `NeutrafaceCondensed-TR.ttf`, so it becomes "Neutraface Condensed".
 
 = 1.4.5 =
 * New font: Liberation Serif (`LiberationSerif-Regular-TR.ttf`). It is metric-compatible with Times New Roman (same widths and vertical metrics) and appears in the product editor's font list.
