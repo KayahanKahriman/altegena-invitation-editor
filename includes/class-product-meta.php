@@ -109,6 +109,7 @@ class Altegena_Product_Meta
             'Fragrance',
             'Futura Book',
             'Kastangel',
+            'Liberation Serif',
             'Lovely Home',
             'Madina',
             'Mokka',

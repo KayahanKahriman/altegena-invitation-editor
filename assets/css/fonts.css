@@ -180,6 +180,14 @@
 }
 
 @font-face {
+    font-family: 'Liberation Serif';
+    src: url('../fonts/LiberationSerif-Regular-TR.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
     font-family: 'Lovely Home';
     src: url('../fonts/LovelyHome-TR.ttf') format('truetype');
     font-weight: normal;

@@ -4,8 +4,9 @@
  *
  * Print never falls back to another font, so templates must reference fonts
  * that exist and fonts must contain every character customers type. This page
- * lists template layers whose font file is missing (with safe, spelling-only
- * fixes) and a per-font character coverage report.
+ * lists template layers whose font file is missing (with safe fixes: spelling
+ * differences and metric-compatible replacements) and a per-font character
+ * coverage report.
  */
 
 if (!defined('ABSPATH')) {
@@ -16,6 +17,17 @@ class Altegena_Print_Font_Audit
 {
     const TURKISH_CHARS = 'ÇçĞğİıÖöŞşÜü';
     const BACKUP_META_KEY = '_invitation_json_config_font_fix_backup';
+
+    /**
+     * Fonts templates name but the plugin doesn't ship, mapped to a bundled
+     * metric-compatible replacement (same advance widths and vertical metrics,
+     * so the layout doesn't move). Keys are normalize_name() forms.
+     */
+    const METRIC_COMPATIBLE = array(
+        'timesnewroman' => 'Liberation Serif',
+        'timesroman' => 'Liberation Serif',
+        'times' => 'Liberation Serif',
+    );
 
     private static $instance = null;
 
@@ -43,9 +55,12 @@ class Altegena_Print_Font_Audit
     }
 
     /**
-     * A spelling-only fix for an unknown family: an existing family with the
-     * same name once spaces/hyphens are ignored (e.g. "TrajanPro-Bold" ->
-     * "Trajan Pro" + bold), and only if that exact weight/style file exists.
+     * A safe fix for an unknown family, only if that exact weight/style file
+     * exists:
+     * - spelling: an existing family with the same name once spaces/hyphens
+     *   are ignored (e.g. "TrajanPro-Bold" -> "Trajan Pro" + bold);
+     * - metric-compatible replacement (METRIC_COMPATIBLE, e.g. "Times New
+     *   Roman" -> "Liberation Serif").
      *
      * @return array|null style properties to set (null value = remove the property)
      */
@@ -68,6 +83,10 @@ class Altegena_Print_Font_Audit
                 $suffix_weight !== null ? $suffix_weight : $weight,
                 $suffix_style !== null ? $suffix_style : $style,
             );
+        }
+        $replacements = self::METRIC_COMPATIBLE;
+        if (isset($replacements[self::normalize_name($family)])) {
+            $candidates[] = array(self::normalize_name($replacements[self::normalize_name($family)]), $weight, $style);
         }
 
         foreach ($candidates as $candidate) {
@@ -280,7 +299,7 @@ class Altegena_Print_Font_Audit
                     <input type="hidden" name="action" value="altegena_font_safe_fix">
                     <?php wp_nonce_field('altegena_font_safe_fix'); ?>
                     <p><?php submit_button(sprintf('Güvenli düzeltmeleri uygula (%d katman)', $fixable), 'primary', 'submit', false); ?>
-                        <span class="description">Sadece yazım farkı olan ve dosyası birebir mevcut fontlar eşlenir.</span></p>
+                        <span class="description">Sadece yazım farkı olan fontlar ve ölçüleri birebir aynı eşdeğerler (Times New Roman → Liberation Serif) eşlenir; aynı kalınlık ve stilde dosyası olmalı. Önceki şablon ürüne yedeklenir.</span></p>
                 </form>
             <?php endif; ?>
             <table class="widefat striped">

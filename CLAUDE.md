@@ -11,7 +11,7 @@ When an order is paid, the plugin renders two PDFs per invitation item for the p
 The print shop downloads them and handles sizing and bleed itself.
 
 **Author:** Kayahan
-**Version:** 1.4.4
+**Version:** 1.4.5
 **Text Domain:** `altegena-invitation-editor`
 **Constants prefix:** `ALTEGENA_`
 **UI Language:** Turkish (button labels, error messages)
@@ -90,8 +90,8 @@ altegena-invitation-editor/
 │   │   ├── admin-editor.css          # Admin visual editor styles (three-panel layout, properties)
 │   │   ├── admin-print.css           # Order print box + orders list column
 │   │   ├── public-invitation.css     # Public share page styles
-│   │   └── fonts.css                 # @font-face declarations (48 faces, 45 families) — also the print font registry
-│   ├── fonts/                        # 46 .ttf + 2 .otf font files + .htaccess
+│   │   └── fonts.css                 # @font-face declarations (49 faces, 46 families) — also the print font registry
+│   ├── fonts/                        # 47 .ttf + 2 .otf font files + .htaccess
 │   │   └── print/                    # Offline TrueType conversions of the 2 CFF .otf fonts (+ README with SHA-1s)
 │   └── backgrounds/                  # Invitation background images (referenced by JSON config)
 ├── readme.txt                        # Update-modal metadata + changelog (plugin-update-checker)
@@ -142,7 +142,7 @@ altegena-invitation-editor/
   - fonts CSS;
   - `admin-editor.css` (+ inline `Altegena_Settings::css_vars()`);
   - `admin-editor.js`.
-- **Localized data (`altegena_admin_config`):** `fonts` (45 bundled family names), `plugin_url`.
+- **Localized data (`altegena_admin_config`):** `fonts` (46 bundled family names), `plugin_url`.
 - **Save validation:** `save_product_data_tab()` requires `canvas` and `layers` and `wp_slash()`es before `update_post_meta()`. Empty values delete the meta.
 
 ### `Altegena_Cart_Handler` (class-cart-handler.php)
@@ -233,7 +233,10 @@ altegena-invitation-editor/
 ### `Altegena_Print_Font_Audit` (class-print-font-audit.php)
 - **Font denetimi tab:**
   - lists template layers whose font family/file doesn't exist;
-  - **safe fixes** (`admin_post_altegena_font_safe_fix`): spelling-only, exact weight/style file must exist, backup in `_invitation_json_config_font_fix_backup`;
+  - **safe fixes** (`admin_post_altegena_font_safe_fix`):
+    - they fix spelling differences, plus metric-compatible replacements from `METRIC_COMPATIBLE` (Times New Roman / Times-Roman / Times → Liberation Serif);
+    - the exact weight/style file must exist;
+    - a backup goes in `_invitation_json_config_font_fix_backup`;
   - per-font coverage of Turkish letters and template characters;
   - flags restricted embedding (fsType) and CFF;
   - lists layers that get synthetic bold/italic.
@@ -320,7 +323,7 @@ Visual design editor in the product metabox.
 - **Alignment:** align to canvas (1+ selected layers); align/distribute the selection (2+/3+) on the stored % values.
 - **Properties:**
   - ID, label, group, default text, hidden;
-  - font: 45 bundled fonts only (a template font without a file shows as "(dosyası yok)");
+  - font: 46 bundled fonts only (a template font without a file shows as "(dosyası yok)");
   - size, color, weight, style, textAlign, letterSpacing, lineHeight;
   - left/top/width %, rotate.
 - **Form submission:** applies the JSON tab if it is active, then `syncConfigToHiddenField()`.
@@ -364,7 +367,7 @@ Stored in `_invitation_json_config` post meta:
 
 ## Custom Fonts
 
-- **Files:** 48 files (46 `.ttf` + 2 `.otf`) in `assets/fonts/`, declared by 48 `@font-face` rules / 45 families in `fonts.css` (`font-display: swap`).
+- **Files:** 49 files (47 `.ttf` + 2 `.otf`) in `assets/fonts/`, declared by 49 `@font-face` rules / 46 families in `fonts.css` (`font-display: swap`).
 - **Naming:** every font file is `<Name>-TR.<ext>`.
   - `-TR` means the font has every Turkish letter (ÇĞİıÖŞÜ, upper and lower case).
   - Templates reference font families, never file names, so a rename only touches `fonts.css`.

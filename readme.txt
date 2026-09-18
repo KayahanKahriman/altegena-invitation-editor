@@ -3,7 +3,7 @@ Contributors: kayahan
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.4.4
+Stable tag: 1.4.5
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -23,6 +23,12 @@ Updates are delivered from the plugin's GitHub repository — WordPress shows th
 usual "update available" notice when a newer release is tagged.
 
 == Changelog ==
+
+= 1.4.5 =
+* New font: Liberation Serif (`LiberationSerif-Regular-TR.ttf`). It is metric-compatible with Times New Roman (same widths and vertical metrics) and appears in the product editor's font list.
+* Font denetimi: "Güvenli düzeltmeleri uygula" also replaces Times New Roman, Times-Roman and Times with Liberation Serif.
+  * A layer is changed only when the same weight/style file exists, and the previous template is backed up.
+  * On the local copy this fixes 29 layers in 14 templates, plus 4 TrajanPro-Bold layers.
 
 = 1.4.4 =
 * Font files follow one naming standard: every file is `<Name>-TR.<ext>`, and every font includes all Turkish letters.
