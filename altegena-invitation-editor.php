@@ -3,7 +3,7 @@
  * Plugin Name: Altegena Invitation Editor
  * Plugin URI: https://github.com/KayahanKahriman/altegena-invitation-editor
  * Description: A lightweight, DOM-based invitation editor for WooCommerce with WhatsApp sharing.
- * Version: 1.4.7
+ * Version: 1.4.8
  * Author: Kayahan
  * Author URI: https://github.com/KayahanKahriman
  * Text Domain: altegena-invitation-editor
@@ -41,7 +41,7 @@ class Altegena_Invitation_Editor
 		define('ALTEGENA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 		define('ALTEGENA_PLUGIN_URL', plugin_dir_url(__FILE__));
 		define('ALTEGENA_PLUGIN_FILE', __FILE__);
-		define('ALTEGENA_VERSION', '1.4.7');
+		define('ALTEGENA_VERSION', '1.4.8');
 
 		// Share feature payload limits
 		define('ALTEGENA_SHARE_MAX_CONFIG_BYTES', 262144);   // 256 KB of layer text JSON
@@ -115,8 +115,13 @@ class Altegena_Invitation_Editor
 		wp_add_inline_style('altegena-editor-css', Altegena_Settings::css_vars());
 
 		// html2canvas is bundled locally (not a CDN) so the same-origin canvas is not tainted.
-		wp_enqueue_script('altegena-html2canvas', ALTEGENA_PLUGIN_URL . 'assets/js/vendor/html2canvas.min.js', array(), '1.4.1', true);
-		wp_enqueue_script('altegena-editor-js', ALTEGENA_PLUGIN_URL . 'assets/js/editor.js', array('jquery', 'wc-add-to-cart', 'altegena-html2canvas'), $editor_js_ver, true);
+		// Only the share feature needs it, so it is NOT enqueued with the page (44 KB off every
+		// product page view, better mobile LCP): editor.js loads it on demand from
+		// `html2canvas_url`, prefetching when the editor modal opens.
+		$html2canvas_url = add_query_arg('ver', $html2canvas_ver, ALTEGENA_PLUGIN_URL . 'assets/js/vendor/html2canvas.min.js');
+		// defer: the editor only initializes on DOM ready and is used after a click, so it
+		// does not need to block parsing.
+		wp_enqueue_script('altegena-editor-js', ALTEGENA_PLUGIN_URL . 'assets/js/editor.js', array('jquery', 'wc-add-to-cart'), $editor_js_ver, array('in_footer' => true, 'strategy' => 'defer'));
 
 		wp_localize_script('altegena-editor-js', 'altegena_config', array(
 			'raw_config' => $config,
@@ -126,6 +131,7 @@ class Altegena_Invitation_Editor
 			'share_action' => 'altegena_save_share',
 			'product_id' => $post->ID,
 			'share_message' => Altegena_Settings::text('share_message'),
+			'html2canvas_url' => $html2canvas_url,
 		));
 	}
 }

@@ -3,7 +3,7 @@ Contributors: kayahan
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.4.7
+Stable tag: 1.4.8
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -23,6 +23,10 @@ Updates are delivered from the plugin's GitHub repository — WordPress shows th
 usual "update available" notice when a newer release is tagged.
 
 == Changelog ==
+
+= 1.4.8 =
+* Performance: html2canvas (44 KB) is no longer loaded with every product page. Only Share needs it, so editor.js loads it on demand (prefetched when the editor opens). Mobile LCP on product pages improves.
+* editor.js now loads with `defer`.
 
 = 1.4.7 =
 * Fix: orders placed before a template's Font denetimi fix failed with "Font dosyası yok" (e.g. TrajanPro-Bold).

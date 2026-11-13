@@ -143,6 +143,12 @@
         bindEvents: function () {
             const self = this;
 
+            // Warm html2canvas when the editor opens so Share is usually instant.
+            // (The modal itself is opened by the inline script in class-cart-handler.php.)
+            $('#open-card-designer').on('click', function () {
+                self.loadHtml2canvas().catch(function () { /* retried on Share */ });
+            });
+
             // Sidebar Input -> Preview
             this.sidebar.on('input', '.altegena-layer-input', function () {
                 const $input = $(this);
@@ -452,6 +458,32 @@
             });
         },
 
+        // html2canvas is only needed for Share, so it is not enqueued with the page
+        // (44 KB off every product page view). Loaded on demand from altegena_config;
+        // a failed load is not cached, so the next attempt retries.
+        loadHtml2canvas: function () {
+            if (typeof html2canvas !== 'undefined') return Promise.resolve();
+            if (this._h2cPromise) return this._h2cPromise;
+            const self = this;
+            this._h2cPromise = new Promise(function (resolve, reject) {
+                const s = document.createElement('script');
+                s.src = altegena_config.html2canvas_url;
+                s.async = true;
+                s.onload = function () {
+                    if (typeof html2canvas !== 'undefined') return resolve();
+                    self._h2cPromise = null;
+                    reject(new Error('html2canvas missing after load'));
+                };
+                s.onerror = function () {
+                    self._h2cPromise = null;
+                    s.remove();
+                    reject(new Error('html2canvas failed to load'));
+                };
+                document.head.appendChild(s);
+            });
+            return this._h2cPromise;
+        },
+
         // Capture the card at native resolution. The live .altegena-canvas carries a
         // transform: scale() from fitCanvas(), which html2canvas does not honor
         // reliably, so we capture an un-scaled off-screen clone instead.
@@ -496,18 +528,16 @@
             const self = this;
             if ($btn.hasClass('altegena-loading')) return;
 
-            if (typeof html2canvas === 'undefined') {
-                alert('Paylaşım aracı yüklenemedi. Lütfen sayfayı yenileyin.');
-                return;
-            }
-
             const originalText = $btn.text();
             $btn.addClass('altegena-loading').text('Hazırlanıyor...').prop('disabled', true);
 
             self.updateHiddenInput();
             const textMap = self.buildTextMap();
 
-            self.captureCard().then(imageDataUrl => {
+            self.loadHtml2canvas().catch(err => {
+                alert('Paylaşım aracı yüklenemedi. Lütfen sayfayı yenileyin.');
+                throw Object.assign(err, { altegenaHandled: true });
+            }).then(() => self.captureCard()).then(imageDataUrl => {
                 return $.ajax({
                     url: altegena_config.ajax_url,
                     type: 'POST',
@@ -530,7 +560,9 @@
                 });
             }).catch(err => {
                 console.error('Altegena share error', err);
-                alert('Paylaşım oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
+                if (!err || !err.altegenaHandled) {
+                    alert('Paylaşım oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
+                }
             }).then(() => {
                 $btn.removeClass('altegena-loading').text(originalText).prop('disabled', false);
             });
