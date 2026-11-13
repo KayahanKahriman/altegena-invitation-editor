@@ -18,6 +18,10 @@
                 return;
             }
 
+            if (this.config.canvas) {
+                this.config.canvas.bg_image = this.sameOriginUrl(this.config.canvas.bg_image);
+            }
+
             this.is_admin_mode = altegena_config.is_admin_mode;
             this.container = $('#altegena-editor-app');
 
@@ -30,6 +34,23 @@
             this.loadFromLocalStorage();
             this.bindEvents();
             this.updateHiddenInput();
+        },
+
+        // Templates may store the background under the other host variant of this site
+        // (www vs bare domain, http vs https). Display works either way, but Share's
+        // html2canvas capture needs a same-origin image: a cross-origin one without CORS
+        // headers is dropped and the shared PNG has no background. Only the host variant
+        // is rewritten; genuinely external URLs are left alone.
+        sameOriginUrl: function (url) {
+            if (!url) return url;
+            try {
+                const u = new URL(url, window.location.href);
+                const bare = function (h) { return h.replace(/^www\./i, '').toLowerCase(); };
+                if (u.origin !== window.location.origin && bare(u.hostname) === bare(window.location.hostname)) {
+                    return window.location.origin + u.pathname + u.search + u.hash;
+                }
+            } catch (e) { /* not a parsable URL: keep as is */ }
+            return url;
         },
 
         renderLayout: function () {

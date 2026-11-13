@@ -3,7 +3,7 @@ Contributors: kayahan
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.4.8
+Stable tag: 1.4.9
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -23,6 +23,9 @@ Updates are delivered from the plugin's GitHub repository — WordPress shows th
 usual "update available" notice when a newer release is tagged.
 
 == Changelog ==
+
+= 1.4.9 =
+* Fix: shared images (WhatsApp / share page preview) had no card background when the template stored the background under the other host variant of the site (e.g. bare domain while the site runs on www). The editor now rewrites such URLs to the site's own origin, so the html2canvas capture is same-origin. Stored templates are unchanged; external URLs are left alone.
 
 = 1.4.8 =
 * Performance: html2canvas (44 KB) is no longer loaded with every product page. Only Share needs it, so editor.js loads it on demand (prefetched when the editor opens). Mobile LCP on product pages improves.

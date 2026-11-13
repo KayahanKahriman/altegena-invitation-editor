@@ -11,7 +11,7 @@ When an order is paid, the plugin renders two PDFs per invitation item for the p
 The print shop downloads them and handles sizing and bleed itself.
 
 **Author:** Kayahan
-**Version:** 1.4.8
+**Version:** 1.4.9
 **Text Domain:** `altegena-invitation-editor`
 **Constants prefix:** `ALTEGENA_`
 **UI Language:** Turkish (button labels, error messages)
@@ -110,7 +110,7 @@ altegena-invitation-editor/
   - loads `class-print-cli.php` only under WP-CLI.
 - **Constants:** `ALTEGENA_PLUGIN_DIR`, `ALTEGENA_PLUGIN_URL`, `ALTEGENA_PLUGIN_FILE`, `ALTEGENA_VERSION`, `ALTEGENA_SHARE_MAX_CONFIG_BYTES`, `ALTEGENA_SHARE_MAX_IMAGE_BYTES`. Optional (wp-config.php): `ALTEGENA_PRINT_DIR`.
 - **Enqueue logic:** Only loads assets on single product pages (`is_product()`) that have `_invitation_json_config` meta set.
-- **Script dependencies:** `jquery`, `wc-add-to-cart` (editor.js in footer with `defer`). html2canvas is NOT enqueued: `Altegena_Editor.loadHtml2canvas()` loads it from `altegena_config.html2canvas_url` on demand (prefetched on `#open-card-designer` click, awaited in Share) to keep 44 KB off every product page view.
+- **Script dependencies:** `jquery`, `wc-add-to-cart` (editor.js in footer with `defer`). html2canvas is NOT enqueued: `Altegena_Editor.loadHtml2canvas()` loads it from `altegena_config.html2canvas_url` on demand (prefetched on `#open-card-designer` click, awaited in Share) to keep 44 KB off every product page view. `sameOriginUrl()` rewrites a `bg_image` stored under the other host variant (www/bare, http/https) to the current origin at init — html2canvas drops cross-origin images without CORS headers, which left shared PNGs without a background.
 - **Localized data (`altegena_config`):** `raw_config`, `is_admin_mode` (`manage_options` + `?mode=admin`), `ajax_url`, `share_nonce`, `share_action`, `product_id`, `share_message`, `html2canvas_url`.
 
 ### `Altegena_Settings` (class-settings.php)
